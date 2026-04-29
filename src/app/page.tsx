@@ -183,9 +183,9 @@ export default function Home() {
       </main>
 
       {/* Structured Footer */}
-      <footer className="bg-white border-t border-slate-200 py-16">
-        <div className="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex flex-col items-center md:items-start gap-4">
+      <footer className="bg-white border-t border-slate-200 py-10">
+        <div className="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex flex-col items-center md:items-start gap-2">
             <span className="logo-text !text-xl">HUNTR</span>
             <p className="text-sm font-medium text-slate-400">The automated job search platform.</p>
           </div>
@@ -196,7 +196,7 @@ export default function Home() {
             <Link href="mailto:support@huntr.com" className="hover:text-blue-600 transition-colors">Contact Support</Link>
           </nav>
         </div>
-        <div className="max-w-[1200px] mx-auto px-6 mt-12 pt-8 border-t border-slate-100 text-center">
+        <div className="max-w-[1200px] mx-auto px-6 mt-8 pt-6 border-t border-slate-100 text-center">
           <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
             &copy; 2026 HUNTR SYSTEMS &bull; ALL RIGHTS RESERVED
           </div>
