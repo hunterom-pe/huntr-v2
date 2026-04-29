@@ -49,7 +49,7 @@ export default function OnboardingPage() {
 
   const startAnalysis = () => {
     setIsAnalyzing(true);
-    const statuses = ["Extracting context...", "Mapping skills DNA...", "Calibrating targets...", "Ready!"];
+    const statuses = ["Reading your resume...", "Extracting your skills...", "Setting up your profile...", "Almost done!"];
     let i = 0;
     const interval = setInterval(() => {
       setAnalysisStatus(statuses[i]);
@@ -80,13 +80,13 @@ export default function OnboardingPage() {
             <motion.div key="step1" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, y: -20, filter: "blur(10px)" }} className="space-y-8">
               <div className="text-center space-y-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-600 text-[10px] font-black tracking-[0.2em] uppercase mb-2">
-                  System Initialization
+                  Step 1 of 2
                 </div>
                 <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">
-                  Upload Master Resume
+                  Upload your resume
                 </h1>
                 <p className="text-lg text-slate-500 font-medium max-w-md mx-auto">
-                  Provide your base `.docx` file. We will extract your DNA and build a surgical application profile.
+                  Provide your most up-to-date `.docx` file. We'll use this to build your profile and find matching jobs.
                 </p>
               </div>
 
@@ -119,7 +119,7 @@ export default function OnboardingPage() {
                     </div>
                     <div className="space-y-2">
                       <p className="text-2xl font-black text-slate-900 tracking-tight">{analysisStatus}</p>
-                      <p className="text-sm font-bold text-blue-500 uppercase tracking-widest opacity-80">Do not close window</p>
+                      <p className="text-sm font-bold text-blue-500 uppercase tracking-widest opacity-80">Please wait</p>
                     </div>
                   </div>
                 </div>
@@ -134,10 +134,10 @@ export default function OnboardingPage() {
                   <CheckCircle2 className="text-emerald-500" size={32} />
                 </div>
                 <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">
-                  Identity Mapped
+                  Resume Uploaded
                 </h1>
                 <p className="text-lg text-slate-500 font-medium max-w-md mx-auto">
-                  Your base profile is locked. Now, define the parameters for your next mission.
+                  Your profile is ready. Now, tell us what kind of opportunities you're looking for.
                 </p>
               </div>
 
@@ -157,12 +157,12 @@ export default function OnboardingPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Mission Location</label>
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Location</label>
                   <div className="relative">
                     <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                     <input 
                       type="text" 
-                      placeholder="Remote, SF, or NY" 
+                      placeholder="Remote, San Francisco, or New York" 
                       className="w-full pl-14 pr-6 py-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all font-medium text-slate-900 placeholder-slate-400"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
@@ -175,7 +175,7 @@ export default function OnboardingPage() {
                   disabled={isSubmitting || !targetRole || !location}
                   className="w-full btn-primary py-5 text-sm font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 rounded-xl disabled:opacity-50 mt-4 shadow-[0_0_40px_rgba(37,99,235,0.2)] hover:shadow-[0_0_60px_rgba(37,99,235,0.3)] transition-all duration-300"
                 >
-                  {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <>Initialize Dashboard <ArrowRight size={20} /></>}
+                  {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <>Continue to Dashboard <ArrowRight size={20} /></>}
                 </button>
               </div>
             </motion.div>
