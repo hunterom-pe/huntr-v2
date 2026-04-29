@@ -34,13 +34,33 @@ export default function ProfileClient({ user }: { user: any }) {
     }
   };
 
-  const handleResumeUpload = () => {
-    // Simulating resume upload
+  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile || !selectedFile.name.endsWith(".docx")) {
+      alert("Please upload a .docx file only.");
+      return;
+    }
+
     setIsUploading(true);
-    setTimeout(() => {
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        alert("Resume successfully uploaded to secure storage.");
+      } else {
+        alert("Failed to securely store resume.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error uploading resume.");
+    } finally {
       setIsUploading(false);
-      alert("Resume successfully updated!");
-    }, 1500);
+    }
   };
 
   return (

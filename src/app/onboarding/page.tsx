@@ -38,10 +38,28 @@ export default function OnboardingPage() {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile && selectedFile.name.endsWith(".docx")) {
-      startAnalysis();
+      setIsAnalyzing(true);
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      
+      try {
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (res.ok) {
+          startAnalysis();
+        } else {
+          alert("Failed to securely store resume.");
+          setIsAnalyzing(false);
+        }
+      } catch (err) {
+        console.error("Upload error:", err);
+        setIsAnalyzing(false);
+      }
     } else {
       alert("Please upload a .docx file only.");
     }
