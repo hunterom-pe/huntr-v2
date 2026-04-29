@@ -21,7 +21,7 @@ export default function OnboardingPage() {
       const res = await fetch("/api/user/onboard", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ targetRole, location }),
+        body: JSON.stringify({ jobTitle: targetRole, location }),
       });
 
       if (res.ok) {
