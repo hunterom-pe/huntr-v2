@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Upload, Search, MapPin, CheckCircle2, Loader2, Zap, ArrowRight, FileText } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
@@ -48,7 +49,7 @@ export default function OnboardingPage() {
 
   const startAnalysis = () => {
     setIsAnalyzing(true);
-    const statuses = ["Extracting...", "Skills Mapping...", "DNA Analysis...", "Ready!"];
+    const statuses = ["Extracting context...", "Mapping skills DNA...", "Calibrating targets...", "Ready!"];
     let i = 0;
     const interval = setInterval(() => {
       setAnalysisStatus(statuses[i]);
@@ -57,77 +58,112 @@ export default function OnboardingPage() {
         clearInterval(interval);
         setTimeout(() => { setIsAnalyzing(false); setStep(2); }, 800);
       }
-    }, 1000);
+    }, 1200);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 relative bg-slate-50/30">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-900 font-sans relative overflow-hidden">
+      {/* Immersive Dark Background Mesh */}
+      <div className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] rounded-full bg-blue-600/20 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-cyan-400/10 blur-[120px] pointer-events-none" />
+      
+      {/* Logo */}
+      <div className="absolute top-8 left-8 z-20">
+        <Link href="/" className="logo-text !text-white !from-white !to-white text-2xl">
+          HUNTR
+        </Link>
+      </div>
+
       <div className="w-full max-w-xl relative z-10">
         <AnimatePresence mode="wait">
           {step === 1 && (
-            <motion.div key="step1" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
-              <div className="text-center space-y-3">
-                <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20 mx-auto mb-4">
-                  <FileText className="text-white" size={24} />
+            <motion.div key="step1" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, y: -20, filter: "blur(10px)" }} className="space-y-8">
+              <div className="text-center space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-400 text-[10px] font-black tracking-[0.2em] uppercase mb-2">
+                  System Initialization
                 </div>
-                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Upload Master Resume</h1>
-                <p className="text-sm text-slate-400 font-medium">Standard .docx format only for surgical precision.</p>
+                <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-[1.1]">
+                  Upload Master Resume
+                </h1>
+                <p className="text-lg text-slate-400 font-medium max-w-md mx-auto">
+                  Provide your base `.docx` file. We will extract your DNA and build a surgical application profile.
+                </p>
               </div>
 
               {!isAnalyzing ? (
-                <div className="glass-panel p-12 border-dashed border-2 border-slate-200 hover:border-blue-400 transition-all cursor-pointer relative group bg-white/40">
-                  <input type="file" accept=".docx" onChange={handleFileUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
-                  <div className="text-center space-y-3">
-                    <Upload className="text-slate-300 group-hover:text-blue-500 mx-auto transition-colors" size={32} />
-                    <p className="text-sm font-bold text-slate-600">Drag & drop or browse</p>
+                <div className="relative group cursor-pointer">
+                  {/* Hover Glow */}
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-[2rem] blur opacity-20 group-hover:opacity-40 transition duration-500" />
+                  
+                  <div className="relative glass-panel p-16 rounded-[2rem] border-white/10 bg-slate-800/50 backdrop-blur-xl transition-all duration-300">
+                    <input type="file" accept=".docx" onChange={handleFileUpload} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
+                    <div className="text-center space-y-6">
+                      <div className="w-20 h-20 bg-slate-900 rounded-3xl flex items-center justify-center mx-auto shadow-2xl shadow-black/50 border border-white/5 group-hover:scale-110 group-hover:border-blue-500/30 transition-all duration-500">
+                        <Upload className="text-blue-400" size={32} />
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-xl font-bold text-white">Drag & drop or browse</p>
+                        <p className="text-sm font-medium text-slate-500">Microsoft Word (.docx) only</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ) : (
-                <div className="glass-panel p-12 text-center space-y-6 overflow-hidden relative bg-white">
-                  <div className="scan-line !animation-duration-[2s]" />
-                  <div className="relative">
-                    <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto opacity-10" />
-                    <Zap className="absolute inset-0 m-auto text-blue-600 animate-pulse" size={24} />
+                <div className="relative glass-panel p-16 rounded-[2rem] border-blue-500/30 bg-slate-800/80 backdrop-blur-xl text-center space-y-8 overflow-hidden shadow-2xl shadow-blue-900/20">
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/10 to-transparent scan-line !animation-duration-[2s]" />
+                  <div className="relative z-10 space-y-8">
+                    <div className="w-24 h-24 mx-auto relative flex items-center justify-center">
+                      <div className="absolute inset-0 border-4 border-slate-700 rounded-full" />
+                      <div className="absolute inset-0 border-4 border-blue-500 rounded-full border-t-transparent animate-spin" />
+                      <Zap className="text-blue-400 animate-pulse" size={32} />
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-2xl font-black text-white tracking-tight">{analysisStatus}</p>
+                      <p className="text-sm font-bold text-blue-400 uppercase tracking-widest opacity-80">Do not close window</p>
+                    </div>
                   </div>
-                  <p className="text-lg font-black text-slate-800 uppercase tracking-widest">{analysisStatus}</p>
                 </div>
               )}
             </motion.div>
           )}
 
           {step === 2 && (
-            <motion.div key="step2" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-              <div className="text-center space-y-3">
-                <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/20 mx-auto mb-4">
-                  <CheckCircle2 className="text-white" size={24} />
+            <motion.div key="step2" initial={{ opacity: 0, y: 20, filter: "blur(10px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} className="space-y-8">
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                  <CheckCircle2 className="text-emerald-400" size={32} />
                 </div>
-                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Identity Mapped</h1>
-                <p className="text-sm text-slate-400 font-medium">Now, define your target mission.</p>
+                <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-[1.1]">
+                  Identity Mapped
+                </h1>
+                <p className="text-lg text-slate-400 font-medium max-w-md mx-auto">
+                  Your base profile is locked. Now, define the parameters for your next mission.
+                </p>
               </div>
 
-              <div className="glass-panel p-8 space-y-6 bg-white/80 border-white shadow-xl">
-                <div className="space-y-1.5">
-                  <label className="label-caps ml-1">Target Role</label>
+              <div className="glass-panel p-10 space-y-8 rounded-[2rem] border-white/10 bg-slate-800/50 backdrop-blur-xl shadow-2xl">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Target Role</label>
                   <div className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
                     <input 
                       type="text" 
                       placeholder="e.g. Senior UX Designer" 
-                      className="input-glass pl-11"
+                      className="w-full pl-14 pr-6 py-4 rounded-xl border border-white/10 bg-slate-900/50 focus:bg-slate-900 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all font-medium text-white placeholder-slate-600 shadow-inner"
                       value={targetRole}
                       onChange={(e) => setTargetRole(e.target.value)}
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="label-caps ml-1">Mission Location</label>
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Mission Location</label>
                   <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
                     <input 
                       type="text" 
                       placeholder="Remote, SF, or NY" 
-                      className="input-glass pl-11"
+                      className="w-full pl-14 pr-6 py-4 rounded-xl border border-white/10 bg-slate-900/50 focus:bg-slate-900 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all font-medium text-white placeholder-slate-600 shadow-inner"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                     />
@@ -137,9 +173,9 @@ export default function OnboardingPage() {
                 <button 
                   onClick={handleCompleteOnboarding} 
                   disabled={isSubmitting || !targetRole || !location}
-                  className="w-full btn-primary py-4 text-lg flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full btn-primary py-5 text-sm font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 rounded-xl disabled:opacity-50 mt-4 shadow-[0_0_40px_rgba(37,99,235,0.3)] hover:shadow-[0_0_60px_rgba(37,99,235,0.5)] transition-all duration-300"
                 >
-                  {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <>Launch Dashboard <ArrowRight size={20} /></>}
+                  {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <>Initialize Dashboard <ArrowRight size={20} /></>}
                 </button>
               </div>
             </motion.div>
