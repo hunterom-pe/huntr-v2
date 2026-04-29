@@ -26,8 +26,8 @@ export default function Home() {
 
       <main className="max-w-[1200px] mx-auto px-6">
         {/* Hero Section */}
-        <section className="text-center pt-20 pb-32 space-y-12">
-          <div className="space-y-8">
+        <section className="text-center pt-12 pb-16 space-y-10">
+          <div className="space-y-6">
             <h1 className="hero-text-large">
               Your Job Search, <br />
               <span className="bg-gradient-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent">Automated</span>
@@ -47,7 +47,7 @@ export default function Home() {
             </Link>
           </div>
           
-          <div className="pt-8 flex justify-center items-center gap-8 text-sm font-bold text-slate-400">
+          <div className="pt-4 flex justify-center items-center gap-8 text-sm font-bold text-slate-400">
             <span className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> No credit card required</span>
             <span className="flex items-center gap-2 hidden sm:flex"><Shield size={16} className="text-blue-500" /> Private & Secure</span>
           </div>
@@ -55,8 +55,8 @@ export default function Home() {
 
 
         {/* Integration Logo Cloud */}
-        <div className="pt-10 pb-32 border-b border-slate-200/60 mb-32 relative z-20">
-          <p className="text-center text-[10px] font-black uppercase tracking-widest text-slate-400 mb-10">Seamlessly connects with</p>
+        <div className="pt-4 pb-24 border-b border-slate-200/60 mb-24 relative z-20">
+          <p className="text-center text-[10px] font-black uppercase tracking-widest text-slate-400 mb-8">Seamlessly connects with</p>
           <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-40 grayscale">
             <span className="text-2xl font-black tracking-tight text-slate-900">LinkedIn</span>
             <span className="text-2xl font-black tracking-tighter text-slate-900">indeed</span>
