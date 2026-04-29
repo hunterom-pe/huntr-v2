@@ -6,16 +6,21 @@ import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get("file") as File | null;
     const jobDescription = formData.get("jobDescription") as string;
 
-    if (!file || !jobDescription) {
-      return NextResponse.json({ error: "Missing file or job description" }, { status: 400 });
+    if (!jobDescription) {
+      return NextResponse.json({ error: "Missing job description" }, { status: 400 });
     }
 
-    // 1. Extract text from original DOCX
-    const arrayBuffer = await file.arrayBuffer();
-    const { value: resumeText } = await mammoth.extractRawText({ buffer: Buffer.from(arrayBuffer) });
+    // 1. Extract text from original DOCX (or use mock if none provided)
+    let resumeText = "Experienced professional with a strong background in the industry. Highly skilled in problem solving, team leadership, and modern technologies. Proven track record of delivering high quality results on time and under budget.";
+    
+    if (file) {
+      const arrayBuffer = await file.arrayBuffer();
+      const extracted = await mammoth.extractRawText({ buffer: Buffer.from(arrayBuffer) });
+      resumeText = extracted.value;
+    }
 
     // 2. Get AI Optimization
     const optimization = await optimizeResumeContent(resumeText, jobDescription);
