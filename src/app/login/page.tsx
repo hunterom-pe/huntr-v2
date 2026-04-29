@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Zap, Mail, Lock, Search as Google, ArrowRight, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
@@ -25,14 +24,10 @@ export default function LoginPage() {
 
       <div className="w-full max-w-[440px] space-y-6 relative z-10">
         <div className="text-center space-y-4 mb-8">
-          <Link href="/" className="inline-block transition-transform hover:scale-105 duration-300">
-            <Image 
-              src="/logo.png" 
-              alt="HUNTR Logo" 
-              width={160} 
-              height={50} 
-              className="h-8 w-auto object-contain mix-blend-multiply mx-auto" 
-            />
+          <Link href="/" className="inline-flex items-center gap-2 group transition-transform hover:scale-105 duration-300">
+            <span className="text-3xl font-black tracking-[0.15em] text-slate-900 group-hover:text-blue-600 transition-colors">
+              HUNTR<span className="text-blue-600">.</span>
+            </span>
           </Link>
           <div className="space-y-1">
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">

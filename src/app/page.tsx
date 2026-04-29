@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowRight, Play, Zap, Shield, Search, FileText } from "lucide-react";
 
 export default function Home() {
@@ -14,14 +13,10 @@ export default function Home() {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header Bento */}
         <header className="glass-panel px-8 py-4 flex justify-between items-center z-50">
-          <Link href="/" className="flex items-center">
-            <Image 
-              src="/logo.png" 
-              alt="HUNTR Logo" 
-              width={120} 
-              height={30} 
-              className="h-6 w-auto object-contain mix-blend-multiply" 
-            />
+          <Link href="/" className="flex items-center group">
+            <span className="text-xl font-black tracking-[0.15em] text-slate-900 group-hover:text-blue-600 transition-colors">
+              HUNTR<span className="text-blue-600">.</span>
+            </span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">
             <Link href="#process" className="hover:text-blue-600 transition-colors">How it works</Link>
@@ -52,7 +47,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="lg:col-span-5 glass-panel p-8 overflow-hidden group">
+          <div className="lg:col-span-5 glass-panel p-8 bg-slate-900/5 overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-100/20 to-transparent pointer-events-none" />
             <div className="relative z-10 h-full flex flex-col justify-between">
               <div className="label-caps text-blue-600 opacity-80">Live matching search</div>

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Briefcase, User, LogOut, Zap, Menu, Bell } from "lucide-react";
 import { useState } from "react";
@@ -28,14 +27,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <aside className="hidden lg:flex flex-col w-72 h-[calc(100vh-3rem)] sticky top-6 z-20">
         <div className="glass-panel h-full flex flex-col p-6 border-white/60 shadow-2xl shadow-slate-200/50">
           <div className="flex items-center mb-12 px-2">
-            <Link href="/" className="flex items-center">
-              <Image 
-                src="/logo.png" 
-                alt="HUNTR Logo" 
-                width={130} 
-                height={35} 
-                className="h-6 w-auto object-contain mix-blend-multiply" 
-              />
+            <Link href="/" className="flex items-center group">
+              <span className="text-xl font-black tracking-[0.15em] text-slate-900 group-hover:text-blue-600 transition-colors">
+                HUNTR<span className="text-blue-600">.</span>
+              </span>
             </Link>
           </div>
 
@@ -121,8 +116,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="absolute inset-0 bg-slate-900/10 backdrop-blur-md" onClick={() => setIsMobileMenuOpen(false)} />
           <aside className="relative w-80 glass-panel h-full flex flex-col p-8 animate-in slide-in-from-left duration-300">
             <div className="flex items-center justify-between mb-12">
-              <Link href="/" className="flex items-center">
-                <Image src="/logo.png" alt="HUNTR Logo" width={130} height={35} className="h-7 w-auto object-contain brightness-0 contrast-200" />
+              <Link href="/" className="flex items-center group">
+                <span className="text-xl font-black tracking-[0.15em] text-slate-900 group-hover:text-blue-600 transition-colors">
+                  HUNTR<span className="text-blue-600">.</span>
+                </span>
               </Link>
               <button onClick={() => setIsMobileMenuOpen(false)} className="text-slate-400 text-xl font-black">✕</button>
             </div>
