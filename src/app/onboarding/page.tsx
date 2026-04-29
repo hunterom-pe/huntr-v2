@@ -3,11 +3,39 @@
 import { useState } from "react";
 import { Upload, Search, MapPin, CheckCircle2, Loader2, Zap, ArrowRight, FileText } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState("");
+  const [targetRole, setTargetRole] = useState("");
+  const [location, setLocation] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+
+  const handleCompleteOnboarding = async () => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/user/onboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetRole, location }),
+      });
+
+      if (res.ok) {
+        router.push("/dashboard");
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to save profile");
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error(error);
+      setIsSubmitting(false);
+    }
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -82,7 +110,13 @@ export default function OnboardingPage() {
                   <label className="label-caps ml-1">Target Role</label>
                   <div className="relative">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <input type="text" placeholder="e.g. Senior UX Designer" className="input-glass pl-11" />
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Senior UX Designer" 
+                      className="input-glass pl-11"
+                      value={targetRole}
+                      onChange={(e) => setTargetRole(e.target.value)}
+                    />
                   </div>
                 </div>
 
@@ -90,12 +124,22 @@ export default function OnboardingPage() {
                   <label className="label-caps ml-1">Mission Location</label>
                   <div className="relative">
                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <input type="text" placeholder="Remote, SF, or NY" className="input-glass pl-11" />
+                    <input 
+                      type="text" 
+                      placeholder="Remote, SF, or NY" 
+                      className="input-glass pl-11"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                    />
                   </div>
                 </div>
 
-                <button onClick={() => window.location.href = "/dashboard"} className="w-full btn-primary py-4 text-lg flex items-center justify-center gap-2">
-                  Launch Dashboard <ArrowRight size={20} />
+                <button 
+                  onClick={handleCompleteOnboarding} 
+                  disabled={isSubmitting || !targetRole || !location}
+                  className="w-full btn-primary py-4 text-lg flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <>Launch Dashboard <ArrowRight size={20} /></>}
                 </button>
               </div>
             </motion.div>
