@@ -44,7 +44,7 @@ export default function Home() {
             <Link href="#features" className="hover:text-blue-600 transition-colors">Security</Link>
             <Link href="/login" className="btn-primary py-2.5 px-6 text-[10px] rounded-lg">Sign In</Link>
           </nav>
-        </header>
+        </motion.header>
 
         {/* Hero Section */}
         <motion.div 
