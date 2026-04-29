@@ -40,6 +40,8 @@ export async function POST(req: Request) {
     if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.S3_BUCKET_NAME) {
       const s3Client = new S3Client({
         region: process.env.AWS_REGION || "us-east-1",
+        endpoint: process.env.S3_ENDPOINT ? process.env.S3_ENDPOINT : undefined,
+        forcePathStyle: !!process.env.S3_ENDPOINT, // Required for Supabase/MinIO
         credentials: {
           accessKeyId: process.env.AWS_ACCESS_KEY_ID,
           secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -54,7 +56,17 @@ export async function POST(req: Request) {
       });
 
       await s3Client.send(command);
-      fileUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION || "us-east-1"}.amazonaws.com/${uniqueFileName}`;
+      
+      // Determine public URL structure based on whether it's Supabase or raw AWS
+      if (process.env.S3_ENDPOINT && process.env.S3_ENDPOINT.includes('supabase')) {
+        // e.g. https://fzskryzalxqnfhtbusem.storage.supabase.co/storage/v1/s3
+        const projectIdMatch = process.env.S3_ENDPOINT.match(/https:\/\/([^.]+)\./);
+        const projectId = projectIdMatch ? projectIdMatch[1] : '';
+        fileUrl = `https://${projectId}.supabase.co/storage/v1/object/public/${process.env.S3_BUCKET_NAME}/${uniqueFileName}`;
+      } else {
+        fileUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION || "us-east-1"}.amazonaws.com/${uniqueFileName}`;
+      }
+      
       console.log("Successfully uploaded to S3 Cloud:", fileUrl);
     } 
     // 2. Fallback to Local Storage (For Local Testing)
