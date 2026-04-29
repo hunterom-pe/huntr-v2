@@ -1,0 +1,81 @@
+import Link from "next/link";
+
+export default function TermsOfService() {
+  return (
+    <div className="min-h-screen bg-[#f8fafc] font-sans pt-24">
+      {/* Locked Header */}
+      <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200/50">
+        <div className="max-w-[1400px] mx-auto px-6 md:px-10 h-24 flex justify-between items-center">
+          <Link href="/" className="logo-text">
+            HUNTR
+          </Link>
+          <nav className="flex items-center gap-6">
+            <Link href="/login" className="px-8 py-3 bg-[#F1F4F9] text-slate-700 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-[#E2E8F0] transition-all">
+              Sign In
+            </Link>
+          </nav>
+        </div>
+      </header>
+
+      <main className="max-w-3xl mx-auto px-6 py-20">
+        <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">Terms of Service</h1>
+        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-12">Last Updated: April 2026</p>
+        
+        <div className="space-y-8 text-lg text-slate-600 font-medium leading-relaxed">
+          <section className="space-y-4">
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">1. Acceptance of Terms</h2>
+            <p>By accessing or using the HUNTR service, you agree to be bound by these Terms. If you disagree with any part of the terms then you may not access the Service.</p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">2. Use License</h2>
+            <p>Permission is granted to temporarily download one copy of the materials (information or software) on HUNTR's website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:</p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>modify or copy the materials;</li>
+              <li>use the materials for any commercial purpose, or for any public display (commercial or non-commercial);</li>
+              <li>attempt to decompile or reverse engineer any software contained on HUNTR's website;</li>
+              <li>remove any copyright or other proprietary notations from the materials; or</li>
+              <li>transfer the materials to another person or "mirror" the materials on any other server.</li>
+            </ul>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">3. Disclaimer</h2>
+            <p>The materials on HUNTR's website are provided on an 'as is' basis. HUNTR makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.</p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">4. Limitations</h2>
+            <p>In no event shall HUNTR or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on HUNTR's website, even if HUNTR or a HUNTR authorized representative has been notified orally or in writing of the possibility of such damage.</p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">5. Governing Law</h2>
+            <p>These terms and conditions are governed by and construed in accordance with the laws of the State of California and you irrevocably submit to the exclusive jurisdiction of the courts in that State or location.</p>
+          </section>
+        </div>
+      </main>
+
+      {/* Structured Footer */}
+      <footer className="bg-white border-t border-slate-200 py-16 mt-20">
+        <div className="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="flex flex-col items-center md:items-start gap-4">
+            <span className="logo-text !text-xl">HUNTR</span>
+            <p className="text-sm font-medium text-slate-400">The automated job search platform.</p>
+          </div>
+          
+          <nav className="flex items-center gap-8 text-sm font-bold text-slate-500">
+            <Link href="/privacy" className="hover:text-blue-600 transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="text-blue-600 transition-colors">Terms of Service</Link>
+            <Link href="mailto:support@huntr.com" className="hover:text-blue-600 transition-colors">Contact Support</Link>
+          </nav>
+        </div>
+        <div className="max-w-[1200px] mx-auto px-6 mt-12 pt-8 border-t border-slate-100 text-center">
+          <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
+            &copy; 2026 HUNTR SYSTEMS &bull; ALL RIGHTS RESERVED
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

@@ -191,9 +191,9 @@ export default function Home() {
           </div>
           
           <nav className="flex items-center gap-8 text-sm font-bold text-slate-500">
-            <Link href="#" className="hover:text-blue-600 transition-colors">Privacy Policy</Link>
-            <Link href="#" className="hover:text-blue-600 transition-colors">Terms of Service</Link>
-            <Link href="#" className="hover:text-blue-600 transition-colors">Contact Support</Link>
+            <Link href="/privacy" className="hover:text-blue-600 transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-blue-600 transition-colors">Terms of Service</Link>
+            <Link href="mailto:support@huntr.com" className="hover:text-blue-600 transition-colors">Contact Support</Link>
           </nav>
         </div>
         <div className="max-w-[1200px] mx-auto px-6 mt-12 pt-8 border-t border-slate-100 text-center">
