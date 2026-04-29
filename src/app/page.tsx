@@ -51,7 +51,7 @@ export default function Home() {
         </section>
 
         {/* How It Works Section */}
-        <section id="how-it-works" className="pb-32 space-y-16">
+        <section id="how-it-works" className="pb-32 space-y-16 scroll-mt-32">
           <div className="text-center space-y-6 max-w-3xl mx-auto mb-10">
             <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-[#F1F4F9] text-slate-500 text-[11px] font-black tracking-[0.2em] uppercase">
               The Process
