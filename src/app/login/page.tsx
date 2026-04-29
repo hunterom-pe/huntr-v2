@@ -148,12 +148,12 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">Full Name</label>
+                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">First Name</label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                     <input 
                       type="text" 
-                      placeholder="John Doe" 
+                      placeholder="John" 
                       className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all font-medium text-slate-900"
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
