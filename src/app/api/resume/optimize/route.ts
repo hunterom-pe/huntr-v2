@@ -68,7 +68,7 @@ export async function POST(req: Request) {
 
     const buffer = await Packer.toBuffer(doc);
 
-    return new Response(buffer, {
+    return new Response(new Uint8Array(buffer), {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "Content-Disposition": `attachment; filename="HUNTR_Optimized_Resume.docx"`,
