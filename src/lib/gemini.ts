@@ -1,9 +1,25 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
 export async function optimizeResumeContent(resumeText: string, jobDescription: string) {
+  // Demo Mode Fallback: If no API key is provided, return a realistic mock response instantly
+  if (!process.env.GEMINI_API_KEY) {
+    console.log("No GEMINI_API_KEY found in .env. Using mock optimization data for demo purposes.");
+    // Simulate slight network delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    return {
+      summary: "Dynamic and results-driven professional with a proven track record of aligning technical execution with high-level business objectives. Highly adaptable and skilled in bridging the gap between cross-functional teams to deliver scalable solutions tailored to this company's exact needs.",
+      bulletPoints: [
+        "Architected and deployed scalable systems that improved operational efficiency by 40% across all target demographics.",
+        "Spearheaded agile methodologies and streamlined testing protocols, resulting in a 25% reduction in time-to-market.",
+        "Collaborated directly with stakeholders to align technical deliverables with core business KPIs, driving a 15% increase in user retention."
+      ]
+    };
+  }
+
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
   const prompt = `
     You are an expert career coach and resume writer. 
     Your task is to rewrite specific parts of a candidate's resume to better align with a specific job description.
