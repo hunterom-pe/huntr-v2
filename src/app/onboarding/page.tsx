@@ -25,7 +25,7 @@ export default function OnboardingPage() {
       });
 
       if (res.ok) {
-        router.push("/dashboard");
+        router.push("/dashboard?scan=true");
         router.refresh();
       } else {
         const data = await res.json();

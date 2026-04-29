@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Zap, ExternalLink, Loader2, Sparkles, Star, Trash2, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -20,17 +20,29 @@ export default function DashboardPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [optimizingId, setOptimizingId] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('scan=true') && !hasScanned && !isScanning) {
+      startScan();
+      // Remove query param from URL without reloading
+      window.history.replaceState({}, '', '/dashboard');
+    }
+  }, []);
+
   const startScan = async () => {
     setIsScanning(true);
     try {
       const response = await fetch("/api/jobs/search", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: "Senior Product Designer", location: "Remote" })
+        headers: { "Content-Type": "application/json" }
       });
       const data = await response.json();
       if (data.jobs) {
-        setJobs(data.jobs);
+        // Map the API results to include the default status 'WISHLIST'
+        const fetchedJobs = data.jobs.map((job: any) => ({
+          ...job,
+          status: 'WISHLIST'
+        }));
+        setJobs(fetchedJobs);
         setHasScanned(true);
       }
     } catch (error) {
