@@ -52,9 +52,14 @@ export default function Home() {
 
         {/* How It Works Section */}
         <section id="how-it-works" className="pb-32 space-y-16">
-          <div className="text-center space-y-4">
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">How it works</h2>
-            <p className="text-lg text-slate-500 max-w-2xl mx-auto">A seamless three-step process to land your dream role without the manual heavy lifting.</p>
+          <div className="text-center space-y-6 max-w-3xl mx-auto mb-10">
+            <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-[#F1F4F9] text-slate-500 text-[11px] font-black tracking-[0.2em] uppercase">
+              The Process
+            </div>
+            <h2 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tight">How it works</h2>
+            <p className="text-xl text-slate-500 font-medium leading-relaxed">
+              A seamless three-step process to land your dream role without the manual heavy lifting.
+            </p>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
