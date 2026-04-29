@@ -159,25 +159,6 @@ export default function Home() {
           </motion.div>
         </motion.div>
 
-        {/* Stats Row */}
-        <div className="grid md:grid-cols-4 gap-6">
-          {[
-            { label: "Jobs Scanned", val: "2.4M+", icon: Globe },
-            { label: "Matches Found", val: "150k+", icon: Search },
-            { label: "Success Rate", val: "94%", icon: CheckCircle2 },
-            { label: "Resumes Optimized", val: "45k+", icon: FileText }
-          ].map((stat, i) => (
-            <motion.div 
-              key={i}
-              whileHover={{ y: -5 }}
-              className="glass-panel p-8 text-center border-white shadow-xl shadow-slate-200/10"
-            >
-              <stat.icon className="mx-auto mb-4 text-blue-600/20" size={24} />
-              <div className="text-3xl font-black text-slate-900 mb-1">{stat.val}</div>
-              <div className="label-caps !text-[9px]">{stat.label}</div>
-            </motion.div>
-          ))}
-        </div>
 
         {/* Process Section */}
         <section id="process" className="py-24 space-y-16">
