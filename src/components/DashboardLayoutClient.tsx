@@ -11,9 +11,11 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function DashboardLayoutClient({ children }: { children: React.ReactNode }) {
+export function DashboardLayoutClient({ children, user }: { children: React.ReactNode, user?: { name?: string | null, email?: string | null } }) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const displayName = user?.name || user?.email?.split('@')[0] || "User";
+  const initials = displayName.substring(0, 2).toUpperCase();
 
   const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -95,11 +97,11 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
             </button>
             <div className="flex items-center gap-4 pl-6 border-l border-slate-200/50">
               <div className="text-right hidden sm:block">
-                <div className="text-[12px] font-black text-slate-900 uppercase tracking-widest">Sandbox User</div>
+                <div className="text-[12px] font-black text-slate-900 uppercase tracking-widest">{displayName}</div>
                 <div className="text-[9px] font-black text-blue-500 uppercase tracking-[0.2em]">Premium Plan</div>
               </div>
               <div className="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center text-white text-xs font-black shadow-2xl shadow-slate-900/20">
-                SU
+                {initials}
               </div>
             </div>
           </div>
