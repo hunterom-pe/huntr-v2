@@ -127,18 +127,18 @@ export default function Home() {
 
         {/* Additional Information Section */}
         <section className="pb-32">
-          <div className="bg-slate-900 rounded-[40px] p-12 md:p-20 text-center space-y-8 relative overflow-hidden shadow-2xl">
-            <div className="absolute top-0 right-0 w-[50%] h-[100%] bg-blue-500/20 blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-[50%] h-[100%] bg-cyan-500/20 blur-[120px] pointer-events-none" />
+          <div className="bg-white border border-slate-200/60 rounded-[40px] p-12 md:p-20 text-center space-y-8 relative overflow-hidden shadow-2xl shadow-slate-200/50">
+            <div className="absolute top-0 right-0 w-[50%] h-[100%] bg-blue-500/10 blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[50%] h-[100%] bg-cyan-500/10 blur-[120px] pointer-events-none" />
             
-            <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight relative z-10">
+            <h2 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight relative z-10">
               Ready to automate your search?
             </h2>
-            <p className="text-slate-300 text-xl max-w-2xl mx-auto font-medium relative z-10 leading-relaxed">
+            <p className="text-slate-500 text-xl max-w-2xl mx-auto font-medium relative z-10 leading-relaxed">
               Join the professionals who are landing interviews faster by letting the system do the hard work.
             </p>
             <div className="pt-6 relative z-10">
-              <Link href="/login" className="inline-flex items-center gap-3 px-12 py-5 bg-white text-slate-900 font-black rounded-full text-lg hover:scale-[1.02] transition-transform shadow-xl shadow-white/10">
+              <Link href="/login" className="inline-flex items-center gap-3 px-12 py-5 bg-blue-600 text-white font-black rounded-full text-lg hover:bg-blue-700 hover:scale-[1.02] transition-all shadow-xl shadow-blue-600/30">
                 Create Free Account <ArrowRight size={20} />
               </Link>
             </div>
