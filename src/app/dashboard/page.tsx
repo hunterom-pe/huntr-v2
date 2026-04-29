@@ -219,7 +219,7 @@ export default function DashboardPage() {
                                     </button>
                                   </div>
                                   <button onClick={() => handleStatusChange(job.id, 'APPLIED')} className="text-[11px] font-black text-slate-400 hover:text-blue-600 uppercase tracking-[0.3em] transition-all flex items-center gap-2 group/btn cursor-grab active:cursor-grabbing">
-                                    Drag to Apply <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                                    Applied <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                                   </button>
                                 </div>
                               </div>
