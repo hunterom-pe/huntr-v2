@@ -33,6 +33,27 @@ export default function DashboardPage() {
     }
   }, []);
 
+  // Fetch tracked jobs from DB on load
+  useEffect(() => {
+    if (!isBrowser) return;
+    const fetchTrackedJobs = async () => {
+      try {
+        const response = await fetch("/api/jobs/tracked");
+        const data = await response.json();
+        if (data.jobs && data.jobs.length > 0) {
+          setJobs(prev => {
+            // Merge DB jobs with any newly generated wishlist jobs
+            const wishlistJobs = prev.filter(j => j.status === 'WISHLIST');
+            return [...data.jobs, ...wishlistJobs];
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch tracked jobs:", error);
+      }
+    };
+    fetchTrackedJobs();
+  }, [isBrowser]);
+
   const startScan = async () => {
     setIsScanning(true);
     try {
@@ -73,8 +94,23 @@ export default function DashboardPage() {
     }
   };
 
-  const handleStatusChange = (id: string, newStatus: Job['status']) => {
+  const handleStatusChange = async (id: string, newStatus: Job['status']) => {
+    // Optimistic UI Update
     setJobs(prev => prev.map(job => job.id === id ? { ...job, status: newStatus } : job));
+
+    // Sync to Database
+    const jobToUpdate = jobs.find(j => j.id === id);
+    if (jobToUpdate) {
+      try {
+        await fetch("/api/jobs/update-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...jobToUpdate, status: newStatus })
+        });
+      } catch (error) {
+        console.error("Failed to sync job status to DB:", error);
+      }
+    }
   };
 
   const handleOptimize = async (id: string) => {
