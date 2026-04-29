@@ -29,12 +29,12 @@ export default function PrivacyPolicy() {
 
           <section className="space-y-4">
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">2. How We Use Your Information</h2>
-            <p>We may use the information we collect about you to provide, maintain, and improve our services, including, for example, to facilitate payments, send receipts, provide products and services you request (and send related information), develop new features, provide customer support to Users and Drivers, develop safety features, authenticate users, and send product updates and administrative messages.</p>
+            <p>We do not use your personal information or resume data for any purpose other than providing the core HUNTR service to you directly. Your data is never used to train external AI models, sold to advertisers, or analyzed for any secondary purposes.</p>
           </section>
 
           <section className="space-y-4">
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">3. Sharing of Information</h2>
-            <p>We may share the information we collect about you as described in this Statement or as described at the time of collection or sharing, including as follows: With third parties to provide you a service you requested through a partnership or promotional offering made by a third party or us; With the general public if you submit content in a public forum, such as blog comments, social media posts, or other features of our services that are viewable by the general public.</p>
+            <p>We absolutely will not share, sell, rent, or distribute any of your personal data, resumes, or job search activity to ANY third parties under any circumstances. Your data is strictly yours and remains entirely private.</p>
           </section>
 
           <section className="space-y-4">

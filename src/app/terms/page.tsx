@@ -28,15 +28,8 @@ export default function TermsOfService() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">2. Use License</h2>
-            <p>Permission is granted to temporarily download one copy of the materials (information or software) on HUNTR's website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:</p>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>modify or copy the materials;</li>
-              <li>use the materials for any commercial purpose, or for any public display (commercial or non-commercial);</li>
-              <li>attempt to decompile or reverse engineer any software contained on HUNTR's website;</li>
-              <li>remove any copyright or other proprietary notations from the materials; or</li>
-              <li>transfer the materials to another person or "mirror" the materials on any other server.</li>
-            </ul>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">2. Data Ownership and Privacy</h2>
+            <p>You retain full ownership of all data, resumes, and personal information you provide to HUNTR. We guarantee that we will never use, share, sell, or distribute any of your data to any third party for any reason. Your information exists within HUNTR solely to automate your personal job search.</p>
           </section>
 
           <section className="space-y-4">
