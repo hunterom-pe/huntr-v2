@@ -68,45 +68,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-white font-sans">
-      {/* Left Panel - Visual/Brand */}
-      <div className="hidden lg:flex w-1/2 bg-slate-900 relative flex-col justify-between p-16 overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] rounded-full bg-blue-600/20 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-cyan-400/20 blur-[120px]" />
+    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50 font-sans relative overflow-hidden">
+      {/* Mesh Background Decorations */}
+      <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-blue-400/10 blur-[120px]" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-400/10 blur-[120px]" />
+
+      <div className="w-full max-w-[440px] space-y-8 relative z-10">
         
-        <div className="relative z-10">
-          <Link href="/" className="logo-text !text-white !from-white !to-white text-3xl">
+        <div className="text-center">
+          <Link href="/" className="logo-text text-3xl">
             HUNTR
           </Link>
         </div>
 
-        <div className="relative z-10 max-w-lg space-y-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-400 text-[10px] font-black tracking-[0.2em] uppercase">
-            Authentication
-          </div>
-          <h1 className="text-5xl font-black text-white tracking-tight leading-[1.1]">
-            Your ultimate<br />career operating system.
-          </h1>
-          <p className="text-xl text-slate-400 font-medium leading-relaxed">
-            Join thousands of professionals landing better roles faster by letting our intelligent system handle the heavy lifting.
-          </p>
-        </div>
-
-        <div className="relative z-10 flex items-center gap-4 text-xs font-bold text-slate-600 uppercase tracking-widest">
-          <span>&copy; 2026 HUNTR SYSTEMS</span>
-        </div>
-      </div>
-
-      {/* Right Panel - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12 relative bg-white">
-        <div className="w-full max-w-[440px] space-y-8">
-          
-          <div className="lg:hidden text-center mb-12">
-            <Link href="/" className="logo-text text-3xl">
-              HUNTR
-            </Link>
-          </div>
-
+        <div className="bg-white p-10 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 space-y-8">
           <div className="space-y-2">
             <h2 className="text-3xl font-black text-slate-900 tracking-tight">
               {isLogin ? "Welcome back" : "Create your account"}
