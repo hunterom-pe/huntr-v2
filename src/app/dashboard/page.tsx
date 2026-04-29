@@ -160,7 +160,7 @@ export default function DashboardPage() {
                     {...provided.droppableProps}
                   >
                     <AnimatePresence>
-                      {jobs.filter(j => j.status === 'WISHLIST').map((job, index) => (
+                      {jobs.filter(j => j.status === 'WISHLIST').sort((a, b) => b.matchScore - a.matchScore).map((job, index) => (
                         <Draggable key={job.id} draggableId={job.id} index={index}>
                           {(provided, snapshot) => (
                             <div
@@ -170,9 +170,6 @@ export default function DashboardPage() {
                             >
                               <div className={`glass-card p-8 group border-white/80 shadow-lg ${snapshot.isDragging ? 'shadow-blue-500/20 scale-[1.02]' : 'hover:shadow-blue-500/5'} transition-all`} {...provided.dragHandleProps}>
                                 <div className="flex flex-col md:flex-row gap-8 items-start md:items-center mb-6">
-                                  <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center font-black text-blue-400 text-lg shadow-2xl">
-                                    {job.company[0]}
-                                  </div>
                                   <div className="flex-1 space-y-1">
                                     <div className="flex items-center gap-3">
                                       <h4 className="text-xl font-extrabold text-slate-900 tracking-tight">{job.title}</h4>
