@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Briefcase, User, LogOut, Zap, Menu, Bell } from "lucide-react";
+import { LayoutDashboard, Briefcase, User, LogOut, Zap, Menu, Bell, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
+import { useNotifications } from "@/lib/NotificationContext";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -14,6 +15,8 @@ function cn(...inputs: ClassValue[]) {
 export function DashboardLayoutClient({ children, user }: { children: React.ReactNode, user?: { name?: string | null, email?: string | null } }) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const displayName = user?.name || user?.email?.split('@')[0] || "User";
   const initials = displayName.substring(0, 2).toUpperCase();
 
@@ -91,10 +94,56 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
           </div>
 
           <div className="flex items-center gap-6">
-            <button className="p-2.5 glass-card rounded-2xl relative text-slate-400 hover:text-slate-900 border-white/80 bg-white/40">
-              <Bell size={20} />
-              <div className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setIsNotifOpen(!isNotifOpen)}
+                className="p-2.5 glass-card rounded-2xl relative text-slate-400 hover:text-slate-900 border-white/80 bg-white/40"
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <div className="absolute -top-1 -right-1 min-w-[20px] h-[20px] bg-red-500 rounded-full border-2 border-white flex items-center justify-center text-[9px] font-black text-white px-1 shadow-lg shadow-red-500/30">
+                    {unreadCount}
+                  </div>
+                )}
+              </button>
+
+              {isNotifOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsNotifOpen(false)} />
+                  <div className="absolute right-0 mt-4 w-80 sm:w-96 glass-panel border-white/60 shadow-2xl shadow-slate-200/50 rounded-2xl z-50 overflow-hidden flex flex-col max-h-[80vh]">
+                    <div className="p-4 border-b border-slate-200/50 flex justify-between items-center bg-white/40 backdrop-blur-md">
+                      <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em]">Notifications</h3>
+                      {unreadCount > 0 && (
+                        <button onClick={() => { markAllAsRead(); setIsNotifOpen(false); }} className="text-[9px] font-black text-blue-600 hover:text-blue-800 uppercase tracking-widest transition-colors flex items-center gap-1">
+                          <CheckCircle2 size={12} /> Mark all read
+                        </button>
+                      )}
+                    </div>
+                    <div className="overflow-y-auto p-2 space-y-2">
+                      {notifications.length === 0 ? (
+                         <div className="p-8 text-center text-[11px] font-bold text-slate-400 uppercase tracking-widest">No notifications</div>
+                      ) : (
+                        notifications.map(n => (
+                          <div 
+                            key={n.id} 
+                            onClick={() => { markAsRead(n.id); }}
+                            className={`p-4 rounded-xl transition-all cursor-pointer border border-transparent ${n.read ? 'opacity-60 hover:bg-slate-50' : 'bg-white shadow-lg shadow-slate-200/20 hover:border-blue-100'}`}
+                          >
+                            <div className="flex gap-3">
+                              <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${n.read ? 'bg-transparent' : 'bg-blue-500'}`} />
+                              <div>
+                                <h4 className={`text-[12px] font-black mb-1 ${n.type === 'report' ? 'text-purple-600' : n.type === 'radar' ? 'text-blue-600' : n.type === 'intel' ? 'text-emerald-600' : 'text-slate-900'}`}>{n.title}</h4>
+                                <p className="text-[12px] text-slate-500 font-medium leading-relaxed">{n.message}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
             <div className="flex items-center gap-4 pl-6 border-l border-slate-200/50">
               <div className="text-right hidden sm:block">
                 <div className="text-[12px] font-black text-slate-900 uppercase tracking-widest">{displayName}</div>

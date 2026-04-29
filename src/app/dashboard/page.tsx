@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Search, Zap, ExternalLink, Loader2, Sparkles, Star, Trash2, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import { useNotifications } from "@/lib/NotificationContext";
 
 interface Job {
   id: string;
@@ -21,6 +22,7 @@ export default function DashboardPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [optimizingId, setOptimizingId] = useState<string | null>(null);
   const [isBrowser, setIsBrowser] = useState(false);
+  const { addNotification } = useNotifications();
 
   useEffect(() => {
     setIsBrowser(true);
@@ -52,6 +54,16 @@ export default function DashboardPage() {
           return [...trackedJobs, ...fetchedJobs];
         });
         
+        // Trigger Radar Alert if high match found
+        const hasHighMatch = fetchedJobs.some((j: any) => j.matchScore >= 90);
+        if (hasHighMatch) {
+          addNotification({
+            title: "Radar Alert",
+            message: "We just found highly-matched roles (>90%) based on your DNA! Check your recommendations.",
+            type: "radar"
+          });
+        }
+
         setHasScanned(true);
       }
     } catch (error) {
@@ -95,6 +107,18 @@ export default function DashboardPage() {
     if (source.droppableId === destination.droppableId) return;
     
     handleStatusChange(draggableId, destination.droppableId as Job['status']);
+
+    // Trigger Interview Intel
+    if (destination.droppableId === 'INTERVIEWING') {
+      const job = jobs.find(j => j.id === draggableId);
+      if (job) {
+        addNotification({
+          title: "Interview Intel",
+          message: `You're interviewing with ${job.company}! We've automatically generated a custom 1-page interview cheat sheet based on their exact job description. Click here to view.`,
+          type: "intel"
+        });
+      }
+    }
   };
 
   const kanbanColumns: { name: Job['status']; title: string }[] = [

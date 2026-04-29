@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 import { DashboardLayoutClient } from "@/components/DashboardLayoutClient";
+import { NotificationProvider } from "@/lib/NotificationContext";
 
 export default async function DashboardLayout({
   children,
@@ -23,5 +24,9 @@ export default async function DashboardLayout({
     redirect("/onboarding");
   }
 
-  return <DashboardLayoutClient user={session.user}>{children}</DashboardLayoutClient>;
+  return (
+    <NotificationProvider>
+      <DashboardLayoutClient user={session.user}>{children}</DashboardLayoutClient>
+    </NotificationProvider>
+  );
 }
