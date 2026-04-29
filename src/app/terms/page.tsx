@@ -10,6 +10,9 @@ export default function TermsOfService() {
             HUNTR
           </Link>
           <nav className="flex items-center gap-6">
+            <Link href="/" className="hidden md:block text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">
+              Home
+            </Link>
             <Link href="/login" className="px-8 py-3 bg-[#F1F4F9] text-slate-700 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-[#E2E8F0] transition-all">
               Sign In
             </Link>
@@ -58,6 +61,7 @@ export default function TermsOfService() {
           </div>
           
           <nav className="flex items-center gap-8 text-sm font-bold text-slate-500">
+            <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
             <Link href="/privacy" className="hover:text-blue-600 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="text-blue-600 transition-colors">Terms of Service</Link>
             <Link href="mailto:support@huntr.com" className="hover:text-blue-600 transition-colors">Contact Support</Link>
