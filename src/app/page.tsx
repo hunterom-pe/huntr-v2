@@ -17,6 +17,9 @@ export default function Home() {
             <Link href="#how-it-works" className="hidden md:block text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">
               How it Works
             </Link>
+            <Link href="/pricing" className="hidden md:block text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">
+              Pricing
+            </Link>
             <Link href="/login" className="px-8 py-3 bg-[#F1F4F9] text-slate-700 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-[#E2E8F0] transition-all">
               Sign In
             </Link>
