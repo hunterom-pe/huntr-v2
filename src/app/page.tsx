@@ -1,89 +1,140 @@
 import Link from "next/link";
-import { ArrowRight, Search, Zap, FileText } from "lucide-react";
+import { ArrowRight, Search, Zap, FileText, CheckCircle2, Shield, Target } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="max-w-[1400px] mx-auto px-10 py-10 flex justify-between items-center">
-        <Link href="/" className="logo-text">
-          HUNTR
-        </Link>
-        <Link href="/login" className="px-8 py-3 bg-[#F1F4F9] text-slate-700 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-[#E2E8F0] transition-all">
-          Sign In
-        </Link>
+    <div className="min-h-screen bg-[#f8fafc] font-sans pt-24">
+      {/* Locked Header */}
+      <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200/50">
+        <div className="max-w-[1400px] mx-auto px-6 md:px-10 h-24 flex justify-between items-center">
+          <Link href="/" className="logo-text">
+            HUNTR
+          </Link>
+          <nav className="flex items-center gap-6">
+            <Link href="#how-it-works" className="hidden md:block text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">
+              How it Works
+            </Link>
+            <Link href="/login" className="px-8 py-3 bg-[#F1F4F9] text-slate-700 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-[#E2E8F0] transition-all">
+              Sign In
+            </Link>
+          </nav>
+        </div>
       </header>
 
-      <main className="max-w-[1400px] mx-auto px-10">
+      <main className="max-w-[1200px] mx-auto px-6">
         {/* Hero Section */}
-        <div className="text-center pt-32 pb-48 space-y-12">
+        <section className="text-center pt-20 pb-32 space-y-12">
           <div className="space-y-8">
             <h1 className="hero-text-large">
               Your Job Search, <br />
-              <span className="text-[#0052FF]">Automated</span>
+              <span className="bg-gradient-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent">Automated</span>
             </h1>
-            <p className="hero-sub">
-              Stop wasting hours searching and applying. Let our AI find your <br className="hidden md:block" />
-              perfect matches and optimize your resume for every single one.
+            <p className="hero-sub text-slate-500 font-medium text-xl max-w-3xl mx-auto leading-relaxed">
+              Stop wasting hours searching and applying. Let our intelligent system find your 
+              perfect matches and tailor your resume for every single opportunity.
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row justify-center gap-6 pt-4">
-            <Link href="/login" className="btn-pill-blue justify-center">
+            <Link href="/login" className="btn-pill-blue justify-center text-base">
               Get Started for Free <ArrowRight size={20} />
             </Link>
-            <Link href="#process" className="btn-pill-gray justify-center">
-              How it Works
+            <Link href="#how-it-works" className="btn-pill-gray justify-center text-base">
+              See How It Works
             </Link>
           </div>
-        </div>
+          
+          <div className="pt-8 flex justify-center items-center gap-8 text-sm font-bold text-slate-400">
+            <span className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> No credit card required</span>
+            <span className="flex items-center gap-2 hidden sm:flex"><Shield size={16} className="text-blue-500" /> Private & Secure</span>
+          </div>
+        </section>
 
-        {/* Feature Cards */}
-        <div id="process" className="grid lg:grid-cols-3 gap-8 pb-32">
-          {[
-            { 
-              title: "Deep Scan", 
-              desc: "Scans thousands of jobs across all major boards in seconds.",
-              icon: Search,
-              color: "text-blue-600",
-              bg: "bg-blue-50"
-            },
-            { 
-              title: "Instant Match", 
-              desc: "We use intelligence to find the jobs that fit your profile best.",
-              icon: Zap,
-              color: "text-blue-500",
-              bg: "bg-blue-50"
-            },
-            { 
-              title: "Auto-Optimize", 
-              desc: "Automatically tailors your resume to every job description.",
-              icon: FileText,
-              color: "text-blue-700",
-              bg: "bg-blue-50"
-            }
-          ].map((feature, i) => (
-            <div key={i} className="feature-card group">
-              <div className="flex justify-between items-start mb-20">
-                <div className={`w-20 h-20 ${feature.bg} rounded-3xl flex items-center justify-center shadow-inner`}>
-                  <feature.icon className={feature.color} size={32} />
+        {/* How It Works Section */}
+        <section id="how-it-works" className="pb-32 space-y-16">
+          <div className="text-center space-y-4">
+            <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">How it works</h2>
+            <p className="text-lg text-slate-500 max-w-2xl mx-auto">A seamless three-step process to land your dream role without the manual heavy lifting.</p>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            {[
+              { 
+                title: "Deep Scan", 
+                desc: "We scan thousands of jobs across all major boards in seconds, filtering out the noise to find exactly what fits.",
+                icon: Search,
+                color: "text-blue-600",
+                bg: "bg-blue-50"
+              },
+              { 
+                title: "Instant Match", 
+                desc: "Our intelligence engine cross-references your profile with job requirements to find the highest probability matches.",
+                icon: Target,
+                color: "text-cyan-600",
+                bg: "bg-cyan-50"
+              },
+              { 
+                title: "Auto-Optimize", 
+                desc: "Automatically tailors and rewrites your resume to highlight the specific skills each job description is looking for.",
+                icon: FileText,
+                color: "text-indigo-600",
+                bg: "bg-indigo-50"
+              }
+            ].map((feature, i) => (
+              <div key={i} className="feature-card group">
+                <div className="mb-12">
+                  <div className={`w-20 h-20 ${feature.bg} rounded-3xl flex items-center justify-center shadow-inner`}>
+                    <feature.icon className={feature.color} size={32} />
+                  </div>
                 </div>
-                <div className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-300 mt-2">
-                  Feature // 0{i + 1}
+                <div className="space-y-4">
+                  <h3 className="text-3xl font-black text-slate-900 tracking-tight">{feature.title}</h3>
+                  <p className="text-slate-500 text-lg font-medium leading-relaxed">{feature.desc}</p>
                 </div>
               </div>
-              <div className="space-y-4">
-                <h3 className="text-3xl font-black text-slate-900 tracking-tight">{feature.title}</h3>
-                <p className="text-slate-500 text-lg font-medium leading-relaxed">{feature.desc}</p>
-              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Additional Information Section */}
+        <section className="pb-32">
+          <div className="bg-slate-900 rounded-[40px] p-12 md:p-20 text-center space-y-8 relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 w-[50%] h-[100%] bg-blue-500/20 blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[50%] h-[100%] bg-cyan-500/20 blur-[120px] pointer-events-none" />
+            
+            <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight relative z-10">
+              Ready to automate your search?
+            </h2>
+            <p className="text-slate-300 text-xl max-w-2xl mx-auto font-medium relative z-10 leading-relaxed">
+              Join the professionals who are landing interviews faster by letting the system do the hard work.
+            </p>
+            <div className="pt-6 relative z-10">
+              <Link href="/login" className="inline-flex items-center gap-3 px-12 py-5 bg-white text-slate-900 font-black rounded-full text-lg hover:scale-[1.02] transition-transform shadow-xl shadow-white/10">
+                Create Free Account <ArrowRight size={20} />
+              </Link>
             </div>
-          ))}
-        </div>
+          </div>
+        </section>
       </main>
 
-      <footer className="border-t border-slate-100 py-32 text-center">
-        <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.5em]">
-          &copy; 2026 HUNTR SYSTEMS &bull; ALL RIGHTS RESERVED
+      {/* Structured Footer */}
+      <footer className="bg-white border-t border-slate-200 py-16">
+        <div className="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="flex flex-col items-center md:items-start gap-4">
+            <span className="logo-text !text-xl">HUNTR</span>
+            <p className="text-sm font-medium text-slate-400">The automated job search platform.</p>
+          </div>
+          
+          <nav className="flex items-center gap-8 text-sm font-bold text-slate-500">
+            <Link href="#" className="hover:text-blue-600 transition-colors">Privacy Policy</Link>
+            <Link href="#" className="hover:text-blue-600 transition-colors">Terms of Service</Link>
+            <Link href="#" className="hover:text-blue-600 transition-colors">Contact Support</Link>
+          </nav>
+        </div>
+        <div className="max-w-[1200px] mx-auto px-6 mt-12 pt-8 border-t border-slate-100 text-center">
+          <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
+            &copy; 2026 HUNTR SYSTEMS &bull; ALL RIGHTS RESERVED
+          </div>
         </div>
       </footer>
     </div>

@@ -40,5 +40,5 @@ body {
 }
 
 .logo-text {
-  @apply text-2xl font-black tracking-[0.2em] text-slate-900 uppercase;
+  @apply text-2xl font-black tracking-[0.2em] uppercase bg-gradient-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent;
 }
