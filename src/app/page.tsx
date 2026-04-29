@@ -53,45 +53,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Hero Mockup */}
-        <motion.div 
-          initial={{ y: 40, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.8 }}
-          className="mt-12 relative max-w-4xl mx-auto"
-        >
-          <div className="absolute inset-0 bg-gradient-to-t from-[#f8fafc] via-[#f8fafc]/50 to-transparent z-10 h-full w-full pointer-events-none" />
-          <div className="rounded-t-3xl border border-slate-200 bg-white/60 backdrop-blur-xl shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.05)] overflow-hidden aspect-[16/9] p-2 flex flex-col relative z-0">
-            <div className="flex gap-2 p-4 border-b border-slate-100 bg-white/50">
-              <div className="w-3 h-3 rounded-full bg-red-400" />
-              <div className="w-3 h-3 rounded-full bg-amber-400" />
-              <div className="w-3 h-3 rounded-full bg-green-400" />
-            </div>
-            <div className="flex-1 p-8 flex gap-6 bg-slate-50/50">
-              <div className="w-1/3 space-y-4 hidden md:block">
-                <div className="h-8 bg-slate-200/50 rounded-lg w-full" />
-                <div className="h-32 bg-white rounded-xl border border-slate-100 shadow-sm" />
-                <div className="h-32 bg-white rounded-xl border border-slate-100 shadow-sm" />
-              </div>
-              <div className="w-full md:w-2/3 bg-white rounded-xl border border-slate-100 shadow-sm p-6 space-y-6">
-                <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
-                  <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center">
-                    <Target className="text-blue-600" size={24} />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-6 bg-slate-200/50 rounded w-48 animate-pulse" />
-                    <div className="h-4 bg-slate-100 rounded w-32" />
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="h-3 bg-slate-100 rounded w-full" />
-                  <div className="h-3 bg-slate-100 rounded w-5/6" />
-                  <div className="h-3 bg-slate-100 rounded w-4/6" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
 
         {/* Integration Logo Cloud */}
         <div className="pt-10 pb-32 border-b border-slate-200/60 mb-32 relative z-20">
