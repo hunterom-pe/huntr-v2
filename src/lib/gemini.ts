@@ -20,7 +20,7 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
   }
 
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
   const prompt = `
     You are an expert career coach. Your goal is ATS Optimization (Precise Mapping).
@@ -42,7 +42,7 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
     RETURN JSON ONLY:
     {
       "originalSummary": "exact paragraph text from Summary to find",
-      "newSummary": "*** HEALTHSTREAM OPTIMIZED *** [then the rewritten Summary paragraph]",
+      "newSummary": "rewritten Summary paragraph mirroring JD terminology",
       "bulletReplacements": [
         { "original": "exact bullet or skill text to find", "new": "rewritten version" }
       ]
@@ -67,15 +67,9 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
     }
     throw new Error("Failed to parse AI response");
   } catch (error: any) {
-    console.error("AI Optimization Error:", error.message || error);
-    
-    // Fallback: Find the first substantial paragraph
-    const lines = resumeText.split('\n').map(l => l.trim()).filter(l => l.length > 50);
-    const targetLine = lines[0] || "Professional Summary";
-    
     return {
-      originalSummary: targetLine,
-      newSummary: targetLine, // No change if AI fails, to avoid "AI OPTIMIZED" text in real files
+      originalSummary: "NO_CHANGES_REQUIRED_FALLBACK_PLACEHOLDER",
+      newSummary: "NO_CHANGES_REQUIRED_FALLBACK_PLACEHOLDER",
       bulletReplacements: []
     };
   }

@@ -72,9 +72,9 @@ export async function POST(req: Request) {
     console.log("Optimization Step 3: Calling AI Engine");
     const opt = await optimizeResumeContent(resumeText, jobDescription);
     
-    if (!opt || !opt.originalSummary || opt.originalSummary.length < 20) {
-      console.error("AI Mapping Error: Summary too short or missing", opt);
-      return NextResponse.json({ error: "AI failed to find a substantial summary section to optimize. Ensure your resume has a 'Professional Summary' or 'Profile' paragraph." }, { status: 422 });
+    if (!opt || (!opt.originalSummary && opt.originalSummary !== "NO_CHANGES_REQUIRED_FALLBACK_PLACEHOLDER")) {
+      console.error("AI Mapping Error: Summary missing", opt);
+      return NextResponse.json({ error: "AI failed to analyze your resume. Please try again in a moment." }, { status: 422 });
     }
 
       // 4. Surgical XML Replacement
@@ -84,81 +84,61 @@ export async function POST(req: Request) {
 
       if (!xml) throw new Error("Could not read document XML");
 
-      const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const createSurgicalRegex = (text: string) => {
-        // Ultimate fuzzy: Allow any amount of whitespace, newlines, or XML tags between every single character
-        return new RegExp(text.split('').map(c => escapeRegExp(c)).join('[\\s\\n\\r]*(<[^>]+>)*[\\s\\n\\r]*'), 'g');
+        const pattern = text.split('').map((c, i) => {
+          const escaped = c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          if (i < text.length - 1) {
+            return `${escaped}(?:(?!<\/w:p>)<[^>]+>|\\s)*?`;
+          }
+          return escaped;
+        }).join('');
+        
+        // Capture the start-tag/prefix, the pattern match, and the suffix/end-tag
+        return new RegExp(`(<w:t[^>]*>[^<]*?)(${pattern})([^<]*?<\/w:t>)`, 'g');
       };
 
-      console.log("Searching for summary match:", opt.originalSummary.substring(0, 50) + "...");
-      console.log("Document XML Snapshot:", xml.substring(0, 300));
+      const xmlEscape = (str: string) => {
+        return str
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&apos;');
+      };
 
-      console.log("AI PROPOSED OPTIMIZATION:");
-      console.log("Targeting:", opt.originalSummary);
-      console.log("Replacing with:", opt.newSummary);
+      const isFallback = opt.originalSummary === "NO_CHANGES_REQUIRED_FALLBACK_PLACEHOLDER";
 
-      // Replace Summary
-      const summaryRegex = createSurgicalRegex(opt.originalSummary);
-      const match = xml.match(summaryRegex);
-      if (match) {
-        console.log("SUCCESS: Match found for summary! Performing XML-aware replacement...");
-        const matchedText = match[0];
-        let first = true;
-        const replacedMatch = matchedText.replace(/<w:t[^>]*>(.*?)<\/w:t>/g, (fullTag, content) => {
-          if (first) {
-            first = false;
-            const tagOpening = fullTag.split('>')[0] + '>';
-            return `${tagOpening}${opt.newSummary}</w:t>`;
-          }
-          const tagOpening = fullTag.split('>')[0] + '>';
-          return `${tagOpening}</w:t>`;
-        });
+      if (!isFallback && opt.originalSummary && opt.newSummary && opt.originalSummary !== opt.newSummary) {
+        console.log("Searching for summary match (Surgical)...");
+        const summaryRegex = createSurgicalRegex(opt.originalSummary);
         
-        // Bulletproof Substring Injection
-        const index = xml.indexOf(matchedText);
-        if (index !== -1) {
-          console.log("Index of match:", index);
-          xml = xml.substring(0, index) + replacedMatch + xml.substring(index + matchedText.length);
-          console.log("Physical Injection Success. New Length:", xml.length);
-        } else {
-          console.warn("Substring match failed even though regex match succeeded. (Hidden Char Conflict)");
+        let matchFound = false;
+        xml = xml.replace(summaryRegex, (fullMatch, prefix, match, suffix) => {
+          if (matchFound) return fullMatch; 
+          matchFound = true;
+          console.log(`SUCCESS: Match found for summary!`);
+          return `${prefix}${xmlEscape(opt.newSummary)}${suffix}`;
+        });
+
+        if (!matchFound) {
+          console.warn("WARNING: No match found for summary.");
         }
-      } else {
-        console.warn("WARNING: No match found for summary. Surgical replacement skipped.");
       }
 
       // Replace Bullets
-      if (opt.bulletReplacements) {
-        console.log(`Optimization Step 5: Processing ${opt.bulletReplacements.length} bullet replacements`);
+      if (opt.bulletReplacements && opt.bulletReplacements.length > 0) {
+        console.log(`Optimization Step 5: Processing ${opt.bulletReplacements.length} bullets`);
         for (const [bIdx, replacement] of opt.bulletReplacements.entries()) {
-          if (replacement.original && replacement.new) {
+          if (replacement.original && replacement.new && replacement.original !== replacement.new) {
             const bulletRegex = createSurgicalRegex(replacement.original);
-            const bMatch = xml.match(bulletRegex);
-            
-            if (bMatch) {
-              const bMatchedText = bMatch[0];
-              console.log(`- Bullet ${bIdx + 1}: Match found!`);
-              
-              let bFirst = true;
-              const bReplacedMatch = bMatchedText.replace(/<w:t[^>]*>(.*?)<\/w:t>/g, (fullTag, content) => {
-                if (bFirst) {
-                  bFirst = false;
-                  const tagOpening = fullTag.split('>')[0] + '>';
-                  return `${tagOpening}${replacement.new}</w:t>`;
-                }
-                const tagOpening = fullTag.split('>')[0] + '>';
-                return `${tagOpening}</w:t>`;
-              });
+            let bMatchFound = false;
 
-              // Use surgical index replacement for bullets too
-              const bIndex = xml.indexOf(bMatchedText);
-              if (bIndex !== -1) {
-                xml = xml.substring(0, bIndex) + bReplacedMatch + xml.substring(bIndex + bMatchedText.length);
-                console.log(`  - Bullet ${bIdx + 1}: Physically injected.`);
-              }
-            } else {
-              console.warn(`- Bullet ${bIdx + 1}: No match found in XML. (Likely formatting tags splitting words)`);
-            }
+            xml = xml.replace(bulletRegex, (fullMatch, prefix, match, suffix) => {
+              if (bMatchFound) return fullMatch;
+              bMatchFound = true;
+              console.log(`  - Bullet ${bIdx + 1}: Match replaced.`);
+              return `${prefix}${xmlEscape(replacement.new)}${suffix}`;
+            });
           }
         }
       }
@@ -167,8 +147,7 @@ export async function POST(req: Request) {
       zip.file("word/document.xml", xml);
       const outputBuffer = zip.generate({ type: "nodebuffer" });
 
-      const uniqueId = Math.random().toString(36).substring(7).toUpperCase();
-      const finalFilename = `Optimized_Resume_${uniqueId}.docx`;
+      const finalFilename = `Optimized_Resume_${Date.now()}.docx`;
       console.log(`Optimization Complete: Sending ${finalFilename} (${outputBuffer.length} bytes)`);
 
       return new Response(outputBuffer, {
