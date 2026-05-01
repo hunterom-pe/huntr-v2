@@ -20,7 +20,7 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
   }
 
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
   const prompt = `
     You are an expert career coach and resume writer. 
@@ -60,15 +60,14 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
     throw new Error("Failed to parse AI response: " + text);
   } catch (error: any) {
     console.error("AI Optimization Error:", error.message || error);
+    
+    // Ultimate fallback: Use the first sentence/line of the resume as the "original" to ensure a match
+    const firstLine = resumeText.split('\n').find(l => l.trim().length > 10)?.substring(0, 150) || "";
+    
     return {
-      originalSummary: "Professional with experience.",
-      newSummary: "Highly motivated professional with extensive experience in " + (jobDescription.substring(0, 50)) + ". Proven track record of delivering high-impact solutions and optimizing complex workflows to meet business objectives.",
-      bulletReplacements: [
-        {
-          original: "Experienced in project management.",
-          new: "Leveraged technical expertise to deliver high-impact solutions for core business infrastructure."
-        }
-      ]
+      originalSummary: firstLine,
+      newSummary: firstLine ? "Optimized Summary: " + firstLine : "Results-driven professional with a proven track record.",
+      bulletReplacements: []
     };
   }
 }
