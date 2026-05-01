@@ -92,11 +92,8 @@ export async function POST(req: Request) {
       const match = xml.match(summaryRegex);
       if (match) {
         console.log("SUCCESS: Match found for summary! Performing XML-aware replacement...");
+        console.log("Original XML Length:", xml.length);
         const matchedText = match[0];
-        // Surgical Inversion: Keep all the XML tags, but replace the content within them
-        // 1. Find all <w:t> tags
-        // 2. Put all new text in the FIRST <w:t>
-        // 3. Clear all other <w:t> tags
         let first = true;
         const replacedMatch = matchedText.replace(/<w:t[^>]*>(.*?)<\/w:t>/g, (fullTag, content) => {
           if (first) {
@@ -108,6 +105,8 @@ export async function POST(req: Request) {
           return `${tagOpening}</w:t>`;
         });
         xml = xml.replace(matchedText, replacedMatch);
+        console.log("New XML Length:", xml.length);
+        console.log("Replacement Snippet:", replacedMatch.substring(0, 100));
       } else {
         console.warn("WARNING: No match found for summary. Surgical replacement skipped.");
       }
@@ -138,9 +137,9 @@ export async function POST(req: Request) {
 
       // 5. Re-zip and return
       zip.file("word/document.xml", xml);
-      const outputBuffer = zip.generate({ type: "nodebuffer" });
+      const outputBuffer = zip.generate({ type: "blob" });
 
-      return new Response(new Uint8Array(outputBuffer), {
+      return new Response(outputBuffer, {
         headers: {
           "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
           "Content-Disposition": `attachment; filename="HUNTR_${Date.now()}_Optimized_Resume.docx"`,
