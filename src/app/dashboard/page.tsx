@@ -176,7 +176,7 @@ export default function DashboardPage() {
     try {
       const formData = new FormData();
       formData.append("jobDescription", job.description);
-      const response = await fetch("/api/resume/optimize", { method: "POST", body: formData });
+      const response = await fetch("/api/optimize", { method: "POST", body: formData });
       console.log("Optimization Response Status:", response.status);
       
       if (response.ok) {
