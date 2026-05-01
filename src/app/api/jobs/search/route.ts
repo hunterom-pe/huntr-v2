@@ -129,12 +129,16 @@ export async function POST(req: Request) {
 
       // Replace Bullets
       if (opt.bulletReplacements) {
-        for (const replacement of opt.bulletReplacements) {
+        console.log(`Optimization Step 5: Processing ${opt.bulletReplacements.length} bullet replacements`);
+        for (const [bIdx, replacement] of opt.bulletReplacements.entries()) {
           if (replacement.original && replacement.new) {
             const bulletRegex = createSurgicalRegex(replacement.original);
             const bMatch = xml.match(bulletRegex);
+            
             if (bMatch) {
               const bMatchedText = bMatch[0];
+              console.log(`- Bullet ${bIdx + 1}: Match found!`);
+              
               let bFirst = true;
               const bReplacedMatch = bMatchedText.replace(/<w:t[^>]*>(.*?)<\/w:t>/g, (fullTag, content) => {
                 if (bFirst) {
@@ -145,7 +149,15 @@ export async function POST(req: Request) {
                 const tagOpening = fullTag.split('>')[0] + '>';
                 return `${tagOpening}</w:t>`;
               });
-              xml = xml.replace(bMatchedText, bReplacedMatch);
+
+              // Use surgical index replacement for bullets too
+              const bIndex = xml.indexOf(bMatchedText);
+              if (bIndex !== -1) {
+                xml = xml.substring(0, bIndex) + bReplacedMatch + xml.substring(bIndex + bMatchedText.length);
+                console.log(`  - Bullet ${bIdx + 1}: Physically injected.`);
+              }
+            } else {
+              console.warn(`- Bullet ${bIdx + 1}: No match found in XML. (Likely formatting tags splitting words)`);
             }
           }
         }

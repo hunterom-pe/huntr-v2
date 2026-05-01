@@ -24,13 +24,14 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
 
   const prompt = `
     You are an expert career coach. Your goal is ATS Optimization (Precise Mapping).
-    Rewrite the candidate's resume summary and bullets to mirror the terminology of the job description.
+    Rewrite the candidate's resume summary, core competencies (skills), and professional experience bullets to mirror the terminology of the job description.
     
     GUIDELINES:
     1. Swap the candidate's words for the job description's keywords where the meaning is identical.
-    2. Do NOT invent new skills or experience.
-    3. Ensure the "originalSummary" and "original" bullet text matches EXACTLY what is in the resume.
-    4. Focus on mirroring specific tools (e.g. TFS, SQL Server, Postman) and methodologies mentioned in the JD.
+    2. Focus on the "Summary", "Core Competencies", and "Professional Experience" sections.
+    3. Do NOT invent new skills or experience.
+    4. Ensure the "original" text matches EXACTLY what is in the resume.
+    5. Focus on mirroring specific tools (e.g. TFS, SQL Server, Postman) and methodologies mentioned in the JD.
     
     ORIGINAL RESUME:
     ${resumeText}
@@ -40,10 +41,10 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
     
     RETURN JSON ONLY:
     {
-      "originalSummary": "exact paragraph text to find",
-      "newSummary": "rewritten paragraph with JD keywords",
+      "originalSummary": "exact paragraph text from Summary to find",
+      "newSummary": "rewritten Summary paragraph",
       "bulletReplacements": [
-        { "original": "exact bullet text from resume", "new": "rewritten bullet" }
+        { "original": "exact bullet or skill text to find", "new": "rewritten version" }
       ]
     }
   `;
