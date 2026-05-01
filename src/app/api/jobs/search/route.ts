@@ -80,13 +80,21 @@ export async function POST(req: Request) {
 
       const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const createSurgicalRegex = (text: string) => {
-        return new RegExp(text.split('').map(c => escapeRegExp(c)).join('(<[^>]+>)*'), 'g');
+        // Ultimate fuzzy: Allow any amount of whitespace, newlines, or XML tags between every single character
+        return new RegExp(text.split('').map(c => escapeRegExp(c)).join('[\\s\\n\\r]*(<[^>]+>)*[\\s\\n\\r]*'), 'g');
       };
+
+      console.log("Searching for summary match:", opt.originalSummary.substring(0, 50) + "...");
+      console.log("Document XML Snapshot:", xml.substring(0, 300));
 
       // Replace Summary
       const summaryRegex = createSurgicalRegex(opt.originalSummary);
-      if (xml.match(summaryRegex)) {
+      const match = xml.match(summaryRegex);
+      if (match) {
+        console.log("SUCCESS: Match found for summary! Replacing...");
         xml = xml.replace(summaryRegex, opt.newSummary);
+      } else {
+        console.warn("WARNING: No match found for summary. Surgical replacement skipped.");
       }
 
       // Replace Bullets
