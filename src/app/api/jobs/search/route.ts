@@ -87,12 +87,15 @@ export async function POST(req: Request) {
       console.log("Searching for summary match:", opt.originalSummary.substring(0, 50) + "...");
       console.log("Document XML Snapshot:", xml.substring(0, 300));
 
+      console.log("AI PROPOSED OPTIMIZATION:");
+      console.log("Targeting:", opt.originalSummary);
+      console.log("Replacing with:", opt.newSummary);
+
       // Replace Summary
       const summaryRegex = createSurgicalRegex(opt.originalSummary);
       const match = xml.match(summaryRegex);
       if (match) {
         console.log("SUCCESS: Match found for summary! Performing XML-aware replacement...");
-        console.log("Original XML Length:", xml.length);
         const matchedText = match[0];
         let first = true;
         const replacedMatch = matchedText.replace(/<w:t[^>]*>(.*?)<\/w:t>/g, (fullTag, content) => {
@@ -104,9 +107,15 @@ export async function POST(req: Request) {
           const tagOpening = fullTag.split('>')[0] + '>';
           return `${tagOpening}</w:t>`;
         });
-        xml = xml.replace(matchedText, replacedMatch);
-        console.log("New XML Length:", xml.length);
-        console.log("Replacement Snippet:", replacedMatch.substring(0, 100));
+        
+        // Literal string replacement to avoid regex special char issues in the second pass
+        const parts = xml.split(matchedText);
+        if (parts.length > 1) {
+          xml = parts.join(replacedMatch);
+          console.log("Length Change:", matchedText.length, "->", replacedMatch.length);
+        } else {
+          console.warn("Literal replacement failed even though match was found. (Internal XML mismatch)");
+        }
       } else {
         console.warn("WARNING: No match found for summary. Surgical replacement skipped.");
       }
