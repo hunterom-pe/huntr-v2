@@ -177,9 +177,11 @@ export default function DashboardPage() {
       const formData = new FormData();
       formData.append("jobDescription", job.description);
       const response = await fetch("/api/resume/optimize", { method: "POST", body: formData });
+      console.log("Optimization Response Status:", response.status);
       
       if (response.ok) {
         const blob = await response.blob();
+        console.log("Blob received, size:", blob.size);
         if (blob.size === 0) throw new Error("Received an empty file from the server.");
         
         console.log("Download starting for optimized resume...");

@@ -130,7 +130,13 @@ export async function POST(req: Request) {
     });
 
   } catch (error: any) {
-    console.error("Resume Optimization Error:", error.message || error);
-    return NextResponse.json({ error: error.message || "Failed to optimize resume" }, { status: 500 });
+    console.error("CRITICAL: Resume Optimization Error!");
+    console.error("Message:", error.message);
+    console.error("Stack:", error.stack);
+    return NextResponse.json({ 
+      error: "Optimization failed on the server.", 
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    }, { status: 500 });
   }
 }
