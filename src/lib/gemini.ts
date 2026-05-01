@@ -42,7 +42,7 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
     RETURN JSON ONLY:
     {
       "originalSummary": "exact paragraph text from Summary to find",
-      "newSummary": "rewritten Summary paragraph",
+      "newSummary": "*** HEALTHSTREAM OPTIMIZED *** [then the rewritten Summary paragraph]",
       "bulletReplacements": [
         { "original": "exact bullet or skill text to find", "new": "rewritten version" }
       ]

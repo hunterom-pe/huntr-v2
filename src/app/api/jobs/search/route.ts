@@ -167,7 +167,8 @@ export async function POST(req: Request) {
       zip.file("word/document.xml", xml);
       const outputBuffer = zip.generate({ type: "nodebuffer" });
 
-      const finalFilename = `Optimized_${path.basename(user.resumePath)}`;
+      const uniqueId = Math.random().toString(36).substring(7).toUpperCase();
+      const finalFilename = `Optimized_Resume_${uniqueId}.docx`;
       console.log(`Optimization Complete: Sending ${finalFilename} (${outputBuffer.length} bytes)`);
 
       return new Response(outputBuffer, {
