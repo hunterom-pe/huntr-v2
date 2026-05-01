@@ -213,7 +213,7 @@ export default function ProfileClient({ user }: { user: any }) {
                 disabled={isUploading}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" 
               />
-              <button disabled={isUploading} className="btn-glass px-6 py-3 flex items-center gap-2 rounded-xl text-[12px] uppercase tracking-widest">
+              <button disabled={isUploading} className="btn-glass px-6 py-3 flex items-center gap-2 rounded-xl text-[12px] uppercase tracking-widest pointer-events-none">
                 {isUploading ? <Loader2 className="animate-spin" size={16} /> : <UploadCloud size={16} />}
                 {isUploading ? "Uploading..." : "Replace File"}
               </button>
