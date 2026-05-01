@@ -209,8 +209,11 @@ export default function DashboardPage() {
         message: "Failed to connect to the optimization engine.",
         type: "intel"
       });
+    } finally {
+      setOptimizingId(null);
     }
   };
+
   const handleFollowUp = async (job: Job) => {
     setFollowUpJob(job);
     setIsGeneratingEmail(true);

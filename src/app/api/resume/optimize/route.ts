@@ -92,6 +92,8 @@ export async function POST(req: Request) {
     zip.file("word/document.xml", xml);
     const outputBuffer = zip.generate({ type: "nodebuffer" });
 
+    console.log("Optimization complete. Sending document...");
+
     return new Response(new Uint8Array(outputBuffer), {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -99,8 +101,8 @@ export async function POST(req: Request) {
       },
     });
 
-  } catch (error) {
-    console.error("Resume Optimization Error:", error);
-    return NextResponse.json({ error: "Failed to optimize resume" }, { status: 500 });
+  } catch (error: any) {
+    console.error("Resume Optimization Error:", error.message || error);
+    return NextResponse.json({ error: error.message || "Failed to optimize resume" }, { status: 500 });
   }
 }
