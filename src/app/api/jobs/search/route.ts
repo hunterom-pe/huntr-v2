@@ -53,23 +53,25 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: `Resume file not found or inaccessible. Please re-upload your resume. (${err.message})` }, { status: 404 });
       }
 
-      // 2. Extract raw text for AI
-      console.log("Optimization Step 2: Extracting text from document");
-      let resumeText: string;
-      try {
-        const extracted = await mammoth.extractRawText({ buffer: resumeBuffer });
-        resumeText = extracted.value;
-      } catch (err: any) {
-        return NextResponse.json({ error: "Failed to extract text from your resume." }, { status: 422 });
-      }
+    // 2. Extract raw text for AI
+    console.log("Optimization Step 2: Extracting text from document");
+    let resumeText: string;
+    try {
+      const extracted = await mammoth.extractRawText({ buffer: resumeBuffer });
+      resumeText = extracted.value;
+      console.log("RAW EXTRACTED TEXT (First 500 chars):", resumeText.substring(0, 500));
+    } catch (err: any) {
+      return NextResponse.json({ error: "Failed to extract text from your resume." }, { status: 422 });
+    }
 
-      // 3. Get AI Optimization
-      console.log("Optimization Step 3: Calling AI Engine");
-      const opt = await optimizeResumeContent(resumeText, jobDescription);
-      
-      if (!opt || !opt.originalSummary || !opt.newSummary) {
-        return NextResponse.json({ error: "AI failed to analyze your resume structure." }, { status: 422 });
-      }
+    // 3. Get AI Optimization
+    console.log("Optimization Step 3: Calling AI Engine");
+    const opt = await optimizeResumeContent(resumeText, jobDescription);
+    
+    if (!opt || !opt.originalSummary || opt.originalSummary.length < 20) {
+      console.error("AI Mapping Error: Summary too short or missing", opt);
+      return NextResponse.json({ error: "AI failed to find a substantial summary section to optimize. Ensure your resume has a 'Professional Summary' or 'Profile' paragraph." }, { status: 422 });
+    }
 
       // 4. Surgical XML Replacement
       console.log("Optimization Step 4: Performing surgical XML replacement");
