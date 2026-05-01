@@ -1,3 +1,4 @@
+/* DIAGNOSTIC: Force re-compile to resolve 404 ghost routes */
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
