@@ -165,12 +165,15 @@ export async function POST(req: Request) {
 
       // 5. Re-zip and return
       zip.file("word/document.xml", xml);
-      const outputBuffer = zip.generate({ type: "blob" });
+      const outputBuffer = zip.generate({ type: "nodebuffer" });
+
+      const finalFilename = `Optimized_${path.basename(user.resumePath)}`;
+      console.log(`Optimization Complete: Sending ${finalFilename} (${outputBuffer.length} bytes)`);
 
       return new Response(outputBuffer, {
         headers: {
           "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-          "Content-Disposition": `attachment; filename="HUNTR_${Date.now()}_Optimized_Resume.docx"`,
+          "Content-Disposition": `attachment; filename="${finalFilename}"`,
         },
       });
     }
