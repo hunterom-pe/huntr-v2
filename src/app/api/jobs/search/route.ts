@@ -110,13 +110,14 @@ export async function POST(req: Request) {
           return `${tagOpening}</w:t>`;
         });
         
-        // Literal string replacement to avoid regex special char issues in the second pass
-        const parts = xml.split(matchedText);
-        if (parts.length > 1) {
-          xml = parts.join(replacedMatch);
-          console.log("Length Change:", matchedText.length, "->", replacedMatch.length);
+        // Bulletproof Substring Injection
+        const index = xml.indexOf(matchedText);
+        if (index !== -1) {
+          console.log("Index of match:", index);
+          xml = xml.substring(0, index) + replacedMatch + xml.substring(index + matchedText.length);
+          console.log("Physical Injection Success. New Length:", xml.length);
         } else {
-          console.warn("Literal replacement failed even though match was found. (Internal XML mismatch)");
+          console.warn("Substring match failed even though regex match succeeded. (Hidden Char Conflict)");
         }
       } else {
         console.warn("WARNING: No match found for summary. Surgical replacement skipped.");

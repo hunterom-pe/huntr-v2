@@ -20,7 +20,7 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
   }
 
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const prompt = `
     You are an expert career coach and resume writer. 
@@ -61,12 +61,13 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
   } catch (error: any) {
     console.error("AI Optimization Error:", error.message || error);
     
-    // Ultimate fallback: Use the first sentence/line of the resume as the "original" to ensure a match
-    const firstLine = resumeText.split('\n').find(l => l.trim().length > 10)?.substring(0, 150) || "";
+    // Find the first paragraph that looks like a summary (not just a name)
+    const lines = resumeText.split('\n').map(l => l.trim()).filter(l => l.length > 50);
+    const targetLine = lines[0] || "Professional Summary";
     
     return {
-      originalSummary: firstLine,
-      newSummary: firstLine ? "Optimized Summary: " + firstLine : "Results-driven professional with a proven track record.",
+      originalSummary: targetLine,
+      newSummary: "AI OPTIMIZED: " + targetLine,
       bulletReplacements: []
     };
   }
