@@ -174,9 +174,11 @@ export default function DashboardPage() {
     if (!job) return;
     setOptimizingId(id);
     try {
-      const formData = new FormData();
-      formData.append("jobDescription", job.description);
-      const response = await fetch("/api/jobs/optimize", { method: "POST", body: formData });
+      const response = await fetch("/api/jobs/engine", { 
+        method: "POST", 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobDescription: job.description }) 
+      });
       console.log("Optimization Response Status:", response.status);
       
       if (response.ok) {

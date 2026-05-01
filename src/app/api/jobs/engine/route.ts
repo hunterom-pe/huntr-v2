@@ -23,8 +23,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No resume found. Please upload one in your profile." }, { status: 404 });
     }
 
-    const formData = await req.formData();
-    const jobDescription = formData.get("jobDescription") as string;
+    const body = await req.json().catch(() => ({}));
+    const jobDescription = body.jobDescription;
 
     if (!jobDescription) {
       return NextResponse.json({ error: "Missing job description" }, { status: 400 });
