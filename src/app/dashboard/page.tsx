@@ -180,13 +180,23 @@ export default function DashboardPage() {
       
       if (response.ok) {
         const blob = await response.blob();
+        if (blob.size === 0) throw new Error("Received an empty file from the server.");
+        
+        console.log("Download starting for optimized resume...");
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
+        a.style.display = 'none';
         a.href = url;
         a.download = `HUNTR_${job.company}_Resume.docx`;
         document.body.appendChild(a);
         a.click();
-        window.URL.revokeObjectURL(url);
+        
+        // Clean up
+        setTimeout(() => {
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        }, 100);
+
         handleStatusChange(id, 'APPLIED');
         
         addNotification({

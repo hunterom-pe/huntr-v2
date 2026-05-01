@@ -31,32 +31,50 @@ export async function POST(req: Request) {
     }
 
     // 1. Fetch resume buffer
+    console.log("Optimization Step 1: Fetching resume buffer from", user.resumePath);
     let resumeBuffer: Buffer;
-    if (user.resumePath.startsWith("http")) {
-      const res = await fetch(user.resumePath);
-      const arrayBuffer = await res.arrayBuffer();
-      resumeBuffer = Buffer.from(arrayBuffer);
-    } else {
-      // SECURITY: Read from protected storage instead of public web root
-      const fileName = path.basename(user.resumePath);
-      const filePath = path.join(process.cwd(), "storage/resumes", fileName);
-      resumeBuffer = await fs.readFile(filePath);
+    try {
+      if (user.resumePath.startsWith("http")) {
+        const res = await fetch(user.resumePath);
+        if (!res.ok) throw new Error(`Failed to fetch remote resume: ${res.statusText}`);
+        const arrayBuffer = await res.arrayBuffer();
+        resumeBuffer = Buffer.from(arrayBuffer);
+      } else {
+        const fileName = path.basename(user.resumePath);
+        const filePath = path.join(process.cwd(), "storage/resumes", fileName);
+        console.log("Attempting to read local file:", filePath);
+        resumeBuffer = await fs.readFile(filePath);
+      }
+    } catch (err: any) {
+      console.error("File Read Error:", err.message);
+      return NextResponse.json({ error: `Resume file not found or inaccessible. Please re-upload your resume in Profile Settings. (${err.message})` }, { status: 404 });
     }
 
     // 2. Extract raw text for AI
-    const extracted = await mammoth.extractRawText({ buffer: resumeBuffer });
-    const resumeText = extracted.value;
-
-    // 3. Get AI Optimization (Mapping original to new)
-    const opt = await optimizeResumeContent(resumeText, jobDescription);
-    console.log("AI Optimization Result:", opt ? "Success" : "Failed");
-    
-    if (!opt || !opt.originalSummary) {
-      console.error("AI failed to find original summary in resume text.");
-      throw new Error("AI Optimization failed to map original content");
+    console.log("Optimization Step 2: Extracting text from document");
+    let resumeText: string;
+    try {
+      const extracted = await mammoth.extractRawText({ buffer: resumeBuffer });
+      resumeText = extracted.value;
+      if (!resumeText || resumeText.trim().length < 50) {
+        throw new Error("Extracted text is too short or empty");
+      }
+    } catch (err: any) {
+      console.error("Text Extraction Error:", err.message);
+      return NextResponse.json({ error: "Failed to extract text from your resume. Ensure it is a valid .docx file." }, { status: 422 });
     }
 
-    // 4. Surgical XML Replacement (The "Secret Sauce")
+    // 3. Get AI Optimization
+    console.log("Optimization Step 3: Calling AI Engine");
+    const opt = await optimizeResumeContent(resumeText, jobDescription);
+    
+    if (!opt || !opt.originalSummary || !opt.newSummary) {
+      console.error("AI Mapping Error: Missing summary fields", opt);
+      return NextResponse.json({ error: "AI failed to analyze your resume structure. Try updating your resume summary to be more distinct." }, { status: 422 });
+    }
+
+    // 4. Surgical XML Replacement
+    console.log("Optimization Step 4: Performing surgical XML replacement");
     const zip = new PizZip(resumeBuffer);
     let xml = zip.file("word/document.xml")?.asText();
 
@@ -76,16 +94,26 @@ export async function POST(req: Request) {
 
     // Replace Summary
     const summaryRegex = createSurgicalRegex(opt.originalSummary);
-    xml = xml.replace(summaryRegex, opt.newSummary);
+    if (xml.match(summaryRegex)) {
+      console.log("Match found for summary! Replacing...");
+      xml = xml.replace(summaryRegex, opt.newSummary);
+    } else {
+      console.warn("Could not find exact match for original summary in document XML. Skipping surgical replacement.");
+    }
 
     // Replace Bullets
     if (opt.bulletReplacements) {
+      let bulletMatches = 0;
       for (const replacement of opt.bulletReplacements) {
         if (replacement.original && replacement.new) {
           const bulletRegex = createSurgicalRegex(replacement.original);
-          xml = xml.replace(bulletRegex, replacement.new);
+          if (xml.match(bulletRegex)) {
+            xml = xml.replace(bulletRegex, replacement.new);
+            bulletMatches++;
+          }
         }
       }
+      console.log(`Replaced ${bulletMatches} bullet points out of ${opt.bulletReplacements.length} requested.`);
     }
 
     // 5. Re-zip and return
