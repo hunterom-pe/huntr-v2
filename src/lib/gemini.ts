@@ -20,41 +20,46 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
   }
 
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const prompt = `
-    You are an expert career coach and resume writer. 
-    Your task is to rewrite a candidate's ENTIRE resume to perfectly align with a specific job description.
+    You are an expert career coach. Rewrite the candidate's resume summary and key bullets to match the job description.
     
-    ORIGINAL RESUME CONTENT:
+    IMPORTANT RULES:
+    1. The "originalSummary" MUST be a substantial paragraph (at least 20 words).
+    2. NEVER target names, phone numbers, emails, or addresses.
+    3. The "originalSummary" MUST be the EXACT text from the resume so I can find and replace it.
+    
+    ORIGINAL RESUME:
     ${resumeText}
     
-    TARGET JOB DESCRIPTION:
+    JOB DESCRIPTION:
     ${jobDescription}
     
-    INSTRUCTIONS:
-    1. Identify the EXACT original text of the "Professional Summary" or "Profile" section.
-    2. Rewrite that summary to align with the Job Description.
-    3. Identify 3-5 key accomplishment bullet points from the "Experience" section.
-    4. Rewrite those specific bullet points.
-    5. Return a JSON object with:
-       - "originalSummary": string (EXACT text from the original)
-       - "newSummary": string (the rewritten version)
-       - "bulletReplacements": array of objects { "original": string, "new": string }
+    RETURN JSON ONLY:
+    {
+      "originalSummary": "exact paragraph text to find",
+      "newSummary": "rewritten paragraph",
+      "bulletReplacements": [
+        { "original": "exact bullet text", "new": "optimized bullet" }
+      ]
+    }
   `;
 
   try {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
+    console.log("AI RAW RESPONSE:", text);
     
-    // Improved JSON extraction (handles markdown code blocks)
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       try {
-        return JSON.parse(jsonMatch[0]);
+        const parsed = JSON.parse(jsonMatch[0]);
+        console.log("AI PARSED OBJECT:", JSON.stringify(parsed, null, 2));
+        return parsed;
       } catch (parseError) {
-        console.error("JSON Parse Error:", parseError, "Raw Text:", text);
+        console.error("JSON Parse Error:", parseError);
       }
     }
     throw new Error("Failed to parse AI response: " + text);
