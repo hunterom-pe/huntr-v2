@@ -28,6 +28,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
+    // SECURITY: Strict file type validation
+    if (!file.name.toLowerCase().endsWith(".docx")) {
+      return NextResponse.json({ error: "Only .docx files are allowed" }, { status: 400 });
+    }
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
@@ -78,7 +83,8 @@ export async function POST(req: Request) {
     // 2. Fallback to Local Storage (If S3 failed or credentials missing)
     if (!uploadSuccessful) {
       console.warn("Falling back to local disk storage.");
-      const uploadDir = path.join(process.cwd(), "public/uploads");
+      // SECURITY: Move files OUT of public/ to prevent direct browser access
+      const uploadDir = path.join(process.cwd(), "storage/resumes");
       
       try {
         await mkdir(uploadDir, { recursive: true });

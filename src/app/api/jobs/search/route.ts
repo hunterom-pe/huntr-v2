@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
     const body = await req.json().catch(() => ({}));
     const page = parseInt(body.page) || 0;
-    const startOffset = page * 10;
+    const startOffset = page * 30;
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email }
@@ -42,42 +42,46 @@ export async function POST(req: Request) {
       return NextResponse.json({ jobs: fallbackJobs });
     }
 
-    // Call SerpApi Google Jobs
+    // Call SerpApi Google Jobs - Fetch 5 pages (10 each) to get 50 results
     const query = encodeURIComponent(title);
     const searchLocation = location.toLowerCase() === "remote" ? "United States" : encodeURIComponent(location);
     const remoteParam = location.toLowerCase() === "remote" ? "&ltype=1" : "";
     
-    const serpUrl = `https://serpapi.com/search.json?engine=google_jobs&q=${query}&location=${searchLocation}&gl=us&hl=en&start=${startOffset}&api_key=${SERPAPI_KEY}${remoteParam}`;
-    
-    console.log("Searching for jobs with URL:", serpUrl);
-    
-    let response = await fetch(serpUrl);
-    let data = await response.json();
+    const fetchJobs = async (start: number) => {
+      const url = `https://serpapi.com/search.json?engine=google_jobs&q=${query}&location=${searchLocation}&gl=us&hl=en&start=${start}&api_key=${SERPAPI_KEY}${remoteParam}`;
+      console.log(`Fetching SerpApi page starting at ${start}`);
+      const res = await fetch(url);
+      if (!res.ok) return { jobs_results: [] };
+      return res.json();
+    };
 
-    console.log("SerpApi raw results count:", data.jobs_results?.length || 0);
+    const results = await Promise.all([
+      fetchJobs(startOffset),
+      fetchJobs(startOffset + 10),
+      fetchJobs(startOffset + 20),
+      fetchJobs(startOffset + 30),
+      fetchJobs(startOffset + 40)
+    ]);
 
-    // If no results found, try searching for just the title in q
-    if (!data.jobs_results) {
-      console.warn(`No results for "${title}" in "${location}". Trying broad search...`);
-      const broadUrl = `https://serpapi.com/search.json?engine=google_jobs&q=${encodeURIComponent(title + " " + location)}&gl=us&hl=en&start=${startOffset}&api_key=${SERPAPI_KEY}`;
-      response = await fetch(broadUrl);
-      data = await response.json();
-    }
+    const allJobsResults = results.flatMap(r => r.jobs_results || []);
+    console.log("Total SerpApi results count:", allJobsResults.length);
 
-    if (!data.jobs_results) {
+    if (allJobsResults.length === 0) {
       return NextResponse.json({ jobs: [] });
     }
 
-    // Map and Persist the live jobs
-    const savedJobs = [];
+    // Map and Persist the live jobs in parallel
     if (user) {
-      for (const job of data.jobs_results.slice(0, 10)) {
+      const uniqueResults = Array.from(new Map(allJobsResults.map(item => [item.job_id, item])).values());
+      
+      const savedJobs = await Promise.all(uniqueResults.slice(0, 50).map(async (job) => {
         const jobId = job.job_id || Math.random().toString(36).substr(2, 9);
+        const jobLocation = job.location || location;
         const mappedJob = {
           id: jobId,
           title: job.title || title,
           company: job.company_name || "Unknown Company",
-          location: job.location || location,
+          location: jobLocation.toLowerCase().includes("anywhere") ? "Remote" : jobLocation,
           description: job.description ? job.description.substring(0, 500) + "..." : "No description provided.",
           matchScore: Math.floor(Math.random() * (98 - 85 + 1)) + 85,
           applyLink: job.apply_options?.[0]?.link || "#",
@@ -85,7 +89,7 @@ export async function POST(req: Request) {
           userId: user.id
         };
 
-        const persistedJob = await prisma.job.upsert({
+        return prisma.job.upsert({
           where: { id: jobId },
           update: {
             title: mappedJob.title,
@@ -107,11 +111,12 @@ export async function POST(req: Request) {
             userId: user.id
           }
         });
-        savedJobs.push(persistedJob);
-      }
+      }));
+
+      return NextResponse.json({ jobs: savedJobs });
     }
 
-    return NextResponse.json({ jobs: savedJobs });
+    return NextResponse.json({ jobs: [] });
   } catch (error) {
     console.error("Job Search Error:", error);
     return NextResponse.json({ error: "Failed to search live jobs" }, { status: 500 });

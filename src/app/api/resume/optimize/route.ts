@@ -37,7 +37,9 @@ export async function POST(req: Request) {
       const arrayBuffer = await res.arrayBuffer();
       resumeBuffer = Buffer.from(arrayBuffer);
     } else {
-      const filePath = path.join(process.cwd(), "public", user.resumePath);
+      // SECURITY: Read from protected storage instead of public web root
+      const fileName = path.basename(user.resumePath);
+      const filePath = path.join(process.cwd(), "storage/resumes", fileName);
       resumeBuffer = await fs.readFile(filePath);
     }
 

@@ -44,7 +44,13 @@ export default function RootLayout({
           </div>
           
           {/* Desktop App Content */}
-          <div className="hidden md:flex md:flex-col md:min-h-full md:w-full">
+          <div className="hidden md:flex md:flex-col md:min-h-full md:w-full relative overflow-hidden">
+            {/* Background Aura */}
+            <div className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">
+              <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-blue-400/5 blur-[120px] animate-mesh" />
+              <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-400/5 blur-[120px] animate-mesh" style={{ animationDelay: '-5s' }} />
+              <div className="absolute top-[20%] right-[-5%] w-[30%] h-[30%] rounded-full bg-cyan-400/5 blur-[100px] animate-mesh" style={{ animationDelay: '-10s' }} />
+            </div>
             {children}
           </div>
         </NextAuthProvider>

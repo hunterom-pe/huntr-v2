@@ -1,17 +1,31 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { z } from "zod";
+
+const registerSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  name: z.string().min(1, "First name is required"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters long")
+    .regex(/[a-zA-Z]/, "Password must contain at least one letter")
+    .regex(/[0-9]/, "Password must contain at least one number"),
+});
 
 export async function POST(req: Request) {
   try {
-    const { email, password, name } = await req.json();
-
-    if (!email || !password) {
+    const body = await req.json();
+    
+    // Validate the input data
+    const validation = registerSchema.safeParse(body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "Email and password are required" },
+        { error: validation.error.errors[0].message },
         { status: 400 }
       );
     }
+
+    const { email, password, name } = validation.data;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -43,10 +57,19 @@ export async function POST(req: Request) {
       { message: "User registered successfully", userId: user.id },
       { status: 201 }
     );
-  } catch (error) {
-    console.error("Registration error:", error);
+  } catch (error: any) {
+    console.error("Registration error full details:", error);
+    
+    // Check if it's a Prisma connection error
+    if (error.code === 'P1001') {
+      return NextResponse.json(
+        { error: "Could not connect to the database. Please check your DATABASE_URL." },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "Something went wrong during registration" },
+      { error: `Registration failed: ${error.message || "Internal server error"}` },
       { status: 500 }
     );
   }

@@ -31,6 +31,24 @@ export default function LoginPage() {
 
     try {
       if (!isLogin) {
+        // Client-side validation for registration
+        if (!formData.name.trim()) {
+          throw new Error("First name is required");
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+          throw new Error("Please enter a valid email address");
+        }
+
+        if (formData.password.length < 8) {
+          throw new Error("Password must be at least 8 characters long");
+        }
+
+        if (!/[a-zA-Z]/.test(formData.password) || !/[0-9]/.test(formData.password)) {
+          throw new Error("Password must contain both letters and numbers");
+        }
+
         // Register user
         const res = await fetch("/api/auth/register", {
           method: "POST",
@@ -69,26 +87,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50 font-sans relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-6 font-sans relative overflow-hidden bg-slate-50">
       {/* Mesh Background Decorations */}
-      <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-blue-400/10 blur-[120px]" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-400/10 blur-[120px]" />
+      <div className="absolute top-[-10%] left-[-10%] w-[70%] h-[70%] rounded-full bg-blue-400/10 blur-[120px] animate-mesh" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[70%] h-[70%] rounded-full bg-indigo-400/10 blur-[120px] animate-mesh" style={{ animationDelay: '-5s' }} />
+      <div className="absolute top-[20%] right-[-5%] w-[40%] h-[40%] rounded-full bg-cyan-400/10 blur-[100px] animate-mesh" style={{ animationDelay: '-10s' }} />
 
       <div className="w-full max-w-[440px] space-y-8 relative z-10">
         
-        <div className="text-center">
-          <Link href="/" className="logo-text text-3xl">
+        <div className="text-center mb-4">
+          <Link href="/" className="logo-text !text-4xl tracking-[0.4em]">
             HUNTR
           </Link>
         </div>
 
-        <div className="bg-white p-10 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 space-y-8">
-          <div className="space-y-2">
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-              {isLogin ? "Welcome back" : "Create your account"}
+        <div className="glass-panel p-12 border-white shadow-2xl shadow-slate-200/50 space-y-10">
+          <div className="space-y-3">
+            <h2 className="heading-editorial !text-4xl tracking-tighter leading-none">
+              {isLogin ? "Welcome back" : "Join the elite"}
             </h2>
-            <p className="text-slate-500 font-medium text-lg">
-              {isLogin ? "Enter your details to access your dashboard." : "Get started with your automated job search."}
+            <p className="text-slate-500 font-medium text-[16px] opacity-80">
+              {isLogin ? "Enter your credentials to resume your hunt." : "Start your automated career acceleration today."}
             </p>
           </div>
 
@@ -104,7 +123,7 @@ export default function LoginPage() {
               onClick={handleGoogleSignIn}
               type="button"
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 py-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-all text-slate-700 font-bold shadow-sm"
+              className="w-full flex items-center justify-center gap-3 py-4.5 rounded-2xl border border-white bg-white/60 hover:bg-white transition-all text-slate-700 font-black text-[12px] uppercase tracking-widest shadow-xl shadow-slate-200/20 backdrop-blur-md"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -115,22 +134,22 @@ export default function LoginPage() {
               Continue with Google
             </button>
 
-            <div className="relative flex items-center gap-4 py-2">
-              <div className="flex-1 h-[1px] bg-slate-200" />
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">or continue with email</span>
-              <div className="flex-1 h-[1px] bg-slate-200" />
+            <div className="relative flex items-center gap-6 py-2">
+              <div className="flex-1 h-[1px] bg-slate-200/60" />
+              <span className="label-mono !text-[9px] opacity-40">secure email login</span>
+              <div className="flex-1 h-[1px] bg-slate-200/60" />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {!isLogin && (
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">First Name</label>
+                  <label className="label-mono ml-1">First Name</label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                     <input 
                       type="text" 
                       placeholder="John" 
-                      className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all font-medium text-slate-900"
+                      className="input-glass pl-12"
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
                       required={!isLogin} 
@@ -140,13 +159,13 @@ export default function LoginPage() {
               )}
               
               <div className="space-y-2">
-                <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">Email Address</label>
+                <label className="label-mono ml-1">Email Address</label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   <input 
                     type="email" 
                     placeholder="name@company.com" 
-                    className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all font-medium text-slate-900"
+                    className="input-glass pl-12"
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     required 
@@ -155,19 +174,24 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">Password</label>
+                <label className="label-mono ml-1">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   <input 
                     type="password" 
                     placeholder="••••••••" 
-                    className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all font-medium text-slate-900"
+                    className="input-glass pl-12"
                     value={formData.password}
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
                     required 
-                    minLength={6}
+                    minLength={isLogin ? 1 : 8}
                   />
                 </div>
+                {!isLogin && (
+                  <p className="label-mono !text-slate-400 !text-[9px] ml-1">
+                    Min. 8 characters with letters and numbers
+                  </p>
+                )}
               </div>
 
               <button 

@@ -4,73 +4,112 @@ import Link from "next/link";
 import { ArrowRight, Search, Zap, FileText, CheckCircle2, Shield, Target } from "lucide-react";
 import { motion } from "framer-motion";
 
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+};
+
+const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans pt-24">
+    <div className="min-h-screen font-sans pt-32 overflow-x-hidden">
+      {/* Redundant background removed as it is now in layout.tsx */}
+
+
       {/* Locked Header */}
-      <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200/50">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-10 h-24 flex justify-between items-center">
-          <Link href="/" className="logo-text">
+      <header className="fixed top-0 left-0 w-full z-50 bg-white/40 backdrop-blur-xl border-b border-white/40 shadow-sm">
+        <div className="max-w-[1400px] mx-auto px-8 md:px-12 h-24 flex justify-between items-center">
+          <Link href="/" className="logo-text !text-3xl tracking-[0.3em]">
             HUNTR
           </Link>
-          <nav className="flex items-center gap-6">
-            <Link href="#how-it-works" className="hidden md:block text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">
+          <nav className="flex items-center gap-10">
+            <Link href="#how-it-works" className="hidden lg:block label-mono !text-slate-900 opacity-60 hover:opacity-100 transition-opacity">
               How it Works
             </Link>
-            <Link href="/pricing" className="hidden md:block text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">
+            <Link href="/pricing" className="hidden lg:block label-mono !text-slate-900 opacity-60 hover:opacity-100 transition-opacity">
               Pricing
             </Link>
-            <Link href="/login" className="px-8 py-3 bg-[#F1F4F9] text-slate-700 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-[#E2E8F0] transition-all">
+            <Link href="/login" className="px-10 py-3.5 bg-slate-900 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20">
               Sign In
             </Link>
           </nav>
         </div>
       </header>
 
-      <main className="max-w-[1200px] mx-auto px-6">
+      <main className="max-w-[1200px] mx-auto px-6 relative z-10">
         {/* Hero Section */}
-        <section className="text-center pt-12 pb-16 space-y-10">
+        <motion.section 
+          initial="initial"
+          animate="animate"
+          variants={staggerContainer}
+          className="text-center pt-12 pb-16 space-y-10"
+        >
           <div className="space-y-6">
-            <h1 className="hero-text-large">
+            <motion.h1 variants={fadeInUp} className="hero-text-large">
               Your Job Search, <br />
               <span className="bg-gradient-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent">Automated</span>
-            </h1>
-            <p className="hero-sub text-slate-500 font-medium text-xl max-w-3xl mx-auto leading-relaxed">
+            </motion.h1>
+            <motion.p variants={fadeInUp} className="hero-sub text-slate-500 font-medium text-xl max-w-3xl mx-auto leading-relaxed">
               Stop wasting hours searching and applying. Let our intelligent system find your 
               perfect matches and tailor your resume for every single opportunity.
-            </p>
+            </motion.p>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-6 pt-4">
+          <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row justify-center gap-6 pt-4">
             <Link href="/login" className="btn-pill-blue justify-center text-base">
               Get Started for Free <ArrowRight size={20} />
             </Link>
             <Link href="#how-it-works" className="btn-pill-gray justify-center text-base">
               See How It Works
             </Link>
-          </div>
+          </motion.div>
           
-          <div className="pt-4 flex justify-center items-center gap-8 text-sm font-bold text-slate-400">
+          <motion.div variants={fadeInUp} className="pt-4 flex justify-center items-center gap-8 text-sm font-bold text-slate-400">
             <span className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> No credit card required</span>
             <span className="flex items-center gap-2 hidden sm:flex"><Shield size={16} className="text-blue-500" /> Private & Secure</span>
-          </div>
-        </section>
-
+          </motion.div>
+        </motion.section>
 
         {/* Integration Logo Cloud */}
-        <div className="pt-4 pb-24 border-b border-slate-200/60 mb-24 relative z-20">
-          <p className="text-center text-[10px] font-black uppercase tracking-widest text-slate-400 mb-8">Seamlessly connects with</p>
-          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-40 grayscale">
-            <span className="text-2xl font-black tracking-tight text-slate-900">LinkedIn</span>
-            <span className="text-2xl font-black tracking-tighter text-slate-900">indeed</span>
-            <span className="text-2xl font-black tracking-tight text-slate-900">Glassdoor</span>
-            <span className="text-2xl font-bold tracking-tight text-slate-900">ZipRecruiter</span>
+        <motion.div 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+          viewport={{ once: true }}
+          className="pt-8 pb-32 border-b border-slate-200/40 mb-32 relative z-20"
+        >
+          <p className="text-center label-mono mb-12 !tracking-[0.4em] opacity-40">Seamlessly connects with</p>
+          <div className="flex flex-wrap justify-center items-center gap-16 md:gap-24 opacity-30 grayscale hover:grayscale-0 transition-all duration-700">
+            {["LinkedIn", "indeed", "Glassdoor", "ZipRecruiter"].map((logo) => (
+              <motion.span 
+                key={logo}
+                animate={{ y: [0, -5, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: Math.random() * 2 }}
+                className="text-2xl font-black tracking-tighter text-slate-900"
+              >
+                {logo}
+              </motion.span>
+            ))}
           </div>
-        </div>
+        </motion.div>
 
         {/* How It Works Section */}
         <section id="how-it-works" className="pb-32 space-y-16 scroll-mt-32">
-          <div className="text-center space-y-6 max-w-3xl mx-auto mb-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="text-center space-y-6 max-w-3xl mx-auto mb-10"
+          >
             <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-[#F1F4F9] text-slate-500 text-[11px] font-black tracking-[0.2em] uppercase">
               The Process
             </div>
@@ -78,7 +117,7 @@ export default function Home() {
             <p className="text-xl text-slate-500 font-medium leading-relaxed">
               A seamless three-step process to land your dream role without the manual heavy lifting.
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid lg:grid-cols-3 gap-8">
             {[
@@ -106,11 +145,14 @@ export default function Home() {
             ].map((feature, i) => (
               <motion.div 
                 key={i} 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                viewport={{ once: true, margin: "-50px" }}
                 whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300 }}
-                className="feature-card group relative overflow-hidden"
+                className="feature-card group relative overflow-hidden shadow-sm"
               >
-                <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-slate-200/40 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-blue-50 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 <div className="mb-12 relative z-10">
                   <div className={`w-20 h-20 ${feature.bg} rounded-3xl flex items-center justify-center shadow-inner group-hover:shadow-lg transition-all duration-300`}>
                     <feature.icon className={`${feature.color} group-hover:scale-110 transition-transform duration-300`} size={32} />
@@ -125,8 +167,14 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Additional Information Section */}
-        <section className="pb-32">
+        {/* Additional Information Section (CTA) */}
+        <motion.section 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="pb-32"
+        >
           <div className="bg-white border border-slate-200/60 rounded-[40px] p-12 md:p-20 text-center space-y-8 relative overflow-hidden shadow-2xl shadow-slate-200/50">
             <div className="absolute top-0 right-0 w-[50%] h-[100%] bg-blue-500/10 blur-[120px] pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[50%] h-[100%] bg-cyan-500/10 blur-[120px] pointer-events-none" />
@@ -138,16 +186,16 @@ export default function Home() {
               Join the professionals who are landing interviews faster by letting the system do the hard work.
             </p>
             <div className="pt-6 relative z-10">
-              <Link href="/login" className="inline-flex items-center gap-3 px-12 py-5 bg-blue-600 text-white font-black rounded-full text-lg hover:bg-blue-700 hover:scale-[1.02] transition-all shadow-xl shadow-blue-600/30">
+              <Link href="/login" className="inline-flex items-center gap-3 px-12 py-5 bg-blue-600 text-white font-black rounded-full text-lg hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-blue-600/30">
                 Create Free Account <ArrowRight size={20} />
               </Link>
             </div>
           </div>
-        </section>
+        </motion.section>
       </main>
 
       {/* Structured Footer */}
-      <footer className="bg-white border-t border-slate-200 py-10">
+      <footer className="bg-white border-t border-slate-200 py-10 relative z-10">
         <div className="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-center md:items-start gap-2">
             <span className="logo-text !text-xl">HUNTR</span>

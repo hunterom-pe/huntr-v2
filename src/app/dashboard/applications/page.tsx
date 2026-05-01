@@ -101,11 +101,11 @@ export default function ApplicationsPage() {
                       <td className="px-8 py-6">
                         <div className="space-y-1">
                           <div className="font-extrabold text-slate-900 text-lg tracking-tight">{app.title}</div>
-                          <div className="text-[12px] font-black text-blue-500 uppercase tracking-widest">{app.company}</div>
+                          <div className="text-[12px] font-black text-indigo-500 uppercase tracking-widest">{app.company}</div>
                         </div>
                       </td>
                       <td className="px-8 py-6">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-lg text-[10px] font-black uppercase tracking-widest">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-100/50">
                           <CheckCircle2 size={12} /> {app.status}
                         </div>
                       </td>
@@ -117,7 +117,18 @@ export default function ApplicationsPage() {
                       </td>
                       <td className="px-8 py-6">
                         <div className="flex items-center justify-end gap-3">
-                          <button className="p-2.5 glass-card rounded-xl text-slate-400 hover:text-blue-600 transition-all hover:scale-110 active:scale-95 bg-white/80">
+                          {app.applyLink && app.applyLink !== '#' && (
+                            <a 
+                              href={app.applyLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-2.5 glass-card rounded-xl text-slate-400 hover:text-indigo-600 transition-all hover:scale-110 active:scale-95 bg-white/80"
+                              title="View Original Post"
+                            >
+                              <ExternalLink size={18} />
+                            </a>
+                          )}
+                          <button className="p-2.5 glass-card rounded-xl text-slate-400 hover:text-indigo-600 transition-all hover:scale-110 active:scale-95 bg-white/80">
                             <Download size={18} />
                           </button>
                           <button 
