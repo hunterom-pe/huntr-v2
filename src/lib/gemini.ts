@@ -23,12 +23,14 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
   const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
   const prompt = `
-    You are an expert career coach. Rewrite the candidate's resume summary and key bullets to match the job description.
+    You are an expert career coach. Your goal is ATS Optimization (Precise Mapping).
+    Rewrite the candidate's resume summary and bullets to mirror the terminology of the job description.
     
-    IMPORTANT RULES:
-    1. The "originalSummary" MUST be a substantial paragraph (at least 20 words).
-    2. NEVER target names, phone numbers, emails, or addresses.
-    3. The "originalSummary" MUST be the EXACT text from the resume so I can find and replace it.
+    GUIDELINES:
+    1. Swap the candidate's words for the job description's keywords where the meaning is identical.
+    2. Do NOT invent new skills or experience.
+    3. Ensure the "originalSummary" and "original" bullet text matches EXACTLY what is in the resume.
+    4. Focus on mirroring specific tools (e.g. TFS, SQL Server, Postman) and methodologies mentioned in the JD.
     
     ORIGINAL RESUME:
     ${resumeText}
@@ -39,9 +41,9 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
     RETURN JSON ONLY:
     {
       "originalSummary": "exact paragraph text to find",
-      "newSummary": "rewritten paragraph",
+      "newSummary": "rewritten paragraph with JD keywords",
       "bulletReplacements": [
-        { "original": "exact bullet text", "new": "optimized bullet" }
+        { "original": "exact bullet text from resume", "new": "rewritten bullet" }
       ]
     }
   `;
@@ -62,17 +64,17 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
         console.error("JSON Parse Error:", parseError);
       }
     }
-    throw new Error("Failed to parse AI response: " + text);
+    throw new Error("Failed to parse AI response");
   } catch (error: any) {
     console.error("AI Optimization Error:", error.message || error);
     
-    // Find the first paragraph that looks like a summary (not just a name)
+    // Fallback: Find the first substantial paragraph
     const lines = resumeText.split('\n').map(l => l.trim()).filter(l => l.length > 50);
     const targetLine = lines[0] || "Professional Summary";
     
     return {
       originalSummary: targetLine,
-      newSummary: "AI OPTIMIZED: " + targetLine,
+      newSummary: targetLine, // No change if AI fails, to avoid "AI OPTIMIZED" text in real files
       bulletReplacements: []
     };
   }
