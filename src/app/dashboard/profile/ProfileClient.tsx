@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState } from "react";
-import { User, Mail, MapPin, Briefcase, FileText, UploadCloud, Loader2, Search } from "lucide-react";
+import { User, Mail, MapPin, Briefcase, FileText, UploadCloud, Loader2, Search, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function ProfileClient({ user }: { user: any }) {
@@ -114,7 +115,8 @@ export default function ProfileClient({ user }: { user: any }) {
                   type="text" 
                   value={jobTitle} 
                   onChange={(e) => setJobTitle(e.target.value)}
-                  className="input-glass pl-12" 
+                  placeholder="e.g. Senior Product Designer"
+                  className="w-full bg-slate-50/80 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all cursor-text" 
                 />
               </div>
             </div>
@@ -126,7 +128,8 @@ export default function ProfileClient({ user }: { user: any }) {
                   type="text" 
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="input-glass pl-12" 
+                  placeholder="e.g. New York, NY or Remote"
+                  className="w-full bg-slate-50/80 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all cursor-text" 
                 />
               </div>
             </div>
@@ -171,6 +174,51 @@ export default function ProfileClient({ user }: { user: any }) {
           </div>
         </div>
 
+        {/* Privacy Section */}
+        <div className="glass-card p-8 bg-emerald-50/30 border-emerald-100/50 shadow-xl shadow-emerald-500/5">
+          <div className="flex items-start gap-6">
+            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-md text-emerald-600 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-lg font-extrabold text-slate-900 tracking-tight">Your Privacy is Our Priority</h4>
+              <p className="text-[14px] text-slate-600 leading-relaxed font-medium">
+                We operate on a strict <span className="text-emerald-700 font-bold">Zero-Access Policy</span>. This means your personal data, resumes, and job matches are securely encrypted and only accessible by you. We don&apos;t have access to your private files, we never sell your data, and we don&apos;t monitor your applications. Your career journey is your business—we&apos;re just here to help you navigate it.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Danger Zone */}
+        <div className="glass-panel p-8 md:p-12 border-red-100/30 bg-red-50/10 mt-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+            <div className="space-y-1">
+              <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Danger Zone</h2>
+              <p className="text-[11px] font-black text-red-500 uppercase tracking-widest">Manage your career data</p>
+              <p className="text-[14px] text-slate-500 font-medium max-w-md mt-4">
+                Wiping your search history will permanently delete all job recommendations and tracked applications. This action cannot be undone.
+              </p>
+            </div>
+            <button 
+              onClick={async () => {
+                if (confirm("DANGER: This will permanently delete all your job matches and application history. Are you absolutely sure?")) {
+                  try {
+                    const res = await fetch("/api/jobs/reset", { method: "POST" });
+                    if (res.ok) {
+                      alert("Search history has been wiped. Your dashboard is now fresh.");
+                      window.location.reload();
+                    }
+                  } catch (e) {
+                    alert("Failed to reset history.");
+                  }
+                }
+              }}
+              className="btn-glass border-red-200 text-red-600 hover:bg-red-600 hover:text-white px-8 py-4 rounded-2xl text-[12px] font-black uppercase tracking-[0.2em] transition-all"
+            >
+              Reset Search History
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

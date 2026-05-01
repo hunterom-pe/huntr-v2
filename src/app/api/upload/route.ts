@@ -37,41 +37,47 @@ export async function POST(req: Request) {
     let fileUrl = "";
 
     // 1. Try S3 Cloud Storage
+    let uploadSuccessful = false;
     if (process.env.SUPABASE_S3_ACCESS_KEY_ID && process.env.SUPABASE_S3_SECRET_ACCESS_KEY && process.env.S3_BUCKET_NAME) {
-      const s3Client = new S3Client({
-        region: process.env.SUPABASE_S3_REGION || "us-east-1",
-        endpoint: process.env.S3_ENDPOINT ? process.env.S3_ENDPOINT : undefined,
-        forcePathStyle: !!process.env.S3_ENDPOINT, // Required for Supabase/MinIO
-        credentials: {
-          accessKeyId: process.env.SUPABASE_S3_ACCESS_KEY_ID,
-          secretAccessKey: process.env.SUPABASE_S3_SECRET_ACCESS_KEY,
-        },
-      });
+      try {
+        const s3Client = new S3Client({
+          region: process.env.SUPABASE_S3_REGION || "us-east-1",
+          endpoint: process.env.S3_ENDPOINT ? process.env.S3_ENDPOINT : undefined,
+          forcePathStyle: !!process.env.S3_ENDPOINT, // Required for Supabase/MinIO
+          credentials: {
+            accessKeyId: process.env.SUPABASE_S3_ACCESS_KEY_ID,
+            secretAccessKey: process.env.SUPABASE_S3_SECRET_ACCESS_KEY,
+          },
+        });
 
-      const command = new PutObjectCommand({
-        Bucket: process.env.S3_BUCKET_NAME,
-        Key: uniqueFileName,
-        Body: buffer,
-        ContentType: file.type,
-      });
+        const command = new PutObjectCommand({
+          Bucket: process.env.S3_BUCKET_NAME,
+          Key: uniqueFileName,
+          Body: buffer,
+          ContentType: file.type,
+        });
 
-      await s3Client.send(command);
-      
-      // Determine public URL structure based on whether it's Supabase or raw AWS
-      if (process.env.S3_ENDPOINT && process.env.S3_ENDPOINT.includes('supabase')) {
-        // e.g. https://fzskryzalxqnfhtbusem.storage.supabase.co/storage/v1/s3
-        const projectIdMatch = process.env.S3_ENDPOINT.match(/https:\/\/([^.]+)\./);
-        const projectId = projectIdMatch ? projectIdMatch[1] : '';
-        fileUrl = `https://${projectId}.supabase.co/storage/v1/object/public/${process.env.S3_BUCKET_NAME}/${uniqueFileName}`;
-      } else {
-        fileUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.SUPABASE_S3_REGION || "us-east-1"}.amazonaws.com/${uniqueFileName}`;
+        await s3Client.send(command);
+        
+        // Determine public URL structure based on whether it's Supabase or raw AWS
+        if (process.env.S3_ENDPOINT && process.env.S3_ENDPOINT.includes('supabase')) {
+          const projectIdMatch = process.env.S3_ENDPOINT.match(/https:\/\/([^.]+)\./);
+          const projectId = projectIdMatch ? projectIdMatch[1] : '';
+          fileUrl = `https://${projectId}.supabase.co/storage/v1/object/public/${process.env.S3_BUCKET_NAME}/${uniqueFileName}`;
+        } else {
+          fileUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.SUPABASE_S3_REGION || "us-east-1"}.amazonaws.com/${uniqueFileName}`;
+        }
+        
+        console.log("Successfully uploaded to S3 Cloud:", fileUrl);
+        uploadSuccessful = true;
+      } catch (s3Error) {
+        console.error("S3 upload failed, falling back to local:", s3Error);
       }
-      
-      console.log("Successfully uploaded to S3 Cloud:", fileUrl);
     } 
-    // 2. Fallback to Local Storage (For Local Testing)
-    else {
-      console.warn("No S3 credentials found in .env. Falling back to local disk storage.");
+
+    // 2. Fallback to Local Storage (If S3 failed or credentials missing)
+    if (!uploadSuccessful) {
+      console.warn("Falling back to local disk storage.");
       const uploadDir = path.join(process.cwd(), "public/uploads");
       
       try {

@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
+export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -19,17 +19,14 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const jobs = await prisma.job.findMany({
-      where: { 
-        userId: user.id,
-        isDeleted: false
-      },
-      orderBy: { createdAt: "desc" }
+    // Delete all jobs associated with this user
+    await prisma.job.deleteMany({
+      where: { userId: user.id }
     });
 
-    return NextResponse.json({ jobs });
+    return NextResponse.json({ success: true, message: "Search history wiped successfully" });
   } catch (error) {
-    console.error("Fetch Tracked Jobs Error:", error);
+    console.error("Reset Jobs Error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

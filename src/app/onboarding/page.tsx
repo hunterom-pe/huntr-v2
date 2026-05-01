@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState } from "react";
@@ -104,7 +105,7 @@ export default function OnboardingPage() {
                   Upload your resume
                 </h1>
                 <p className="text-lg text-slate-500 font-medium max-w-md mx-auto">
-                  Provide your most up-to-date `.docx` file. We'll use this to build your profile and find matching jobs.
+                  Provide your most up-to-date `.docx` file. We&apos;ll use this to build your profile and find matching jobs.
                 </p>
               </div>
 
@@ -155,7 +156,7 @@ export default function OnboardingPage() {
                   Resume Uploaded
                 </h1>
                 <p className="text-lg text-slate-500 font-medium max-w-md mx-auto">
-                  Your profile is ready. Now, tell us what kind of opportunities you're looking for.
+                  Your profile is ready. Now, tell us what kind of opportunities you&apos;re looking for.
                 </p>
               </div>
 

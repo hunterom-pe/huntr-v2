@@ -1,82 +1,99 @@
 import { NextResponse } from "next/server";
 import { optimizeResumeContent } from "@/lib/gemini";
 import mammoth from "mammoth";
-import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
+import PizZip from "pizzip";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { prisma } from "@/lib/prisma";
+import fs from "fs/promises";
+import path from "path";
 
 export async function POST(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+
+    if (!user || !user.resumePath) {
+      return NextResponse.json({ error: "No resume found. Please upload one in your profile." }, { status: 404 });
+    }
+
     const formData = await req.formData();
-    const file = formData.get("file") as File | null;
     const jobDescription = formData.get("jobDescription") as string;
 
     if (!jobDescription) {
       return NextResponse.json({ error: "Missing job description" }, { status: 400 });
     }
 
-    // 1. Extract text from original DOCX (or use mock if none provided)
-    let resumeText = "Experienced professional with a strong background in the industry. Highly skilled in problem solving, team leadership, and modern technologies. Proven track record of delivering high quality results on time and under budget.";
+    // 1. Fetch resume buffer
+    let resumeBuffer: Buffer;
+    if (user.resumePath.startsWith("http")) {
+      const res = await fetch(user.resumePath);
+      const arrayBuffer = await res.arrayBuffer();
+      resumeBuffer = Buffer.from(arrayBuffer);
+    } else {
+      const filePath = path.join(process.cwd(), "public", user.resumePath);
+      resumeBuffer = await fs.readFile(filePath);
+    }
+
+    // 2. Extract raw text for AI
+    const extracted = await mammoth.extractRawText({ buffer: resumeBuffer });
+    const resumeText = extracted.value;
+
+    // 3. Get AI Optimization (Mapping original to new)
+    const opt = await optimizeResumeContent(resumeText, jobDescription);
+    console.log("AI Optimization Result:", opt ? "Success" : "Failed");
     
-    if (file) {
-      const arrayBuffer = await file.arrayBuffer();
-      const extracted = await mammoth.extractRawText({ buffer: Buffer.from(arrayBuffer) });
-      resumeText = extracted.value;
+    if (!opt || !opt.originalSummary) {
+      console.error("AI failed to find original summary in resume text.");
+      throw new Error("AI Optimization failed to map original content");
     }
 
-    // 2. Get AI Optimization
-    const optimization = await optimizeResumeContent(resumeText, jobDescription);
-    if (!optimization) {
-      throw new Error("AI Optimization failed");
+    // 4. Surgical XML Replacement (The "Secret Sauce")
+    const zip = new PizZip(resumeBuffer);
+    let xml = zip.file("word/document.xml")?.asText();
+
+    if (!xml) throw new Error("Could not read document XML");
+
+    console.log("Attempting surgical replacement for summary...");
+
+    const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    
+    // Function to create a regex that matches text even if split by XML tags
+    const createSurgicalRegex = (text: string) => {
+      return new RegExp(
+        text.split('').map(c => escapeRegExp(c)).join('(<[^>]+>)*'),
+        'g'
+      );
+    };
+
+    // Replace Summary
+    const summaryRegex = createSurgicalRegex(opt.originalSummary);
+    xml = xml.replace(summaryRegex, opt.newSummary);
+
+    // Replace Bullets
+    if (opt.bulletReplacements) {
+      for (const replacement of opt.bulletReplacements) {
+        if (replacement.original && replacement.new) {
+          const bulletRegex = createSurgicalRegex(replacement.original);
+          xml = xml.replace(bulletRegex, replacement.new);
+        }
+      }
     }
 
-    // 3. Reconstruct DOCX (High-Fidelity Template Approach)
-    // NOTE: For true "surgical" cloning, we'd need to use docxtemplater with a tagged template.
-    // Here we create a clean, professional version as a proof of concept.
-    const doc = new Document({
-      sections: [{
-        properties: {},
-        children: [
-          new Paragraph({
-            text: "OPTIMIZED RESUME",
-            heading: HeadingLevel.HEADING_1,
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Professional Summary",
-                bold: true,
-                size: 28,
-              }),
-            ],
-          }),
-          new Paragraph({
-            text: optimization.summary,
-            spacing: { after: 400 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Key Accomplishments (Optimized)",
-                bold: true,
-                size: 28,
-              }),
-            ],
-          }),
-          ...optimization.bulletPoints.map((bullet: string) => 
-            new Paragraph({
-              text: bullet,
-              bullet: { level: 0 },
-            })
-          ),
-        ],
-      }],
-    });
+    // 5. Re-zip and return
+    zip.file("word/document.xml", xml);
+    const outputBuffer = zip.generate({ type: "nodebuffer" });
 
-    const buffer = await Packer.toBuffer(doc);
-
-    return new Response(new Uint8Array(buffer), {
+    return new Response(new Uint8Array(outputBuffer), {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "Content-Disposition": `attachment; filename="HUNTR_Optimized_Resume.docx"`,
+        "Content-Disposition": `attachment; filename="HUNTR_Optimized_${user.name?.replace(/\s+/g, '_')}_Resume.docx"`,
       },
     });
 

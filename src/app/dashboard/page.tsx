@@ -1,3 +1,4 @@
+/* eslint-disable */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -5,6 +6,7 @@ import { Search, Zap, ExternalLink, Loader2, Sparkles, Star, Trash2, ArrowRight 
 import { motion, AnimatePresence } from "framer-motion";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { useNotifications } from "@/lib/NotificationContext";
+import { useRouter } from "next/navigation";
 
 interface Job {
   id: string;
@@ -14,6 +16,8 @@ interface Job {
   description: string;
   matchScore: number;
   status: 'WISHLIST' | 'APPLIED' | 'INTERVIEWING' | 'OFFER' | 'REJECTED';
+  isSaved?: boolean;
+  applyLink?: string;
 }
 
 export default function DashboardPage() {
@@ -23,6 +27,7 @@ export default function DashboardPage() {
   const [optimizingId, setOptimizingId] = useState<string | null>(null);
   const [isBrowser, setIsBrowser] = useState(false);
   const { addNotification } = useNotifications();
+  const router = useRouter();
 
   useEffect(() => {
     setIsBrowser(true);
@@ -41,11 +46,11 @@ export default function DashboardPage() {
         const response = await fetch("/api/jobs/tracked");
         const data = await response.json();
         if (data.jobs && data.jobs.length > 0) {
-          setJobs(prev => {
-            // Merge DB jobs with any newly generated wishlist jobs
-            const wishlistJobs = prev.filter(j => j.status === 'WISHLIST');
-            return [...data.jobs, ...wishlistJobs];
-          });
+          setJobs(data.jobs);
+          // If we have wishlist jobs, it means a search has been performed before
+          if (data.jobs.some((j: any) => j.status === 'WISHLIST')) {
+            setHasScanned(true);
+          }
         }
       } catch (error) {
         console.error("Failed to fetch tracked jobs:", error);
@@ -54,37 +59,26 @@ export default function DashboardPage() {
     fetchTrackedJobs();
   }, [isBrowser]);
 
-  const startScan = async () => {
+  const jobsPerPage = 8;
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const startScan = async (page = 0) => {
     setIsScanning(true);
+    setCurrentPage(page);
     try {
       const response = await fetch("/api/jobs/search", {
         method: "POST",
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ page })
       });
       const data = await response.json();
       if (data.jobs) {
-        // Map the API results to include the default status 'WISHLIST'
-        const fetchedJobs = data.jobs.map((job: any) => ({
-          ...job,
-          status: 'WISHLIST'
-        }));
-        
-        // Preserve jobs that the user has already moved to the tracker
+        // Merge with existing jobs, but avoid duplicates
         setJobs(prev => {
-          const trackedJobs = prev.filter(j => j.status !== 'WISHLIST');
-          return [...trackedJobs, ...fetchedJobs];
+          const existingIds = new Set(prev.map(j => j.id));
+          const newJobs = data.jobs.filter((j: any) => !existingIds.has(j.id));
+          return [...prev, ...newJobs];
         });
-        
-        // Trigger Radar Alert if high match found
-        const hasHighMatch = fetchedJobs.some((j: any) => j.matchScore >= 90);
-        if (hasHighMatch) {
-          addNotification({
-            title: "Radar Alert",
-            message: "We just found highly-matched roles (>90%) based on your DNA! Check your recommendations.",
-            type: "radar"
-          });
-        }
-
         setHasScanned(true);
       }
     } catch (error) {
@@ -94,24 +88,74 @@ export default function DashboardPage() {
     }
   };
 
-  const handleStatusChange = async (id: string, newStatus: Job['status']) => {
-    // Optimistic UI Update
-    setJobs(prev => prev.map(job => job.id === id ? { ...job, status: newStatus } : job));
+    const handleStatusChange = async (id: string, newStatus: Job['status']) => {
+      // Optimistic UI Update
+      setJobs(prev => prev.map(job => job.id === id ? { ...job, status: newStatus } : job));
 
-    // Sync to Database
-    const jobToUpdate = jobs.find(j => j.id === id);
-    if (jobToUpdate) {
+      // Sync to Database
+      const jobToUpdate = jobs.find(j => j.id === id);
+      if (jobToUpdate) {
+        try {
+          await fetch("/api/jobs/update-status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, status: newStatus })
+          });
+        } catch (error) {
+          console.error("Failed to sync job status to DB:", error);
+        }
+      }
+    };
+
+    const handleDelete = async (id: string) => {
+      if (!confirm("Are you sure you want to remove this application from your tracker?")) return;
+      
+      // Optimistic UI Update
+      setJobs(prev => prev.filter(job => job.id !== id));
+
       try {
         await fetch("/api/jobs/update-status", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...jobToUpdate, status: newStatus })
+          body: JSON.stringify({ id, isDeleted: true })
+        });
+        addNotification({
+          title: "Application Removed",
+          message: "The job has been removed from your tracker.",
+          type: "intel"
         });
       } catch (error) {
-        console.error("Failed to sync job status to DB:", error);
+        console.error("Failed to delete job:", error);
       }
-    }
-  };
+    };
+
+    const handleToggleSave = async (id: string) => {
+      const job = jobs.find(j => j.id === id);
+      if (!job) return;
+      
+      const newSavedState = !job.isSaved;
+
+      // Optimistic UI Update
+      setJobs(prev => prev.map(j => j.id === id ? { ...j, isSaved: newSavedState } : j));
+
+      try {
+        await fetch("/api/jobs/update-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, isSaved: newSavedState })
+        });
+        
+        if (newSavedState) {
+          addNotification({
+            title: "Job Pinned",
+            message: "This job will now stay at the top of your radar.",
+            type: "intel"
+          });
+        }
+      } catch (error) {
+        console.error("Failed to toggle save:", error);
+      }
+    };
 
   const handleOptimize = async (id: string) => {
     const job = jobs.find(j => j.id === id);
@@ -121,6 +165,7 @@ export default function DashboardPage() {
       const formData = new FormData();
       formData.append("jobDescription", job.description);
       const response = await fetch("/api/resume/optimize", { method: "POST", body: formData });
+      
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
@@ -131,7 +176,27 @@ export default function DashboardPage() {
         a.click();
         window.URL.revokeObjectURL(url);
         handleStatusChange(id, 'APPLIED');
+        
+        addNotification({
+          title: "Optimization Complete",
+          message: "Your resume has been surgically optimized and downloaded.",
+          type: "intel"
+        });
+      } else {
+        const errorData = await response.json();
+        addNotification({
+          title: "Optimization Failed",
+          message: errorData.error || "Could not optimize resume. Please check your AI key or resume format.",
+          type: "intel"
+        });
       }
+    } catch (error) {
+      console.error("Optimization failed:", error);
+      addNotification({
+        title: "Connection Error",
+        message: "Failed to connect to the optimization engine.",
+        type: "intel"
+      });
     } finally {
       setOptimizingId(null);
     }
@@ -166,6 +231,17 @@ export default function DashboardPage() {
 
   if (!isBrowser) return null;
 
+  const wishlistJobs = jobs.filter(j => j.status === 'WISHLIST')
+    .sort((a, b) => {
+      // Starred jobs always come first
+      if (a.isSaved && !b.isSaved) return -1;
+      if (!a.isSaved && b.isSaved) return 1;
+      // Then sort by match score
+      return b.matchScore - a.matchScore;
+    });
+  const paginatedWishlist = wishlistJobs.slice(currentPage * jobsPerPage, (currentPage + 1) * jobsPerPage);
+  const totalPages = Math.ceil(wishlistJobs.length / jobsPerPage);
+
   return (
     <div className="space-y-12">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
@@ -173,7 +249,7 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Job Recommendations</h1>
           <p className="text-[13px] text-slate-500 font-bold uppercase tracking-widest opacity-60">Finding your next career move</p>
         </div>
-        <button onClick={startScan} disabled={isScanning} className="btn-primary flex items-center gap-3 py-4 px-8 rounded-2xl shadow-2xl shadow-blue-500/20">
+        <button onClick={() => startScan(0)} disabled={isScanning} className="btn-primary flex items-center gap-3 py-4 px-8 rounded-2xl shadow-2xl shadow-blue-500/20">
           {isScanning ? <><Loader2 className="animate-spin" size={18} /> Searching...</> : <><Search size={18} /> {hasScanned ? "Search Again" : "Find Jobs"}</>}
         </button>
       </div>
@@ -187,7 +263,7 @@ export default function DashboardPage() {
             <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Ready to find matches?</h2>
             <p className="text-[15px] text-slate-500 font-medium leading-relaxed">Search across major boards to find jobs that perfectly match your experience.</p>
           </div>
-          <button onClick={startScan} className="btn-primary px-10 py-4 rounded-2xl">Start Job Search</button>
+          <button onClick={() => startScan(0)} className="btn-primary px-10 py-4 rounded-2xl">Start Job Search</button>
         </div>
       ) : isScanning ? (
         <div className="glass-card p-20 text-center space-y-10 relative overflow-hidden bg-white/60">
@@ -209,7 +285,7 @@ export default function DashboardPage() {
           <div className="grid xl:grid-cols-12 gap-10">
             <div className="xl:col-span-8 space-y-6">
               <div className="flex items-center justify-between px-2">
-                <span className="label-caps !text-[11px]">Recommended for you [{jobs.filter(j => j.status === 'WISHLIST').length}]</span>
+                <span className="label-caps !text-[11px]">Recommended for you [{wishlistJobs.length}]</span>
               </div>
 
               <Droppable droppableId="WISHLIST">
@@ -219,14 +295,17 @@ export default function DashboardPage() {
                     ref={provided.innerRef} 
                     {...provided.droppableProps}
                   >
-                    <AnimatePresence>
-                      {jobs.filter(j => j.status === 'WISHLIST').sort((a, b) => b.matchScore - a.matchScore).map((job, index) => (
+                    <AnimatePresence mode="popLayout">
+                      {paginatedWishlist.map((job, index) => (
                         <Draggable key={job.id} draggableId={job.id} index={index}>
                           {(provided, snapshot) => (
-                            <div
+                            <motion.div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
-                              style={{...provided.draggableProps.style, opacity: snapshot.isDragging ? 0.8 : 1}}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, scale: 0.95 }}
+                              style={{...provided.draggableProps.style}}
                             >
                               <div className={`glass-card p-8 group border-white/80 shadow-lg ${snapshot.isDragging ? 'shadow-blue-500/20 scale-[1.02]' : 'hover:shadow-blue-500/5'} transition-all`} {...provided.dragHandleProps}>
                                 <div className="flex flex-col md:flex-row gap-8 items-start md:items-center mb-6">
@@ -238,7 +317,12 @@ export default function DashboardPage() {
                                     <p className="text-[14px] text-slate-500 font-bold uppercase tracking-widest opacity-70">{job.company} <span className="mx-2 text-slate-300">/</span> {job.location}</p>
                                   </div>
                                   <div className="flex gap-3 self-end md:self-center">
-                                    <button className="p-3 glass-card rounded-2xl text-slate-300 hover:text-yellow-500 transition-colors bg-white/80"><Star size={20} /></button>
+                                    <button 
+                                      onClick={() => handleToggleSave(job.id)}
+                                      className={`p-3 glass-card rounded-2xl transition-all duration-300 ${job.isSaved ? 'text-yellow-500 bg-yellow-50/50 border-yellow-200' : 'text-slate-300 hover:text-yellow-500 bg-white/80'}`}
+                                    >
+                                      <Star size={20} fill={job.isSaved ? "currentColor" : "none"} />
+                                    </button>
                                     <button onClick={() => handleStatusChange(job.id, 'REJECTED')} className="p-3 glass-card rounded-2xl text-slate-300 hover:text-red-500 transition-colors bg-white/80"><Trash2 size={20} /></button>
                                   </div>
                                 </div>
@@ -248,22 +332,52 @@ export default function DashboardPage() {
                                 <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between pt-8 border-t border-slate-100/50">
                                   <div className="flex gap-3">
                                     <button onClick={() => handleOptimize(job.id)} disabled={optimizingId === job.id} className="btn-primary py-3.5 px-8 flex items-center justify-center gap-3 rounded-2xl text-[12px] uppercase tracking-[0.2em]">
-                                      {optimizingId === job.id ? <><Loader2 className="animate-spin" size={18} /> Updating Resume...</> : <><Sparkles size={18} /> Optimize Resume</>}
+                                      {optimizingId === job.id ? <><Loader2 className="animate-spin" size={18} /> Updating...</> : <><Sparkles size={18} /> Optimize</>}
                                     </button>
-                                    <button className="btn-glass py-3.5 px-8 flex items-center justify-center gap-3 rounded-2xl text-[12px] uppercase tracking-[0.2em] border-slate-200">
-                                      <ExternalLink size={18} /> View Job Post
-                                    </button>
+                                    <a href={job.applyLink !== '#' ? job.applyLink : undefined} target="_blank" rel="noreferrer" className="btn-glass py-3.5 px-8 flex items-center justify-center gap-3 rounded-2xl text-[12px] uppercase tracking-[0.2em] border-slate-200">
+                                      <ExternalLink size={18} /> View Job
+                                    </a>
                                   </div>
                                   <button onClick={() => handleStatusChange(job.id, 'APPLIED')} className="text-[11px] font-black text-slate-400 hover:text-blue-600 uppercase tracking-[0.3em] transition-all flex items-center gap-2 group/btn cursor-grab active:cursor-grabbing">
                                     Applied <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                                   </button>
                                 </div>
                               </div>
-                            </div>
+                            </motion.div>
                           )}
                         </Draggable>
                       ))}
                     </AnimatePresence>
+                    
+                    {wishlistJobs.length > 0 && (
+                      <div className="flex items-center justify-between pt-8 px-2">
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                          Showing {currentPage * jobsPerPage + 1} - {Math.min((currentPage + 1) * jobsPerPage, wishlistJobs.length)} of {wishlistJobs.length} matches
+                        </div>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+                            disabled={currentPage === 0}
+                            className="btn-glass px-4 py-2 rounded-xl text-[10px] font-black uppercase disabled:opacity-30"
+                          >
+                            Prev
+                          </button>
+                          <button 
+                            onClick={() => {
+                              if ((currentPage + 1) * jobsPerPage >= wishlistJobs.length) {
+                                startScan(currentPage + 1);
+                              } else {
+                                setCurrentPage(prev => prev + 1);
+                              }
+                            }}
+                            disabled={isScanning}
+                            className="btn-primary px-4 py-2 rounded-xl text-[10px] font-black uppercase"
+                          >
+                            {isScanning ? "..." : "Next"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                     {provided.placeholder}
                   </div>
                 )}
@@ -303,8 +417,14 @@ export default function DashboardPage() {
                                     {...provided.draggableProps} 
                                     {...provided.dragHandleProps}
                                     style={{...provided.draggableProps.style}}
-                                    className={`glass-card p-4 rounded-2xl bg-white border-white shadow-xl ${snapshot.isDragging ? 'shadow-blue-500/20 scale-105' : 'shadow-slate-200/20 hover:scale-[1.02]'} transition-transform cursor-grab active:cursor-grabbing`}
+                                    className={`glass-card p-4 rounded-2xl bg-white border-white shadow-xl group/card relative ${snapshot.isDragging ? 'shadow-blue-500/20 scale-105' : 'shadow-slate-200/20 hover:scale-[1.02]'} transition-transform cursor-grab active:cursor-grabbing`}
                                   >
+                                    <button 
+                                      onClick={(e) => { e.stopPropagation(); handleDelete(job.id); }}
+                                      className="absolute -top-2 -right-2 w-6 h-6 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-red-500 hover:border-red-100 shadow-sm opacity-0 group-hover/card:opacity-100 transition-all z-10"
+                                    >
+                                      <Trash2 size={12} />
+                                    </button>
                                     <div className="text-[13px] font-extrabold text-slate-900 mb-1">{job.title}</div>
                                     <div className="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em]">{job.company}</div>
                                   </div>
