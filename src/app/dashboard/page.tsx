@@ -467,7 +467,7 @@ export default function DashboardPage() {
                                 <div className="flex flex-col sm:flex-row gap-6 items-stretch sm:items-center justify-between pt-10 border-t border-slate-200/40">
                                   <div className="flex gap-4">
                                     <button onClick={() => handleOptimize(job.id)} disabled={optimizingId === job.id} className="btn-primary py-4 px-10 flex items-center justify-center gap-3">
-                                      {optimizingId === job.id ? <><Loader2 className="animate-spin" size={18} /> Surgically Optimizing...</> : <><Sparkles size={18} className="text-blue-400" /> AI Optimize</>}
+                                      {optimizingId === job.id ? <><Loader2 className="animate-spin" size={18} /> Optimizing...</> : <><Sparkles size={18} className="text-white/80" /> Optimize Resume</>}
                                     </button>
                                     <a href={job.applyLink !== '#' ? job.applyLink : undefined} target="_blank" rel="noreferrer" className="btn-glass py-4 px-10 flex items-center justify-center gap-3">
                                       <ExternalLink size={18} /> View Source
