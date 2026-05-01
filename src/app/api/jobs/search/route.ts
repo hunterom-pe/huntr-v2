@@ -91,8 +91,23 @@ export async function POST(req: Request) {
       const summaryRegex = createSurgicalRegex(opt.originalSummary);
       const match = xml.match(summaryRegex);
       if (match) {
-        console.log("SUCCESS: Match found for summary! Replacing...");
-        xml = xml.replace(summaryRegex, opt.newSummary);
+        console.log("SUCCESS: Match found for summary! Performing XML-aware replacement...");
+        const matchedText = match[0];
+        // Surgical Inversion: Keep all the XML tags, but replace the content within them
+        // 1. Find all <w:t> tags
+        // 2. Put all new text in the FIRST <w:t>
+        // 3. Clear all other <w:t> tags
+        let first = true;
+        const replacedMatch = matchedText.replace(/<w:t[^>]*>(.*?)<\/w:t>/g, (fullTag, content) => {
+          if (first) {
+            first = false;
+            const tagOpening = fullTag.split('>')[0] + '>';
+            return `${tagOpening}${opt.newSummary}</w:t>`;
+          }
+          const tagOpening = fullTag.split('>')[0] + '>';
+          return `${tagOpening}</w:t>`;
+        });
+        xml = xml.replace(matchedText, replacedMatch);
       } else {
         console.warn("WARNING: No match found for summary. Surgical replacement skipped.");
       }
@@ -102,8 +117,20 @@ export async function POST(req: Request) {
         for (const replacement of opt.bulletReplacements) {
           if (replacement.original && replacement.new) {
             const bulletRegex = createSurgicalRegex(replacement.original);
-            if (xml.match(bulletRegex)) {
-              xml = xml.replace(bulletRegex, replacement.new);
+            const bMatch = xml.match(bulletRegex);
+            if (bMatch) {
+              const bMatchedText = bMatch[0];
+              let bFirst = true;
+              const bReplacedMatch = bMatchedText.replace(/<w:t[^>]*>(.*?)<\/w:t>/g, (fullTag, content) => {
+                if (bFirst) {
+                  bFirst = false;
+                  const tagOpening = fullTag.split('>')[0] + '>';
+                  return `${tagOpening}${replacement.new}</w:t>`;
+                }
+                const tagOpening = fullTag.split('>')[0] + '>';
+                return `${tagOpening}</w:t>`;
+              });
+              xml = xml.replace(bMatchedText, bReplacedMatch);
             }
           }
         }
@@ -116,7 +143,7 @@ export async function POST(req: Request) {
       return new Response(new Uint8Array(outputBuffer), {
         headers: {
           "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-          "Content-Disposition": `attachment; filename="HUNTR_Optimized_Resume.docx"`,
+          "Content-Disposition": `attachment; filename="HUNTR_${Date.now()}_Optimized_Resume.docx"`,
         },
       });
     }
