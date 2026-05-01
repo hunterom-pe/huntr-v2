@@ -30,9 +30,13 @@ export async function POST(req: Request) {
       }
 
       const jobDescription = body.jobDescription;
+      const jobTitle = body.jobTitle || "Unknown Job";
       if (!jobDescription) {
         return NextResponse.json({ error: "Missing job description" }, { status: 400 });
       }
+
+      console.log(`Optimization Step 0: Starting optimization for [${jobTitle}]`);
+      console.log("JD Snapshot:", jobDescription.substring(0, 150) + "...");
 
       // 1. Fetch resume buffer
       console.log("Optimization Step 1: Fetching resume buffer from", user.resumePath);
