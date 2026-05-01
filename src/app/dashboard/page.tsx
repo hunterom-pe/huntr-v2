@@ -174,10 +174,10 @@ export default function DashboardPage() {
     if (!job) return;
     setOptimizingId(id);
     try {
-      const response = await fetch("/api/jobs/engine", { 
+      const response = await fetch("/api/jobs/search", { 
         method: "POST", 
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jobDescription: job.description }) 
+        body: JSON.stringify({ action: 'optimize', jobDescription: job.description }) 
       });
       console.log("Optimization Response Status:", response.status);
       
