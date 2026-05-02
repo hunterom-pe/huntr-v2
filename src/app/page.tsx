@@ -1,216 +1,350 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Search, Zap, FileText, CheckCircle2, Shield, Target } from "lucide-react";
-import { motion } from "framer-motion";
+import Image from "next/image";
+import { 
+  ArrowRight, Search, Zap, FileText, CheckCircle2, 
+  Shield, Target, Sparkles, Mail, ShieldCheck, 
+  BrainCircuit, DollarSign, ExternalLink, Play 
+} from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 
 const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+  transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
 };
 
 const staggerContainer = {
   animate: {
     transition: {
-      staggerChildren: 0.1
+      staggerChildren: 0.15
     }
   }
 };
 
 export default function Home() {
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
+  });
+
+  const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
+
   return (
-    <div className="min-h-screen font-sans pt-32 overflow-x-hidden">
-      {/* Redundant background removed as it is now in layout.tsx */}
-
-
-      {/* Locked Header */}
-      <header className="fixed top-0 left-0 w-full z-50 bg-white/40 backdrop-blur-xl border-b border-white/40 shadow-sm">
-        <div className="max-w-[1400px] mx-auto px-8 md:px-12 h-24 flex justify-between items-center">
-          <Link href="/" className="logo-text !text-3xl tracking-[0.3em]">
+    <div className="min-h-screen font-sans selection:bg-blue-100 selection:text-blue-900">
+      
+      {/* Premium Navigation */}
+      <nav className="fixed top-0 left-0 w-full z-[100] px-8 py-6">
+        <motion.div 
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="max-w-[1200px] mx-auto glass-panel px-10 py-4 flex justify-between items-center border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+        >
+          <Link href="/" className="logo-text !text-2xl tracking-[0.4em] flex items-center gap-2">
             HUNTR
           </Link>
-          <nav className="flex items-center gap-10">
-            <Link href="#how-it-works" className="hidden lg:block label-mono !text-slate-900 opacity-60 hover:opacity-100 transition-opacity">
-              How it Works
-            </Link>
-            <Link href="/pricing" className="hidden lg:block label-mono !text-slate-900 opacity-60 hover:opacity-100 transition-opacity">
-              Pricing
-            </Link>
-            <Link href="/login" className="px-10 py-3.5 bg-slate-900 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20">
-              Sign In
-            </Link>
-          </nav>
-        </div>
-      </header>
-
-      <main className="max-w-[1200px] mx-auto px-6 relative z-10">
-        {/* Hero Section */}
-        <motion.section 
-          initial="initial"
-          animate="animate"
-          variants={staggerContainer}
-          className="text-center pt-12 pb-16 space-y-10"
-        >
-          <div className="space-y-6">
-            <motion.h1 variants={fadeInUp} className="hero-text-large">
-              Your Job Search, <br />
-              <span className="bg-gradient-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent">Automated</span>
-            </motion.h1>
-            <motion.p variants={fadeInUp} className="hero-sub text-slate-500 font-medium text-xl max-w-3xl mx-auto leading-relaxed">
-              Stop wasting hours searching and applying. Let our intelligent system find your 
-              perfect matches and tailor your resume for every single opportunity.
-            </motion.p>
+          <div className="hidden md:flex items-center gap-12">
+            <Link href="#features" className="label-mono !text-slate-900 opacity-60 hover:opacity-100 transition-all">Engine</Link>
+            <Link href="#intelligence" className="label-mono !text-slate-900 opacity-60 hover:opacity-100 transition-all">Intelligence</Link>
+            <Link href="/pricing" className="label-mono !text-slate-900 opacity-60 hover:opacity-100 transition-all">Pricing</Link>
           </div>
-
-          <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row justify-center gap-6 pt-4">
-            <Link href="/login" className="btn-pill-blue justify-center text-base">
-              Get Started for Free <ArrowRight size={20} />
-            </Link>
-            <Link href="#how-it-works" className="btn-pill-gray justify-center text-base">
-              See How It Works
-            </Link>
-          </motion.div>
-          
-          <motion.div variants={fadeInUp} className="pt-4 flex justify-center items-center gap-8 text-sm font-bold text-slate-400">
-            <span className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-500" /> No credit card required</span>
-            <span className="flex items-center gap-2 hidden sm:flex"><Shield size={16} className="text-blue-500" /> Private & Secure</span>
-          </motion.div>
-        </motion.section>
-
-        {/* Integration Logo Cloud */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 1 }}
-          viewport={{ once: true }}
-          className="pt-8 pb-32 border-b border-slate-200/40 mb-32 relative z-20"
-        >
-          <p className="text-center label-mono mb-12 !tracking-[0.4em] opacity-40">Seamlessly connects with</p>
-          <div className="flex flex-wrap justify-center items-center gap-16 md:gap-24 opacity-30 grayscale hover:grayscale-0 transition-all duration-700">
-            {["LinkedIn", "indeed", "Glassdoor", "ZipRecruiter"].map((logo) => (
-              <motion.span 
-                key={logo}
-                animate={{ y: [0, -5, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: Math.random() * 2 }}
-                className="text-2xl font-black tracking-tighter text-slate-900"
-              >
-                {logo}
-              </motion.span>
-            ))}
+          <div className="flex items-center gap-6">
+            <Link href="/login" className="text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors">Sign In</Link>
+            <Link href="/login" className="btn-primary !py-3 !px-8">Get Started</Link>
           </div>
         </motion.div>
+      </nav>
 
-        {/* How It Works Section */}
-        <section id="how-it-works" className="pb-32 space-y-16 scroll-mt-32">
+      {/* Hero Section: Cinematic Launch */}
+      <section ref={containerRef} className="relative pt-48 pb-32 overflow-hidden bg-mesh-glow">
+        <motion.div 
+          style={{ opacity, scale }}
+          className="max-w-[1400px] mx-auto px-8 md:px-20 text-center space-y-12 relative z-10"
+        >
           <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true, margin: "-100px" }}
-            className="text-center space-y-6 max-w-3xl mx-auto mb-10"
+            variants={fadeInUp}
+            initial="initial"
+            animate="animate"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[11px] font-black uppercase tracking-[0.2em] shadow-sm"
           >
-            <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-[#F1F4F9] text-slate-500 text-[11px] font-black tracking-[0.2em] uppercase">
-              The Process
-            </div>
-            <h2 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tight">How it works</h2>
-            <p className="text-xl text-slate-500 font-medium leading-relaxed">
-              A seamless three-step process to land your dream role without the manual heavy lifting.
-            </p>
+            <Sparkles size={14} className="animate-pulse" /> AI-Powered Job Search v2.0
           </motion.div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            {[
-              { 
-                title: "Deep Scan", 
-                desc: "We scan thousands of jobs across all major boards in seconds, filtering out the noise to find exactly what fits.",
-                icon: Search,
-                color: "text-blue-600",
-                bg: "bg-blue-50"
-              },
-              { 
-                title: "Instant Match", 
-                desc: "Our intelligence engine cross-references your profile with job requirements to find the highest probability matches.",
-                icon: Target,
-                color: "text-cyan-600",
-                bg: "bg-cyan-50"
-              },
-              { 
-                title: "Auto-Optimize", 
-                desc: "Automatically tailors and rewrites your resume to highlight the specific skills each job description is looking for.",
-                icon: FileText,
-                color: "text-indigo-600",
-                bg: "bg-indigo-50"
-              }
-            ].map((feature, i) => (
-              <motion.div 
-                key={i} 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: i * 0.1 }}
-                viewport={{ once: true, margin: "-50px" }}
-                whileHover={{ y: -8, scale: 1.02 }}
-                className="feature-card group relative overflow-hidden shadow-sm"
-              >
-                <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-blue-50 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                <div className="mb-12 relative z-10">
-                  <div className={`w-20 h-20 ${feature.bg} rounded-3xl flex items-center justify-center shadow-inner group-hover:shadow-lg transition-all duration-300`}>
-                    <feature.icon className={`${feature.color} group-hover:scale-110 transition-transform duration-300`} size={32} />
-                  </div>
-                </div>
-                <div className="space-y-4 relative z-10">
-                  <h3 className="text-3xl font-black text-slate-900 tracking-tight">{feature.title}</h3>
-                  <p className="text-slate-500 text-lg font-medium leading-relaxed">{feature.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
+          <motion.div 
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
+            className="space-y-8"
+          >
+            <motion.h1 variants={fadeInUp} className="text-7xl md:text-[110px] font-black text-slate-900 tracking-tighter leading-[0.85]">
+              Land Your Dream Job <br />
+              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 bg-clip-text text-transparent text-glow-blue">With Precision.</span>
+            </motion.h1>
+            <motion.p variants={fadeInUp} className="text-xl md:text-2xl text-slate-500 font-medium max-w-3xl mx-auto leading-relaxed tracking-tight">
+              Stop fighting the ATS. Our surgical intelligence engine finds hidden opportunities and optimizes your resume to mirror exactly what hiring managers are seeking.
+            </motion.p>
+          </motion.div>
 
-        {/* Additional Information Section (CTA) */}
-        <motion.section 
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="pb-32"
-        >
-          <div className="bg-white border border-slate-200/60 rounded-[40px] p-12 md:p-20 text-center space-y-8 relative overflow-hidden shadow-2xl shadow-slate-200/50">
-            <div className="absolute top-0 right-0 w-[50%] h-[100%] bg-blue-500/10 blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-[50%] h-[100%] bg-cyan-500/10 blur-[120px] pointer-events-none" />
-            
-            <h2 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight relative z-10">
-              Ready to automate your search?
-            </h2>
-            <p className="text-slate-500 text-xl max-w-2xl mx-auto font-medium relative z-10 leading-relaxed">
-              Join the professionals who are landing interviews faster by letting the system do the hard work.
-            </p>
-            <div className="pt-6 relative z-10">
-              <Link href="/login" className="inline-flex items-center gap-3 px-12 py-5 bg-blue-600 text-white font-black rounded-full text-lg hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-blue-600/30">
-                Create Free Account <ArrowRight size={20} />
-              </Link>
+          <motion.div 
+            variants={fadeInUp}
+            initial="initial"
+            animate="animate"
+            className="flex flex-col sm:flex-row justify-center gap-8 pt-6"
+          >
+            <Link href="/login" className="btn-pill-blue !px-14 !py-6 text-base group">
+              Initiate Search <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link href="#features" className="btn-pill-gray !px-14 !py-6 text-base flex items-center gap-3">
+              <Play size={18} className="fill-current" /> See The Engine
+            </Link>
+          </motion.div>
+
+          {/* Product Reveal: The Dashboard Mockup */}
+          <motion.div 
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5, duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            className="pt-24 relative"
+          >
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[60%] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none" />
+            <div className="glass-panel p-4 md:p-6 bg-white/40 border-white/80 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] relative z-10 rounded-[48px]">
+              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[32px] border border-white/50 bg-slate-50">
+                <Image 
+                  src="/hero-mockup.png" 
+                  alt="Huntr Dashboard" 
+                  fill 
+                  className="object-cover"
+                  priority
+                />
+              </div>
             </div>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* Feature Bento: The Core Engine */}
+      <section id="features" className="py-32 bg-white relative overflow-hidden">
+        <div className="max-w-[1200px] mx-auto px-8">
+          <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-20">
+            <div className="space-y-4 max-w-xl">
+              <div className="label-mono !text-blue-600">The Core Engine</div>
+              <h2 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tight leading-none">Built for High-Growth Professionals.</h2>
+            </div>
+            <p className="text-xl text-slate-500 font-medium max-w-sm pb-2 leading-relaxed">Everything you need to automate the hunt and dominate the application process.</p>
           </div>
-        </motion.section>
-      </main>
+
+          <div className="grid md:grid-cols-12 gap-8 h-auto md:h-[650px]">
+            {/* Bento 1: Deep Scan */}
+            <motion.div 
+              whileHover={{ y: -10 }}
+              className="md:col-span-7 bento-card p-12 flex flex-col justify-between group overflow-hidden relative"
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 rounded-bl-full -mr-20 -mt-20 transition-all duration-500 group-hover:scale-110" />
+              <div className="space-y-6 relative z-10">
+                <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/20">
+                  <Search className="text-white" size={28} />
+                </div>
+                <h3 className="text-4xl font-black text-slate-900 tracking-tight">Surgical Deep Scan</h3>
+                <p className="text-lg text-slate-500 font-medium leading-relaxed max-w-md">Our crawler bypasses the noise, scanning 50+ global job boards in real-time to find roles that match your DNA score.</p>
+              </div>
+              <div className="pt-8 flex gap-4">
+                {['LinkedIn', 'Indeed', 'Ottis', 'Greenhouse'].map(tag => (
+                  <span key={tag} className="px-4 py-1.5 bg-white border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400">{tag}</span>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Bento 2: DNA Match */}
+            <motion.div 
+              whileHover={{ y: -10 }}
+              className="md:col-span-5 bento-card p-12 flex flex-col justify-center text-center bg-gradient-to-br from-indigo-600 to-blue-700 text-white relative group"
+            >
+              <div className="relative z-10 space-y-8">
+                <div className="w-24 h-24 bg-white/20 backdrop-blur-xl rounded-[32px] flex items-center justify-center mx-auto border border-white/30 pulse-glow">
+                  <Target className="text-white" size={40} />
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-4xl font-black tracking-tight">DNA Matching</h3>
+                  <p className="text-blue-100 text-lg font-medium">98% Accuracy in profile-to-job alignment. No more "maybe" applications.</p>
+                </div>
+                <div className="text-6xl font-black text-white/20 tracking-tighter group-hover:text-white/40 transition-colors">98.4%</div>
+              </div>
+            </motion.div>
+
+            {/* Bento 3: Resume Morph */}
+            <motion.div 
+              whileHover={{ y: -10 }}
+              className="md:col-span-12 bento-card p-12 flex flex-col md:flex-row items-center gap-12 bg-slate-50/50 border-slate-200/50"
+            >
+              <div className="flex-1 space-y-6 text-center md:text-left">
+                <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/20 mx-auto md:mx-0">
+                  <FileText className="text-white" size={28} />
+                </div>
+                <h3 className="text-4xl font-black text-slate-900 tracking-tight leading-none">Auto-Optimization Engine</h3>
+                <p className="text-lg text-slate-500 font-medium leading-relaxed max-w-lg">The engine surgically rewrites your professional summary and experience bullets to mirror the job description's terminology. Real-time ATS hacking.</p>
+              </div>
+              <div className="flex-1 w-full max-w-md space-y-4">
+                <div className="glass-card p-6 bg-white border-slate-100 shadow-sm opacity-50 scale-95 blur-[1px]">
+                  <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Original Bullet</p>
+                  <p className="text-sm font-medium text-slate-600 italic">"Responsible for managing team projects and hitting deadlines."</p>
+                </div>
+                <div className="glass-card p-6 bg-blue-600 text-white border-blue-500 shadow-2xl relative">
+                  <div className="absolute -top-3 -right-3 w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center border-4 border-white shadow-xl">
+                    <Zap size={18} />
+                  </div>
+                  <p className="text-[10px] font-black uppercase text-blue-200 mb-2 tracking-widest">Optimized Bullet</p>
+                  <p className="text-sm font-bold leading-relaxed">"Orchestrated cross-functional Agile workflows to deliver high-stakes product releases with a 98% on-time completion rate."</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Intelligence Section: Beyond The Application */}
+      <section id="intelligence" className="py-40 bg-slate-50 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_80%_20%,rgba(37,99,235,0.03),transparent_50%)] pointer-events-none" />
+        <div className="max-w-[1200px] mx-auto px-8 relative z-10">
+          <div className="text-center space-y-6 max-w-3xl mx-auto mb-24">
+            <div className="label-mono !text-indigo-600">The Intelligence Suite</div>
+            <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter leading-none">Win Before The Interview Starts.</h2>
+            <p className="text-xl text-slate-500 font-medium leading-relaxed">Our AI doesn't stop at the application. We provide the tactical intelligence you need to dominate the entire hiring cycle.</p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-16">
+            {/* Intelligence Card 1: Interview Brief */}
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="glass-panel p-12 space-y-10 bg-white/80 border-white/90 shadow-2xl"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center border border-indigo-100">
+                  <ShieldCheck className="text-indigo-600" size={28} />
+                </div>
+                <h4 className="text-2xl font-black text-slate-900 tracking-tight">Surgical Interview Briefs</h4>
+              </div>
+              <p className="text-slate-500 text-lg font-medium leading-relaxed">We analyze the JD to predict exact technical and behavioral questions you'll face. We even build a "Company Dossier" on their likely values and culture.</p>
+              <div className="space-y-4">
+                {['Predicted Questions', 'Company Dossier', 'Reverse Strategy'].map(item => (
+                  <div key={item} className="flex items-center gap-3 text-sm font-bold text-slate-700">
+                    <CheckCircle2 size={18} className="text-emerald-500" /> {item}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Intelligence Card 2: Negotiation Playbook */}
+            <motion.div 
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="glass-panel p-12 space-y-10 bg-white/80 border-white/90 shadow-2xl"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center border border-emerald-100">
+                  <DollarSign className="text-emerald-600" size={28} />
+                </div>
+                <h4 className="text-2xl font-black text-slate-900 tracking-tight">Negotiation Playbooks</h4>
+              </div>
+              <p className="text-slate-500 text-lg font-medium leading-relaxed">Don't leave money on the table. We calculate your market leverage and provide scripts for a 10-15% increase in base salary.</p>
+              <div className="space-y-4">
+                {['Market Benchmarks', 'Leverage Points', 'Negotiation Scripts'].map(item => (
+                  <div key={item} className="flex items-center gap-3 text-sm font-bold text-slate-700">
+                    <CheckCircle2 size={18} className="text-emerald-500" /> {item}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA: Final Launch */}
+      <section className="py-40 relative">
+        <div className="max-w-[1200px] mx-auto px-8">
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
+            viewport={{ once: true }}
+            className="bg-white border border-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.06)] rounded-[64px] p-20 md:p-32 text-center space-y-12 relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_50%_-20%,rgba(37,99,235,0.08),transparent_70%)] pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_120%,rgba(79,70,229,0.05),transparent_70%)] pointer-events-none" />
+            
+            <div className="space-y-6 relative z-10">
+              <h2 className="text-6xl md:text-8xl font-black text-slate-900 tracking-tighter leading-none">Ready for the <br /> <span className="text-blue-600">new elite?</span></h2>
+              <p className="text-xl md:text-2xl text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">Join the top 5% of candidates who automate the hunt and land interviews with surgical precision.</p>
+            </div>
+            
+            <div className="relative z-10 pt-8 flex flex-col sm:flex-row justify-center gap-6">
+              <Link href="/login" className="btn-pill-blue !px-16 !py-6 !text-base">Create Free Account</Link>
+              <Link href="mailto:support@huntr.com" className="btn-pill-gray !px-16 !py-6 !text-base !bg-slate-50 !border-slate-200 !text-slate-600 hover:!bg-white">Contact Sales</Link>
+            </div>
+
+            <div className="pt-12 flex justify-center items-center gap-10 text-[11px] font-black uppercase tracking-[0.3em] text-slate-400 relative z-10">
+              <span>No Credit Card</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-200" />
+              <span>Instant Access</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-200" />
+              <span>Full Privacy</span>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       {/* Structured Footer */}
-      <footer className="bg-white border-t border-slate-200 py-10 relative z-10">
-        <div className="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col items-center md:items-start gap-2">
-            <span className="logo-text !text-xl">HUNTR</span>
-            <p className="text-sm font-medium text-slate-400">The automated job search platform.</p>
+      <footer className="py-20 bg-white border-t border-slate-100">
+        <div className="max-w-[1200px] mx-auto px-8 grid md:grid-cols-12 gap-16">
+          <div className="md:col-span-4 space-y-6">
+            <Link href="/" className="logo-text !text-3xl">HUNTR</Link>
+            <p className="text-slate-500 font-medium leading-relaxed">The only surgical intelligence engine built to automate the high-growth job search. Dominate the hunt.</p>
+            <div className="flex gap-4">
+              {/* Social icons placeholder */}
+              <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"><Target size={18} /></div>
+              <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"><FileText size={18} /></div>
+              <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"><Mail size={18} /></div>
+            </div>
           </div>
-          
-          <nav className="flex items-center gap-8 text-sm font-bold text-slate-500">
-            <Link href="/privacy" className="hover:text-blue-600 transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-blue-600 transition-colors">Terms of Service</Link>
-            <Link href="mailto:support@huntr.com" className="hover:text-blue-600 transition-colors">Contact Support</Link>
-          </nav>
+          <div className="md:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-12">
+            <div className="space-y-6">
+              <h5 className="label-mono !text-slate-900">Product</h5>
+              <ul className="space-y-4 text-sm font-bold text-slate-500">
+                <li><Link href="#features" className="hover:text-blue-600 transition-colors">Surgical Scan</Link></li>
+                <li><Link href="#features" className="hover:text-blue-600 transition-colors">Optimization Engine</Link></li>
+                <li><Link href="/pricing" className="hover:text-blue-600 transition-colors">Pricing</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-6">
+              <h5 className="label-mono !text-slate-900">Intelligence</h5>
+              <ul className="space-y-4 text-sm font-bold text-slate-500">
+                <li><Link href="#intelligence" className="hover:text-blue-600 transition-colors">Interview Briefs</Link></li>
+                <li><Link href="#intelligence" className="hover:text-blue-600 transition-colors">Salary Leverage</Link></li>
+                <li><Link href="#intelligence" className="hover:text-blue-600 transition-colors">Career Dossier</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-6">
+              <h5 className="label-mono !text-slate-900">Company</h5>
+              <ul className="space-y-4 text-sm font-bold text-slate-500">
+                <li><Link href="/privacy" className="hover:text-blue-600 transition-colors">Privacy</Link></li>
+                <li><Link href="/terms" className="hover:text-blue-600 transition-colors">Terms</Link></li>
+                <li><Link href="mailto:support@huntr.com" className="hover:text-blue-600 transition-colors">Support</Link></li>
+              </ul>
+            </div>
+          </div>
         </div>
-        <div className="max-w-[1200px] mx-auto px-6 mt-8 pt-6 border-t border-slate-100 text-center">
-          <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
-            &copy; 2026 HUNTR SYSTEMS &bull; ALL RIGHTS RESERVED
+        <div className="max-w-[1200px] mx-auto px-8 mt-20 pt-8 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]">© 2026 HUNTR SYSTEMS • ALL RIGHTS RESERVED</div>
+          <div className="flex items-center gap-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            <Shield size={12} className="text-emerald-500" /> SOC2 COMPLIANT • AES-256 ENCRYPTED
           </div>
         </div>
       </footer>
