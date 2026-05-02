@@ -445,15 +445,17 @@ export default function DashboardPage() {
                       {paginatedWishlist.map((job, index) => (
                         <Draggable key={job.id} draggableId={job.id} index={index}>
                           {(provided, snapshot) => (
-                            <motion.div
+                            <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, scale: 0.98 }}
-                              transition={{ delay: index * 0.05 }}
-                              style={{...provided.draggableProps.style}}
+                              style={provided.draggableProps.style}
                             >
+                              <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.98 }}
+                                transition={{ delay: index * 0.05 }}
+                              >
                               <div className={`glass-card p-10 group border-white shadow-xl ${snapshot.isDragging ? 'shadow-blue-500/30 scale-[1.02] ring-2 ring-blue-500/20' : 'hover:shadow-blue-500/10 hover:translate-y-[-2px]'} transition-all duration-300`} {...provided.dragHandleProps}>
                                 <div className="flex flex-col md:flex-row gap-10 items-start md:items-center mb-8">
                                   <div className="flex-1 space-y-2">
@@ -492,7 +494,8 @@ export default function DashboardPage() {
                                   </button>
                                 </div>
                               </div>
-                            </motion.div>
+                              </motion.div>
+                            </div>
                           )}
                         </Draggable>
                       ))}
@@ -570,16 +573,18 @@ export default function DashboardPage() {
                             {columnJobs.map((job, index) => (
                               <Draggable key={job.id} draggableId={job.id} index={index}>
                                 {(provided, snapshot) => (
-                                  <motion.div 
+                                  <div 
                                     ref={provided.innerRef} 
                                     {...provided.draggableProps} 
                                     {...provided.dragHandleProps}
-                                    style={{...provided.draggableProps.style}}
-                                    initial={{ opacity: 0, x: 10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                    className={`glass-card p-5 rounded-2xl bg-white/80 border-white shadow-xl group/card relative ${snapshot.isDragging ? `shadow-${col.color}-500/30 scale-105 ring-2 ring-${col.color}-500/20` : 'shadow-slate-200/20 hover:shadow-blue-500/5'} cursor-grab active:cursor-grabbing`}
+                                    style={provided.draggableProps.style}
                                   >
+                                    <motion.div 
+                                      initial={{ opacity: 0, x: 10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ duration: 0.2 }}
+                                      className={`glass-card p-5 rounded-2xl bg-white/80 border-white shadow-xl group/card relative ${snapshot.isDragging ? `shadow-${col.color}-500/30 scale-105 ring-2 ring-${col.color}-500/20` : 'shadow-slate-200/20 hover:shadow-blue-500/5'} cursor-grab active:cursor-grabbing`}
+                                    >
                                     <button 
                                       onClick={(e) => { e.stopPropagation(); handleDelete(job.id); }}
                                       className="absolute -top-2 -right-2 w-7 h-7 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-red-500 hover:border-red-100 shadow-xl opacity-0 group-hover/card:opacity-100 z-10"
@@ -640,7 +645,8 @@ export default function DashboardPage() {
                                         <DollarSign size={12} /> Negotiate
                                       </button>
                                     )}
-                                  </motion.div>
+                                    </motion.div>
+                                  </div>
                                 )}
                               </Draggable>
                             ))}
