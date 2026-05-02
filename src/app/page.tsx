@@ -81,11 +81,11 @@ export default function Home() {
             className="space-y-8"
           >
             <motion.h1 variants={fadeInUp} className="text-7xl md:text-[110px] font-black text-slate-900 tracking-tighter leading-[0.85]">
-              Land Your Dream Job <br />
-              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 bg-clip-text text-transparent text-glow-blue">With Precision.</span>
+              Get Seen By More <br />
+              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 bg-clip-text text-transparent text-glow-blue">Hiring Managers.</span>
             </motion.h1>
             <motion.p variants={fadeInUp} className="text-xl md:text-2xl text-slate-500 font-medium max-w-3xl mx-auto leading-relaxed tracking-tight">
-              Stop fighting the ATS. Our surgical intelligence engine finds hidden opportunities and optimizes your resume to mirror exactly what hiring managers are seeking.
+              We find the perfect roles for your background and automatically optimize your resume to guarantee you stand out in the pile.
             </motion.p>
           </motion.div>
 
