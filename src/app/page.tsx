@@ -60,55 +60,58 @@ export default function Home() {
       </nav>
 
       {/* Hero Section: Cinematic Launch */}
-      <section ref={containerRef} className="relative pt-48 pb-32 overflow-hidden bg-mesh-glow">
-        <motion.div 
-          style={{ opacity, scale }}
-          className="max-w-[1400px] mx-auto px-8 md:px-20 text-center space-y-12 relative z-10"
-        >
+      <section ref={containerRef} className="relative pt-48 pb-12 overflow-hidden bg-mesh-glow">
+        <div className="max-w-[1400px] mx-auto px-8 md:px-20 text-center relative z-10">
+          
           <motion.div 
-            variants={fadeInUp}
-            initial="initial"
-            animate="animate"
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[11px] font-black uppercase tracking-[0.2em] shadow-sm"
+            style={{ opacity, scale }}
+            className="space-y-12 mb-24"
           >
-            <Sparkles size={14} className="animate-pulse" /> AI-Powered Job Search v2.0
+            <motion.div 
+              variants={fadeInUp}
+              initial="initial"
+              animate="animate"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[11px] font-black uppercase tracking-[0.2em] shadow-sm"
+            >
+              <Sparkles size={14} className="animate-pulse" /> AI-Powered Job Search v2.0
+            </motion.div>
+
+            <motion.div 
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              className="space-y-8"
+            >
+              <motion.h1 variants={fadeInUp} className="text-7xl md:text-[110px] font-black text-slate-900 tracking-tighter leading-[0.85]">
+                Get Seen By More <br />
+                <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 bg-clip-text text-transparent text-glow-blue">Hiring Managers.</span>
+              </motion.h1>
+              <motion.p variants={fadeInUp} className="text-xl md:text-2xl text-slate-500 font-medium max-w-3xl mx-auto leading-relaxed tracking-tight">
+                We find the perfect roles for your background and automatically optimize your resume to guarantee you stand out in the pile.
+              </motion.p>
+            </motion.div>
+
+            <motion.div 
+              variants={fadeInUp}
+              initial="initial"
+              animate="animate"
+              className="flex flex-col sm:flex-row justify-center gap-8 pt-6"
+            >
+              <Link href="/login" className="btn-pill-blue !px-14 !py-6 text-base group">
+                Initiate Search <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link href="#features" className="btn-pill-gray !px-14 !py-6 text-base flex items-center gap-3">
+                <Play size={18} className="fill-current" /> See The Engine
+              </Link>
+            </motion.div>
           </motion.div>
 
-          <motion.div 
-            variants={staggerContainer}
-            initial="initial"
-            animate="animate"
-            className="space-y-8"
-          >
-            <motion.h1 variants={fadeInUp} className="text-7xl md:text-[110px] font-black text-slate-900 tracking-tighter leading-[0.85]">
-              Get Seen By More <br />
-              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 bg-clip-text text-transparent text-glow-blue">Hiring Managers.</span>
-            </motion.h1>
-            <motion.p variants={fadeInUp} className="text-xl md:text-2xl text-slate-500 font-medium max-w-3xl mx-auto leading-relaxed tracking-tight">
-              We find the perfect roles for your background and automatically optimize your resume to guarantee you stand out in the pile.
-            </motion.p>
-          </motion.div>
-
-          <motion.div 
-            variants={fadeInUp}
-            initial="initial"
-            animate="animate"
-            className="flex flex-col sm:flex-row justify-center gap-8 pt-6"
-          >
-            <Link href="/login" className="btn-pill-blue !px-14 !py-6 text-base group">
-              Initiate Search <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link href="#features" className="btn-pill-gray !px-14 !py-6 text-base flex items-center gap-3">
-              <Play size={18} className="fill-current" /> See The Engine
-            </Link>
-          </motion.div>
-
-          {/* Product Reveal: The Dashboard Mockup */}
+          {/* Product Reveal: The Dashboard Mockup (Now independent of the hero fade) */}
           <motion.div 
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5, duration: 1, ease: [0.22, 1, 0.36, 1] }}
-            className="pt-24 relative"
+            className="relative"
           >
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[60%] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none" />
             <div className="glass-panel p-4 md:p-6 bg-white/40 border-white/80 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] relative z-10 rounded-[48px]">
@@ -123,7 +126,7 @@ export default function Home() {
               </div>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       </section>
 
       {/* Feature Bento: The Core Engine */}
