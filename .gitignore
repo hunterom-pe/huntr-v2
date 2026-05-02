@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database
+*.db
+*.db-journal
+
+# logs & output
+*-output.txt
+*.log
+
+# local storage & temp
+/storage/
+/scratch/
+.DS_Store

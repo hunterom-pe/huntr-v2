@@ -32,15 +32,15 @@ export async function POST(req: Request) {
     let savedJob;
 
     if (id) {
-      // Try to find existing
-      const existingJob = await prisma.job.findUnique({
-        where: { id }
+      // Try to find existing and verify ownership
+      const existingJob = await prisma.job.findFirst({
+        where: { id, userId: user.id }
       });
-
+      
       if (existingJob) {
         // Update existing fields if provided
         savedJob = await prisma.job.update({
-          where: { id },
+          where: { id, userId: user.id },
           data: { 
             status: status || undefined,
             isDeleted: isDeleted !== undefined ? isDeleted : undefined,
