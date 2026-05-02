@@ -150,7 +150,7 @@ export async function POST(req: Request) {
       const finalFilename = `Optimized_Resume_${Date.now()}.docx`;
       console.log(`Optimization Complete: Sending ${finalFilename} (${outputBuffer.length} bytes)`);
 
-      return new Response(outputBuffer, {
+      return new Response(new Uint8Array(outputBuffer), {
         headers: {
           "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
           "Content-Disposition": `attachment; filename="${finalFilename}"`,
