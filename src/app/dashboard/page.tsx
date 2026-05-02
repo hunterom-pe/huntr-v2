@@ -26,6 +26,7 @@ export default function DashboardPage() {
   const [hasScanned, setHasScanned] = useState(false);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [optimizingId, setOptimizingId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [followUpJob, setFollowUpJob] = useState<Job | null>(null);
   const [generatedEmail, setGeneratedEmail] = useState<string>("");
   const [isGeneratingEmail, setIsGeneratingEmail] = useState(false);
@@ -119,8 +120,14 @@ export default function DashboardPage() {
       }
     };
 
-    const handleDelete = async (id: string) => {
-      if (!confirm("Are you sure you want to remove this application from your tracker?")) return;
+    const handleDelete = (id: string) => {
+      setDeleteConfirmId(id);
+    };
+
+    const confirmDelete = async () => {
+      if (!deleteConfirmId) return;
+      const id = deleteConfirmId;
+      setDeleteConfirmId(null);
       
       // Optimistic UI Update
       setJobs(prev => prev.filter(job => job.id !== id));
@@ -1020,6 +1027,48 @@ export default function DashboardPage() {
                   <ExternalLink size={14} /> View Original Source
                 </a>
                 <button onClick={() => setViewJob(null)} className="btn-primary px-10">Close Details</button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Custom Confirmation Modal */}
+      <AnimatePresence>
+        {deleteConfirmId && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"
+              onClick={() => setDeleteConfirmId(null)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="glass-panel w-full max-w-md bg-white p-10 relative z-10 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] border-white text-center"
+            >
+              <div className="w-20 h-20 bg-red-50 rounded-[28px] flex items-center justify-center mx-auto mb-8 border border-red-100">
+                <Trash2 className="text-red-500" size={32} />
+              </div>
+              <h3 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">Remove Job?</h3>
+              <p className="text-slate-500 font-medium mb-10 leading-relaxed px-4">This application will be permanently removed from your tracker. This action cannot be undone.</p>
+              
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => setDeleteConfirmId(null)}
+                  className="flex-1 btn-glass !py-4.5 !text-[12px]"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmDelete}
+                  className="flex-1 py-4.5 bg-red-500 text-white font-black text-[12px] uppercase tracking-widest rounded-2xl shadow-xl shadow-red-500/20 hover:bg-red-600 active:scale-95 transition-all"
+                >
+                  Remove
+                </button>
               </div>
             </motion.div>
           </div>

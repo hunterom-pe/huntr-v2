@@ -14,6 +14,7 @@ export default function OnboardingPage() {
   const [targetRole, setTargetRole] = useState("");
   const [location, setLocation] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [alert, setAlert] = useState<{ title: string; message: string; type: 'success' | 'error' | 'warning' } | null>(null);
   const router = useRouter();
 
   const handleCompleteOnboarding = async () => {
@@ -30,7 +31,11 @@ export default function OnboardingPage() {
         router.refresh();
       } else {
         const data = await res.json();
-        alert(data.error || "Failed to save profile");
+        setAlert({
+          title: "Setup Failed",
+          message: data.error || "We couldn't save your profile preferences. Please try again.",
+          type: "error"
+        });
         setIsSubmitting(false);
       }
     } catch (error) {
@@ -54,15 +59,28 @@ export default function OnboardingPage() {
         if (res.ok) {
           startAnalysis();
         } else {
-          alert("Failed to securely store resume.");
+          setAlert({
+            title: "Upload Failed",
+            message: "We encountered an error while securing your resume. Please try again.",
+            type: "error"
+          });
           setIsAnalyzing(false);
         }
       } catch (err) {
         console.error("Upload error:", err);
+        setAlert({
+          title: "System Error",
+          message: "An unexpected error occurred during the upload process.",
+          type: "error"
+        });
         setIsAnalyzing(false);
       }
     } else {
-      alert("Please upload a .docx file only.");
+      setAlert({
+        title: "Invalid File",
+        message: "Please upload a .docx file only to ensure the engine can parse your skills correctly.",
+        type: "warning"
+      });
     }
   };
 
@@ -201,6 +219,27 @@ export default function OnboardingPage() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Global Alert Modal */}
+      <AnimatePresence>
+        {alert && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/10 backdrop-blur-md" onClick={() => setAlert(null)} />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} className="glass-panel w-full max-w-md bg-white p-10 relative z-10 shadow-2xl border-white text-center">
+              <div className={`w-20 h-20 rounded-[28px] flex items-center justify-center mx-auto mb-8 border ${
+                alert.type === 'success' ? "bg-emerald-50 border-emerald-100 text-emerald-500" :
+                alert.type === 'error' ? "bg-red-50 border-red-100 text-red-500" :
+                "bg-amber-50 border-amber-100 text-amber-500"
+              }`}>
+                {alert.type === 'success' ? <CheckCircle2 size={32} /> : alert.type === 'error' ? <Zap className="fill-current" size={32} /> : <FileText size={32} />}
+              </div>
+              <h3 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">{alert.title}</h3>
+              <p className="text-slate-500 font-medium mb-10 leading-relaxed px-4">{alert.message}</p>
+              <button onClick={() => setAlert(null)} className="btn-primary w-full py-4.5">Understood</button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

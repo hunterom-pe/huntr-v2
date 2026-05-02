@@ -2,8 +2,15 @@
 "use client";
 
 import { useState } from "react";
-import { User, Mail, MapPin, Briefcase, FileText, UploadCloud, Loader2, Search, Trash2, ShieldCheck, Lock } from "lucide-react";
+import { User, Mail, MapPin, Briefcase, FileText, UploadCloud, Loader2, Search, Trash2, ShieldCheck, Lock, AlertCircle, CheckCircle2, Info } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 export default function ProfileClient({ user }: { user: any }) {
   const router = useRouter();
@@ -18,6 +25,11 @@ export default function ProfileClient({ user }: { user: any }) {
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
+
+  // Modal State
+  const [alert, setAlert] = useState<{ title: string; message: string; type: 'success' | 'error' | 'warning' } | null>(null);
+  const [showConfirmReset, setShowConfirmReset] = useState(false);
+  const [isWiping, setIsWiping] = useState(false);
 
   const displayName = user?.name || user?.email?.split('@')[0] || "User";
   const initials = displayName.substring(0, 2).toUpperCase();
@@ -85,7 +97,11 @@ export default function ProfileClient({ user }: { user: any }) {
   const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile || !selectedFile.name.endsWith(".docx")) {
-      alert("Please upload a .docx file only.");
+      setAlert({
+        title: "Invalid File Type",
+        message: "Please upload a .docx file only.",
+        type: "warning"
+      });
       return;
     }
 
@@ -99,13 +115,25 @@ export default function ProfileClient({ user }: { user: any }) {
         body: formData,
       });
       if (res.ok) {
-        alert("Resume successfully uploaded to secure storage.");
+        setAlert({
+          title: "Upload Successful",
+          message: "Your resume has been securely stored and indexed for matching.",
+          type: "success"
+        });
       } else {
-        alert("Failed to securely store resume.");
+        setAlert({
+          title: "Upload Failed",
+          message: "We encountered an error while securing your file. Please try again.",
+          type: "error"
+        });
       }
     } catch (err) {
       console.error(err);
-      alert("Error uploading resume.");
+      setAlert({
+        title: "System Error",
+        message: "An unexpected error occurred during the upload process.",
+        type: "error"
+      });
     } finally {
       setIsUploading(false);
     }
@@ -306,25 +334,75 @@ export default function ProfileClient({ user }: { user: any }) {
               </p>
             </div>
             <button 
-              onClick={async () => {
-                if (confirm("DANGER: This will permanently delete all your job matches and application history. Are you absolutely sure?")) {
-                  try {
-                    const res = await fetch("/api/jobs/reset", { method: "POST" });
-                    if (res.ok) {
-                      alert("Search history has been wiped. Your dashboard is now fresh.");
-                      window.location.reload();
-                    }
-                  } catch (e) {
-                    alert("Failed to reset history.");
-                  }
-                }
-              }}
+              onClick={() => setShowConfirmReset(true)}
               className="btn-glass border-red-200 text-red-600 hover:bg-red-600 hover:text-white px-8 py-4 rounded-2xl text-[12px] font-black uppercase tracking-[0.2em] transition-all"
             >
               Reset Search History
             </button>
           </div>
         </div>
+
+        {/* Modal Logic */}
+        <AnimatePresence>
+          {/* Global Alert Modal */}
+          {alert && (
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/10 backdrop-blur-md" onClick={() => setAlert(null)} />
+              <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} className="glass-panel w-full max-w-md bg-white p-10 relative z-10 shadow-2xl border-white text-center">
+                <div className={cn(
+                  "w-20 h-20 rounded-[28px] flex items-center justify-center mx-auto mb-8 border",
+                  alert.type === 'success' ? "bg-emerald-50 border-emerald-100 text-emerald-500" :
+                  alert.type === 'error' ? "bg-red-50 border-red-100 text-red-500" :
+                  "bg-amber-50 border-amber-100 text-amber-500"
+                )}>
+                  {alert.type === 'success' ? <CheckCircle2 size={32} /> : alert.type === 'error' ? <AlertCircle size={32} /> : <Info size={32} />}
+                </div>
+                <h3 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">{alert.title}</h3>
+                <p className="text-slate-500 font-medium mb-10 leading-relaxed px-4">{alert.message}</p>
+                <button onClick={() => setAlert(null)} className="btn-primary w-full py-4.5">Understood</button>
+              </motion.div>
+            </div>
+          )}
+
+          {/* Confirm Reset Modal */}
+          {showConfirmReset && (
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/10 backdrop-blur-md" onClick={() => setShowConfirmReset(false)} />
+              <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} className="glass-panel w-full max-w-md bg-white p-10 relative z-10 shadow-2xl border-white text-center">
+                <div className="w-20 h-20 bg-red-50 rounded-[28px] flex items-center justify-center mx-auto mb-8 border border-red-100">
+                  <Trash2 className="text-red-500" size={32} />
+                </div>
+                <h3 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">Wipe Everything?</h3>
+                <p className="text-slate-500 font-medium mb-10 leading-relaxed px-4 text-[15px]">This will permanently delete all your job matches and application history. <span className="text-red-600 font-bold">This cannot be undone.</span></p>
+                
+                <div className="flex gap-4">
+                  <button onClick={() => setShowConfirmReset(false)} className="flex-1 btn-glass !py-4.5 !text-[12px]">Cancel</button>
+                  <button 
+                    disabled={isWiping}
+                    onClick={async () => {
+                      setIsWiping(true);
+                      try {
+                        const res = await fetch("/api/jobs/reset", { method: "POST" });
+                        if (res.ok) {
+                          setAlert({ title: "History Wiped", message: "Your search history has been deleted. Your dashboard is now fresh.", type: "success" });
+                          setTimeout(() => window.location.reload(), 2000);
+                        }
+                      } catch (e) {
+                        setAlert({ title: "Action Failed", message: "We couldn't reset your history. Please try again.", type: "error" });
+                      } finally {
+                        setShowConfirmReset(false);
+                        setIsWiping(false);
+                      }
+                    }} 
+                    className="flex-1 py-4.5 bg-red-500 text-white font-black text-[12px] uppercase tracking-widest rounded-2xl shadow-xl shadow-red-500/20 hover:bg-red-600 transition-all flex items-center justify-center gap-2"
+                  >
+                    {isWiping ? <Loader2 className="animate-spin" size={16} /> : "Wipe Now"}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

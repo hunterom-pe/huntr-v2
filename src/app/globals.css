@@ -6,11 +6,13 @@
 }
 
 :root {
-  --background: #fdfdfe;
-  --foreground: #1e293b;
-  --glass-bg: rgba(255, 255, 255, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.95);
-  --glass-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.05);
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.05);
+  --accent-blue: #2563eb;
+  --accent-indigo: #4f46e5;
 }
 
 body {
@@ -20,8 +22,8 @@ body {
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   background-image: 
-    radial-gradient(at 0% 0%, hsla(225,39%,30%,0.015) 0, transparent 50%), 
-    radial-gradient(at 100% 100%, hsla(253,16%,7%,0.01) 0, transparent 50%);
+    radial-gradient(at 0% 0%, hsla(220,100%,95%,1) 0, transparent 50%), 
+    radial-gradient(at 100% 100%, hsla(240,100%,98%,1) 0, transparent 50%);
 }
 
 /* --- GLASSMORPHISM SYSTEM --- */
@@ -122,10 +124,23 @@ body {
 }
 
 /* --- CUSTOM UTILS --- */
+/* --- ELITE UTILS --- */
+@utility bento-card {
+  @apply glass-card bg-white/50 border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] transition-all duration-700;
+}
+
+@utility text-glow-blue {
+  text-shadow: 0 0 20px rgba(37, 99, 235, 0.2);
+}
+
+@utility bg-mesh-glow {
+  background: radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.05) 0%, transparent 70%);
+}
+
 .shimmer {
-  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
   background-size: 200% 100%;
-  animation: shimmer 2s infinite;
+  animation: shimmer 3s infinite;
 }
 
 @keyframes shimmer {
