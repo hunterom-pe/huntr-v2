@@ -31,7 +31,7 @@ const doc = new Document({
                 new Paragraph({
                     text: "Professional Summary",
                     heading: HeadingLevel.HEADING_2,
-                    border: { bottom: { color: "auto", space: 1, value: "single", size: 6 } },
+                    border: { bottom: { color: "auto", space: 1, style: "single" as any, size: 6 } },
                 }),
                 new Paragraph({
                     children: [
@@ -46,7 +46,7 @@ const doc = new Document({
                 new Paragraph({
                     text: "Core Competencies",
                     heading: HeadingLevel.HEADING_2,
-                    border: { bottom: { color: "auto", space: 1, value: "single", size: 6 } },
+                    border: { bottom: { color: "auto", space: 1, style: "single" as any, size: 6 } },
                 }),
                 new Paragraph({
                     children: [
@@ -61,7 +61,7 @@ const doc = new Document({
                 new Paragraph({
                     text: "Professional Experience",
                     heading: HeadingLevel.HEADING_2,
-                    border: { bottom: { color: "auto", space: 1, value: "single", size: 6 } },
+                    border: { bottom: { color: "auto", space: 1, style: "single" as any, size: 6 } },
                 }),
 
                 new Paragraph({
@@ -113,7 +113,7 @@ const doc = new Document({
                 new Paragraph({
                     text: "Education",
                     heading: HeadingLevel.HEADING_2,
-                    border: { bottom: { color: "auto", space: 1, value: "single", size: 6 } },
+                    border: { bottom: { color: "auto", space: 1, style: "single" as any, size: 6 } },
                 }),
                 new Paragraph({
                     children: [
