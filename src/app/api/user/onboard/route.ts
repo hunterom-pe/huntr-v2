@@ -23,8 +23,8 @@ export async function POST(req: Request) {
     const updatedUser = await prisma.user.update({
       where: { email: session.user.email },
       data: {
-        jobTitle,
-        location,
+        jobTitle: jobTitle.trim(),
+        location: location.trim(),
         resumePath: "uploaded_resume.docx", // Mocking the resume path for now
       },
     });

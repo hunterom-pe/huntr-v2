@@ -26,18 +26,23 @@ export default function PrivacyPolicy() {
         
         <div className="space-y-8 text-lg text-slate-600 font-medium leading-relaxed">
           <section className="space-y-4">
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">1. Information We Collect</h2>
-            <p>We collect information you provide directly to us, such as when you create or modify your account, request services, contact customer support, or otherwise communicate with us. This information may include: name, email, phone number, postal address, profile picture, payment method, items requested (for delivery services), delivery notes, and other information you choose to provide.</p>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">1. Zero-Access Policy</h2>
+            <p>We operate on a <strong>Zero-Access</strong> architecture. Your resumes, job search history, and AI-generated documents are encrypted at rest. HUNTR employees, developers, and administrators have no technical means to view your private files or activity. Your data is strictly yours.</p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">2. How We Use Your Information</h2>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">2. Information We Collect</h2>
+            <p>We collect minimal information required to manage your account: email address and basic profile details (name, job title, and location). Payment information is handled exclusively by our secure payment processor (Stripe) and is never stored on our servers.</p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">3. How We Use Your Information</h2>
             <p>We do not use your personal information or resume data for any purpose other than providing the core HUNTR service to you directly. Your data is never used to train external AI models, sold to advertisers, or analyzed for any secondary purposes.</p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">3. Sharing of Information</h2>
-            <p>We absolutely will not share, sell, rent, or distribute any of your personal data, resumes, or job search activity to ANY third parties under any circumstances. Your data is strictly yours and remains entirely private.</p>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">4. Data Ownership & Sharing</h2>
+            <p>We absolutely will not share, sell, rent, or distribute any of your personal data, resumes, or job search activity to ANY third parties. You retain 100% ownership of your data and can delete your entire account history at any time from your profile settings.</p>
           </section>
 
           <section className="space-y-4">

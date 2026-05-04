@@ -38,29 +38,29 @@ export default function PricingPage() {
       </div>
 
       {/* Pricing Cards */}
-      <div className="max-w-7xl mx-auto px-6 pb-40">
+      <div className="max-w-7xl mx-auto px-6 pb-20">
         <div className="grid md:grid-cols-3 gap-8 items-center">
           
-          {/* Free Tier */}
+          {/* Seeker Tier */}
           <div className="glass-card p-10 bg-white/60 border border-slate-200/60 rounded-[32px] shadow-xl shadow-slate-200/30">
             <div className="flex items-center gap-3 mb-4">
               <Shield className="text-slate-400" size={24} />
-              <h3 className="text-[13px] font-black uppercase tracking-widest text-slate-600">The Hook</h3>
+              <h3 className="text-[13px] font-black uppercase tracking-widest text-slate-600">Seeker</h3>
             </div>
             <div className="mb-6">
               <span className="text-5xl font-black text-slate-900">$0</span>
               <span className="text-slate-500 font-medium"> / forever</span>
             </div>
-            <p className="text-[14px] text-slate-500 font-medium mb-8 leading-relaxed">Perfect for testing the waters and seeing the AI in action.</p>
+            <p className="text-[14px] text-slate-500 font-medium mb-8 leading-relaxed">Perfect for organizing your hunt and testing the surgical engine.</p>
             <Link href="/onboarding" className="btn-glass w-full py-4 mb-8 flex justify-center text-[12px] font-black uppercase tracking-widest text-slate-600 hover:text-slate-900">
               Get Started Free
             </Link>
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-[14px] text-slate-600 font-medium">
-                <Check className="text-blue-500 mt-0.5 shrink-0" size={18} /> 1 AI Job Search Scan
+                <Check className="text-blue-500 mt-0.5 shrink-0" size={18} /> Track up to 10 Jobs
               </li>
               <li className="flex items-start gap-3 text-[14px] text-slate-600 font-medium">
-                <Check className="text-blue-500 mt-0.5 shrink-0" size={18} /> 3 Resume Optimizations
+                <Check className="text-blue-500 mt-0.5 shrink-0" size={18} /> 1 Surgical Resume Download
               </li>
               <li className="flex items-start gap-3 text-[14px] text-slate-600 font-medium">
                 <Check className="text-blue-500 mt-0.5 shrink-0" size={18} /> Basic Kanban Tracker
@@ -75,62 +75,86 @@ export default function PricingPage() {
             </div>
             <div className="flex items-center gap-3 mb-4">
               <Sparkles className="text-blue-400" size={24} />
-              <h3 className="text-[13px] font-black uppercase tracking-widest text-blue-400">Elite Operator</h3>
+              <h3 className="text-[13px] font-black uppercase tracking-widest text-blue-400">Elite</h3>
             </div>
             <div className="mb-6">
-              <span className="text-5xl font-black text-white">$29</span>
+              <span className="text-5xl font-black text-white">$15</span>
               <span className="text-slate-400 font-medium"> / month</span>
+              <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mt-2">Early Adopter Pricing</p>
             </div>
-            <p className="text-[14px] text-slate-300 font-medium mb-8 leading-relaxed">The ultimate 24/7 AI career agent. Zero limits. Full intelligence.</p>
+            <p className="text-[14px] text-slate-300 font-medium mb-8 leading-relaxed">The standard for serious job seekers. Full AI intelligence suite.</p>
             <Link href="/onboarding" className="w-full py-4 mb-8 flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-[12px] font-black uppercase tracking-widest transition-colors shadow-lg shadow-blue-600/30">
               Go Elite <ArrowRight size={16} />
             </Link>
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-[14px] text-white font-medium">
-                <Check className="text-blue-400 mt-0.5 shrink-0" size={18} /> Unlimited AI Job Scans
+                <Check className="text-blue-400 mt-0.5 shrink-0" size={18} /> Unlimited Job Tracking
               </li>
               <li className="flex items-start gap-3 text-[14px] text-white font-medium">
-                <Check className="text-blue-400 mt-0.5 shrink-0" size={18} /> Unlimited Master Resumes
+                <Check className="text-blue-400 mt-0.5 shrink-0" size={18} /> Unlimited Surgical Optimizations
               </li>
               <li className="flex items-start gap-3 text-[14px] text-white font-medium">
-                <Check className="text-blue-400 mt-0.5 shrink-0" size={18} /> High-Match Radar Alerts
+                <Check className="text-blue-400 mt-0.5 shrink-0" size={18} /> Live Negotiation Playbooks
               </li>
               <li className="flex items-start gap-3 text-[14px] text-white font-medium">
-                <Check className="text-blue-400 mt-0.5 shrink-0" size={18} /> Custom Interview Prep Intel
+                <Check className="text-blue-400 mt-0.5 shrink-0" size={18} /> Interview Intelligence Briefs
               </li>
               <li className="flex items-start gap-3 text-[14px] text-white font-medium">
-                <Check className="text-blue-400 mt-0.5 shrink-0" size={18} /> Automated Follow-up Reminders
+                <Check className="text-blue-400 mt-0.5 shrink-0" size={18} /> AI Follow-up Generation
               </li>
             </ul>
           </div>
 
-          {/* Active Tier */}
+          {/* Professional Tier */}
           <div className="glass-card p-10 bg-white/60 border border-slate-200/60 rounded-[32px] shadow-xl shadow-slate-200/30">
             <div className="flex items-center gap-3 mb-4">
               <Zap className="text-slate-400" size={24} />
-              <h3 className="text-[13px] font-black uppercase tracking-widest text-slate-600">Active Hunter</h3>
+              <h3 className="text-[13px] font-black uppercase tracking-widest text-slate-600">Professional</h3>
             </div>
             <div className="mb-6">
-              <span className="text-5xl font-black text-slate-900">$15</span>
+              <span className="text-5xl font-black text-slate-900">$29</span>
               <span className="text-slate-500 font-medium"> / month</span>
             </div>
-            <p className="text-[14px] text-slate-500 font-medium mb-8 leading-relaxed">For the casual job seeker who needs more volume and tracking.</p>
+            <p className="text-[14px] text-slate-500 font-medium mb-8 leading-relaxed">For high-level pivots and multi-role career management.</p>
             <Link href="/onboarding" className="btn-glass w-full py-4 mb-8 flex justify-center text-[12px] font-black uppercase tracking-widest text-slate-600 hover:text-slate-900">
-              Start Active
+              Start Professional
             </Link>
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-[14px] text-slate-600 font-medium">
-                <Check className="text-blue-500 mt-0.5 shrink-0" size={18} /> 5 AI Job Scans / month
+                <Check className="text-blue-500 mt-0.5 shrink-0" size={18} /> Everything in Elite
               </li>
               <li className="flex items-start gap-3 text-[14px] text-slate-600 font-medium">
-                <Check className="text-blue-500 mt-0.5 shrink-0" size={18} /> 15 Resume Optimizations / month
+                <Check className="text-blue-500 mt-0.5 shrink-0" size={18} /> Multi-Resume Personas
               </li>
               <li className="flex items-start gap-3 text-[14px] text-slate-600 font-medium">
-                <Check className="text-blue-500 mt-0.5 shrink-0" size={18} /> Full Kanban Tracker
+                <Check className="text-blue-500 mt-0.5 shrink-0" size={18} /> Career Funnel Analytics
+              </li>
+              <li className="flex items-start gap-3 text-[14px] text-slate-600 font-medium">
+                <Check className="text-blue-500 mt-0.5 shrink-0" size={18} /> Priority AI Processing
               </li>
             </ul>
           </div>
+        </div>
+      </div>
 
+      {/* Privacy Section */}
+      <div className="max-w-4xl mx-auto px-6 pb-40">
+        <div className="glass-card p-12 bg-white/40 border-white/80 shadow-2xl text-center">
+          <div className="w-20 h-20 bg-blue-50 rounded-[28px] flex items-center justify-center mx-auto mb-8 border border-blue-100">
+            <Shield className="text-blue-600" size={32} />
+          </div>
+          <h2 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">Your Privacy is Non-Negotiable</h2>
+          <p className="text-[13px] font-black text-blue-600 uppercase tracking-widest mb-6">Zero-Access Policy</p>
+          <div className="grid md:grid-cols-2 gap-8 text-left">
+            <div className="space-y-2">
+              <h4 className="font-bold text-slate-900">Encrypted By Default</h4>
+              <p className="text-sm text-slate-500 leading-relaxed font-medium">Your resumes, job matches, and negotiation scripts are encrypted. Even we cannot read them.</p>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-bold text-slate-900">You Own Your Data</h4>
+              <p className="text-sm text-slate-500 leading-relaxed font-medium">We don't sell data. We don't track your identity. Your career moves are your business, and yours alone.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

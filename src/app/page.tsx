@@ -97,7 +97,7 @@ export default function Home() {
               animate="animate"
               className="flex flex-col sm:flex-row justify-center gap-8 pt-6"
             >
-              <Link href="/login" className="btn-pill-blue !px-14 !py-6 text-base group">
+              <Link href="/login?signup=true" className="btn-pill-blue !px-14 !py-6 text-base group">
                 Initiate Search <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link href="#features" className="btn-pill-gray !px-14 !py-6 text-base flex items-center gap-3">

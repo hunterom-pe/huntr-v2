@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Upload, Search, MapPin, CheckCircle2, Loader2, Zap, ArrowRight, FileText } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 export default function OnboardingPage() {
@@ -15,7 +16,21 @@ export default function OnboardingPage() {
   const [location, setLocation] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alert, setAlert] = useState<{ title: string; message: string; type: 'success' | 'error' | 'warning' } | null>(null);
+  const { data: session, status } = useSession();
   const router = useRouter();
+
+  if (status === "unauthenticated") {
+    router.push("/login?signup=true");
+    return null;
+  }
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Loader2 className="animate-spin text-blue-600" size={48} />
+      </div>
+    );
+  }
 
   const handleCompleteOnboarding = async () => {
     setIsSubmitting(true);

@@ -42,7 +42,10 @@ export default function ProfileClient({ user }: { user: any }) {
       const response = await fetch("/api/user/onboard", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jobTitle, location }),
+        body: JSON.stringify({ 
+          jobTitle: jobTitle.trim(), 
+          location: location.trim() 
+        }),
       });
       
       if (response.ok) {

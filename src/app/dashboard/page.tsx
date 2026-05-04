@@ -39,6 +39,9 @@ export default function DashboardPage() {
   const [viewJob, setViewJob] = useState<Job | null>(null);
   const [hasCopied, setHasCopied] = useState(false);
   const [isBrowser, setIsBrowser] = useState(false);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [jobType, setJobType] = useState<string>("all");
+  const [remoteOnly, setRemoteOnly] = useState(false);
   const { addNotification } = useNotifications();
   const router = useRouter();
 
@@ -82,7 +85,11 @@ export default function DashboardPage() {
       const response = await fetch("/api/jobs/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ page })
+        body: JSON.stringify({ 
+          page,
+          jobType: jobType !== "all" ? jobType : undefined,
+          remoteOnly: remoteOnly || undefined
+        })
       });
       const data = await response.json();
       if (data.jobs) {
@@ -390,32 +397,121 @@ export default function DashboardPage() {
         <div className="space-y-2">
           <h1 className="heading-editorial">Job Recommendations</h1>
         </div>
-        <motion.button 
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => startScan(0)} 
-          disabled={isScanning} 
-          className="btn-primary flex items-center gap-3"
-        >
-          {isScanning ? <><Loader2 className="animate-spin" size={18} /> Scanning...</> : <><Search size={18} /> {hasScanned ? "Search" : "Find Jobs"}</>}
-        </motion.button>
+        <div className="flex items-center gap-3">
+          <motion.button 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+            className={`p-3 rounded-2xl border transition-all duration-300 ${isFiltersOpen ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-400 hover:text-slate-600'}`}
+            title="Search Filters"
+          >
+            <FolderOpen size={18} />
+          </motion.button>
+          <motion.button 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => startScan(0)} 
+            disabled={isScanning} 
+            className="btn-primary flex items-center gap-3"
+          >
+            {isScanning ? <><Loader2 className="animate-spin" size={18} /> Scanning...</> : <><Search size={18} /> {hasScanned ? "Search" : "Find Jobs"}</>}
+          </motion.button>
+        </div>
       </div>
+
+      <AnimatePresence>
+        {isFiltersOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="glass-card p-6 bg-white/50 border-white/80 shadow-xl mb-8 flex flex-wrap items-center gap-8">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Job Type</label>
+                <div className="flex gap-2">
+                  {['all', 'fulltime', 'contract', 'internship'].map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setJobType(type)}
+                      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${jobType === type ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-400 border border-slate-100 hover:border-blue-200'}`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="h-10 w-[1px] bg-slate-200/50 hidden md:block" />
+
+              <div className="flex items-center gap-4">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Remote Preference</p>
+                  <p className="text-[10px] font-medium text-slate-400">Force remote-only results</p>
+                </div>
+                <button
+                  onClick={() => setRemoteOnly(!remoteOnly)}
+                  className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${remoteOnly ? 'bg-blue-600' : 'bg-slate-200'}`}
+                >
+                  <motion.div 
+                    animate={{ x: remoteOnly ? 24 : 0 }}
+                    className="w-4 h-4 bg-white rounded-full shadow-sm" 
+                  />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {!hasScanned && !isScanning ? (
         <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-panel p-20 text-center space-y-10 relative overflow-hidden"
+          initial={{ opacity: 0, y: 40, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          className="glass-panel p-20 text-center space-y-12 relative overflow-hidden bg-white/40"
         >
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
-          <div className="w-24 h-24 bg-white/60 rounded-[32px] flex items-center justify-center mx-auto mb-8 border border-white/80 shadow-2xl pulse-glow">
-            <Search className="text-blue-600" size={40} />
+          {/* Decorative Elements */}
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600/0 via-blue-600/40 to-blue-600/0" />
+          <div className="absolute -top-24 -left-24 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl" />
+          <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl" />
+          
+          <div className="relative z-10">
+            <div className="w-28 h-28 bg-white rounded-[32px] flex items-center justify-center mx-auto mb-10 border border-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] relative group">
+              <div className="absolute inset-0 bg-blue-500/5 rounded-[32px] animate-pulse" />
+              <BrainCircuit className="text-blue-600 relative z-10" size={48} />
+              
+              {/* Floating micro-icons */}
+              <motion.div 
+                animate={{ y: [0, -10, 0] }} 
+                transition={{ duration: 3, repeat: Infinity }}
+                className="absolute -top-4 -right-4 w-10 h-10 bg-white rounded-xl shadow-lg flex items-center justify-center border border-slate-50"
+              >
+                <Sparkles className="text-amber-400" size={18} />
+              </motion.div>
+            </div>
+
+            <div className="space-y-4 max-w-lg mx-auto mb-12">
+              <h2 className="text-5xl font-black text-slate-900 tracking-tighter leading-tight">
+                Ready to find <span className="text-blue-600">your next job?</span>
+              </h2>
+              <p className="text-[17px] text-slate-500 font-medium leading-relaxed">
+                You haven&apos;t tracked any jobs yet. Start a scan to find roles that match your background.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center gap-6">
+              <motion.button 
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => startScan(0)} 
+                className="btn-primary px-16 py-5 rounded-[20px] shadow-[0_20px_40px_rgba(37,99,235,0.25)] flex items-center gap-4 text-lg"
+              >
+                <Search size={20} />
+                Find Jobs
+              </motion.button>
+            </div>
           </div>
-          <div className="space-y-4 max-w-md mx-auto">
-            <h2 className="text-4xl font-black text-slate-900 tracking-tighter">Ready to launch?</h2>
-            <p className="text-[17px] text-slate-500 font-medium leading-relaxed">Our AI engine is ready to scan the web and find jobs that match your DNA perfectly.</p>
-          </div>
-          <button onClick={() => startScan(0)} className="btn-primary px-12 py-5 rounded-2xl shadow-blue-500/30">Initiate Search</button>
         </motion.div>
       ) : isScanning ? (
         <div className="glass-panel p-24 text-center space-y-12 relative overflow-hidden border-blue-500/10">

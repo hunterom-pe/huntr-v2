@@ -166,8 +166,8 @@ export async function POST(req: Request) {
       where: { email: session.user.email }
     });
 
-    const title = user?.jobTitle || "Product Designer";
-    const location = user?.location || "Remote";
+    const title = user?.jobTitle?.trim() || "Product Designer";
+    const location = user?.location?.trim() || "Remote";
 
     const SERPAPI_KEY = process.env.SERPAPI_API_KEY;
 
@@ -190,10 +190,29 @@ export async function POST(req: Request) {
 
     const query = encodeURIComponent(title);
     const searchLocation = location.toLowerCase() === "remote" ? "United States" : encodeURIComponent(location);
-    const remoteParam = location.toLowerCase() === "remote" ? "&ltype=1" : "";
+    
+    // 1. Handle Remote Logic
+    // If the user toggled 'remoteOnly' OR their profile location is 'Remote'
+    const isRemote = body.remoteOnly || location.toLowerCase() === "remote";
+    const remoteParam = isRemote ? "&ltype=1" : "";
+    
+    // 2. Handle Job Type Chips
+    // Mapping: fulltime -> jt:fulltime, contract -> jt:contract, etc.
+    let chipsParam = "";
+    if (body.jobType) {
+      const typeMap: Record<string, string> = {
+        fulltime: "jt:fulltime",
+        contract: "jt:contract",
+        internship: "jt:internship"
+      };
+      const chip = typeMap[body.jobType as string];
+      if (chip) {
+        chipsParam = `&chips=${encodeURIComponent(chip)}`;
+      }
+    }
     
     const fetchJobs = async (start: number) => {
-      const url = `https://serpapi.com/search.json?engine=google_jobs&q=${query}&location=${searchLocation}&gl=us&hl=en&start=${start}&api_key=${SERPAPI_KEY}${remoteParam}`;
+      const url = `https://serpapi.com/search.json?engine=google_jobs&q=${query}&location=${searchLocation}&gl=us&hl=en&start=${start}&api_key=${SERPAPI_KEY}${remoteParam}${chipsParam}`;
       const res = await fetch(url);
       if (!res.ok) return { jobs_results: [] };
       return res.json();
@@ -216,6 +235,31 @@ export async function POST(req: Request) {
     if (user) {
       const uniqueResults = Array.from(new Map(allJobsResults.map(item => [item.job_id, item])).values());
       
+      const cleanDescription = (desc: string) => {
+        if (!desc) return "";
+        // 1. Remove common junk headers at the very start
+        const junkPatterns = [
+          /^Description:?\s*/i,
+          /^Job Description:?\s*/i,
+          /^Role Summary:?\s*/i,
+          /^About the Role:?\s*/i,
+          /^About the Company:?\s*/i,
+          /^Summary:?\s*/i,
+          /^Overview:?\s*/i,
+          /^Position Summary:?\s*/i
+        ];
+        
+        let cleaned = desc.trim();
+        for (const pattern of junkPatterns) {
+          cleaned = cleaned.replace(pattern, "");
+        }
+        
+        // 2. Remove leading symbols/noise that often remain
+        cleaned = cleaned.replace(/^[•\-–\s\r\n*]+/, "");
+        
+        return cleaned.substring(0, 500) + "...";
+      };
+
       const savedJobs = await Promise.all(uniqueResults.slice(0, 50).map(async (job) => {
         const jobId = job.job_id || Math.random().toString(36).substr(2, 9);
         const jobLocation = job.location || location;
@@ -224,7 +268,7 @@ export async function POST(req: Request) {
           title: job.title || title,
           company: job.company_name || "Unknown Company",
           location: jobLocation.toLowerCase().includes("anywhere") ? "Remote" : jobLocation,
-          description: job.description ? job.description.substring(0, 500) + "..." : "No description provided.",
+          description: cleanDescription(job.description || "No description provided."),
           matchScore: Math.floor(Math.random() * (98 - 85 + 1)) + 85,
           applyLink: job.apply_options?.[0]?.link || "#",
           status: "WISHLIST",

@@ -95,7 +95,7 @@ Best regards,
   }
 
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
   const prompt = `
     You are a professional career advisor. 
@@ -156,7 +156,7 @@ export async function generateInterviewBrief(jobTitle: string, companyName: stri
   }
 
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
   const prompt = `
     You are an elite interview coach. Generate a "Surgical Intelligence Brief" for a candidate interviewing for the position of "${jobTitle}" at "${companyName}".
@@ -207,8 +207,9 @@ export async function generateInterviewBrief(jobTitle: string, companyName: stri
 }
 
 
-export async function generateNegotiationPlaybook(jobTitle: string, companyName: string, matchScore: number) {
+export async function generateNegotiationPlaybook(jobTitle: string, companyName: string, matchScore: number, location: string = "United States", marketData: string = "") {
   if (!process.env.GEMINI_API_KEY) {
+    // ... (keep fallback as is or update it)
     await new Promise(resolve => setTimeout(resolve, 1500));
     return {
       salaryRange: "$145k - $185k",
@@ -217,15 +218,7 @@ export async function generateNegotiationPlaybook(jobTitle: string, companyName:
         "Rare combination of Next.js and System Design expertise.",
         "Proven track record of delivering 40% efficiency gains."
       ],
-      negotiationScript: `Subject: Regarding the offer for ${jobTitle} - [Your Name]
-
-Dear [Recruiter Name],
-
-Thank you so much for the offer to join ${companyName} as a ${jobTitle}. I am incredibly excited about the team and the mission.
-
-Given my ${matchScore}% alignment with the core technical requirements—specifically my experience in [Skill A] and [Skill B] which are critical for this role—I was hoping we could discuss the base salary. Based on my research for similar roles in the current market, I am looking for a base closer to $180k.
-
-I am very eager to join and contribute. Please let me know if there is any flexibility here.`,
+      negotiationScript: `Subject: Regarding the offer for ${jobTitle} - [Your Name]\n\nDear [Recruiter Name],\n\nThank you so much for the offer to join ${companyName} as a ${jobTitle}. I am incredibly excited about the team and the mission.\n\nGiven my ${matchScore}% alignment with the core technical requirements—specifically my experience in [Skill A] and [Skill B] which are critical for this role—I was hoping we could discuss the base salary. Based on my research for similar roles in the current market, I am looking for a base closer to $180k.\n\nI am very eager to join and contribute. Please let me know if there is any flexibility here.`,
       benefitsChecklist: [
         "Confirm 401k matching percentage and vesting period.",
         "Verify equity (RSU/Option) vesting schedule (e.g., 1-year cliff).",
@@ -235,14 +228,19 @@ I am very eager to join and contribute. Please let me know if there is any flexi
   }
 
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
   const prompt = `
-    You are an elite career negotiator. Generate a "Negotiation Playbook" for a candidate who just received an offer for "${jobTitle}" at "${companyName}" with a match score of ${matchScore}%.
+    You are an elite career negotiator. Generate a "Negotiation Playbook" for a candidate who just received an offer for "${jobTitle}" at "${companyName}" in "${location}".
+    The candidate has a match score of ${matchScore}%.
+    
+    ${marketData ? `RESEARCH DATA FOR THIS ROLE:\n${marketData}\n` : ""}
+    
+    Use the provided research data (if any) and your internal knowledge to provide a REALISTIC salary range for this specific location.
     
     Return a JSON object with:
-    1. "salaryRange": A string showing the estimated US market range for this role (e.g. "$120k - $160k").
-    2. "leveragePoints": Array of 3 points why this candidate has high leverage (referencing the ${matchScore}% match).
+    1. "salaryRange": A string showing the estimated US market range for this role in ${location} (e.g. "$120k - $160k").
+    2. "leveragePoints": Array of 3 points why this candidate has high leverage (referencing the ${matchScore}% match and specific skills).
     3. "negotiationScript": A professional email script to ask for a 10-15% increase in base salary.
     4. "benefitsChecklist": Array of 3 things to verify in the offer letter.
     
@@ -263,11 +261,11 @@ I am very eager to join and contribute. Please let me know if there is any flexi
     console.error("AI Negotiation Playbook Generation Error:", error.message || error);
     // Final defensive fallback
     return {
-      salaryRange: "$130k - $175k",
+      salaryRange: "$95k - $145k",
       leveragePoints: [
-        `Exceptional match score (${matchScore}%) indicates high immediate productivity.`,
-        "Strong alignment with core technical requirements.",
-        "Candidate's unique experience directly solves current team challenges."
+        `Good match score (${matchScore}%) indicates solid technical alignment.`,
+        "Strong fundamental skills matching the core job requirements.",
+        "Ability to contribute effectively to the team from day one."
       ],
       negotiationScript: `Subject: Regarding the offer for ${jobTitle} - [Your Name]
 
@@ -275,7 +273,7 @@ Dear [Recruiter Name],
 
 Thank you so much for the offer to join ${companyName} as a ${jobTitle}. I'm very excited about the opportunity!
 
-Given my ${matchScore}% alignment with the role's requirements, I'd like to discuss the base salary. Based on market data for this seniority, I'm looking for a range closer to $170k.
+Given my ${matchScore}% alignment with the role's requirements, I'd like to discuss the base salary. Based on market data for this seniority, I'm looking for a range closer to $135k.
 
 I'm very eager to join—please let me know if there's flexibility here.`,
       benefitsChecklist: [
