@@ -10,8 +10,9 @@ export interface Job {
   location: string;
   description: string;
   matchScore: number;
-  status: string;
+  status: 'WISHLIST' | 'APPLIED' | 'INTERVIEWING' | 'OFFER' | 'REJECTED';
   applyLink?: string;
+
 }
 
 export interface InterviewBrief {
@@ -331,11 +332,9 @@ export function IntelModals({
 
                     <div className="space-y-10">
                       <section className="space-y-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="label-mono !text-slate-900 flex items-center gap-2">
-                            <ScrollText size={14} className="text-emerald-500" /> Negotiation Script
-                          </h3>
-                          <button onClick={() => copyToClipboard(playbookData.negotiationScript)} className="text-[10px] font-black uppercase text-emerald-600 hover:underline">Copy Script</button>
+                        <div className="flex justify-between items-center mb-6">
+                          <h3 className="label-mono !text-emerald-600 !text-[10px] tracking-[0.2em]">Negotiation Script</h3>
+                          <button onClick={() => copyToClipboard(playbookData?.negotiationScript || "")} className="text-[10px] font-black uppercase text-emerald-600 hover:underline">Copy Script</button>
                         </div>
                         <div className="p-6 bg-slate-900 rounded-3xl text-slate-300 text-[13px] font-medium leading-relaxed font-sans whitespace-pre-wrap">
                           {playbookData.negotiationScript}
@@ -368,8 +367,9 @@ export function IntelModals({
                 </p>
                 <div className="flex gap-4">
                   <button onClick={() => setPlaybookJob(null)} className="btn-glass px-10">Close</button>
-                  <button onClick={() => copyToClipboard(playbookData?.negotiationScript)} disabled={!playbookData} className="btn-primary px-10 bg-emerald-600 hover:bg-emerald-700">Copy Strategy</button>
+                  <button onClick={() => copyToClipboard(playbookData?.negotiationScript || "")} disabled={!playbookData} className="btn-primary px-10 bg-emerald-600 hover:bg-emerald-700">Copy Strategy</button>
                 </div>
+
               </div>
             </motion.div>
           </div>

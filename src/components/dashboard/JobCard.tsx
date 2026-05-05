@@ -13,8 +13,9 @@ interface Job {
   location: string;
   description: string;
   matchScore: number;
-  status: string;
+  status: 'WISHLIST' | 'APPLIED' | 'INTERVIEWING' | 'OFFER' | 'REJECTED';
   isSaved?: boolean;
+
   applyLink?: string;
 }
 
@@ -24,8 +25,9 @@ interface JobCardProps {
   snapshot: DraggableStateSnapshot;
   optimizingId: string | null;
   handleToggleSave: (id: string) => void;
-  handleStatusChange: (id: string, status: string) => void;
+  handleStatusChange: (id: string, status: 'WISHLIST' | 'APPLIED' | 'INTERVIEWING' | 'OFFER' | 'REJECTED') => void;
   handleOptimize: (id: string) => void;
+
 }
 
 
