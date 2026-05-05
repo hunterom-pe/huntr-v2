@@ -12,7 +12,8 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function DashboardLayoutClient({ children, user }: { children: React.ReactNode, user?: { name?: string | null, email?: string | null } }) {
+export function DashboardLayoutClient({ children, user }: { children: React.ReactNode, user?: { name?: string | null, email?: string | null, tier?: string } }) {
+
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -149,7 +150,10 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
             <div className="flex items-center gap-5 pl-8 border-l border-slate-200/40">
               <div className="text-right hidden sm:block">
                 <div className="text-[13px] font-black text-slate-900 tracking-tight leading-none">{displayName}</div>
-                <div className="label-mono !text-blue-600 !text-[9px] mt-1.5 opacity-80">Elite Member</div>
+                <div className="label-mono !text-blue-600 !text-[9px] mt-1.5 opacity-80">
+                  {user?.tier === 'ELITE' ? 'Elite Member' : user?.tier === 'PROFESSIONAL' ? 'Pro Member' : 'Seeker Member'}
+                </div>
+
               </div>
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-[14px] flex items-center justify-center text-white text-xs font-black shadow-2xl shadow-blue-600/30 ring-4 ring-blue-50">
                 {initials}

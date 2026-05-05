@@ -8,6 +8,13 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum Tier {
+  SEEKER
+  ELITE
+  PROFESSIONAL
+}
+
+
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -46,6 +53,8 @@ model User {
   resumePath    String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  tier          Tier      @default(SEEKER)
+
   accounts      Account[]
   jobs          Job[]
   sessions      Session[]

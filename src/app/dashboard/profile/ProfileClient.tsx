@@ -159,7 +159,10 @@ export default function ProfileClient({ user }: { user: any }) {
             </div>
             <div>
               <h3 className="text-xl font-bold text-slate-900 tracking-tight">{displayName}</h3>
-              <div className="text-[13px] font-bold text-indigo-600 mt-1">Premium Member</div>
+              <div className="text-[13px] font-bold text-indigo-600 mt-1">
+                {user?.tier === 'ELITE' ? 'Elite Member' : user?.tier === 'PROFESSIONAL' ? 'Pro Member' : 'Seeker Member'}
+              </div>
+
             </div>
           </div>
 
