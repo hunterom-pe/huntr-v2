@@ -54,6 +54,11 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   tier          Tier      @default(SEEKER)
+  optimizationCount Int   @default(0)
+  briefCount        Int   @default(0)
+  scanCount         Int   @default(0)
+  lastResetDate     DateTime @default(now())
+
 
   accounts      Account[]
   jobs          Job[]

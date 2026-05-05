@@ -9,6 +9,8 @@ import mammoth from "mammoth";
 import PizZip from "pizzip";
 import fs from "fs/promises";
 import path from "path";
+import { checkUsageLimit, incrementUsage } from "@/lib/usage";
+
 
 export async function POST(req: Request) {
   try {
@@ -21,9 +23,19 @@ export async function POST(req: Request) {
 
     // --- RESUME OPTIMIZATION ACTION ---
     if (body.action === 'optimize') {
+      const usage = await checkUsageLimit(session.user.email, 'optimization');
+      if (!usage.allowed) {
+        return NextResponse.json({ 
+          error: "Limit Reached", 
+          message: `You've used all ${usage.limit} optimizations for this month. Upgrade to Elite for more power.`,
+          code: "LIMIT_REACHED"
+        }, { status: 403 });
+      }
+
       const user = await prisma.user.findUnique({
         where: { email: session.user.email },
       });
+
 
       if (!user || !user.resumePath) {
         return NextResponse.json({ error: "No resume found. Please upload one in your profile." }, { status: 404 });
@@ -150,7 +162,11 @@ export async function POST(req: Request) {
       const finalFilename = `Optimized_Resume_${Date.now()}.docx`;
       console.log(`Optimization Complete: Sending ${finalFilename} (${outputBuffer.length} bytes)`);
 
+      // Track usage
+      await incrementUsage(session.user.email, 'optimization');
+
       return new Response(new Uint8Array(outputBuffer), {
+
         headers: {
           "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
           "Content-Disposition": `attachment; filename="${finalFilename}"`,
@@ -159,8 +175,18 @@ export async function POST(req: Request) {
     }
 
     // --- ORIGINAL SEARCH ACTION ---
+    const usage = await checkUsageLimit(session.user.email, 'scan');
+    if (!usage.allowed) {
+      return NextResponse.json({ 
+        error: "Limit Reached", 
+        message: `You've used your ${usage.limit} daily scans. Elite members get 25.`,
+        code: "LIMIT_REACHED"
+      }, { status: 403 });
+    }
+
     const page = parseInt(body.page) || 0;
     const startOffset = page * 30;
+
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email }
@@ -299,7 +325,11 @@ export async function POST(req: Request) {
         });
       }));
 
+      // Track usage
+      await incrementUsage(session.user.email, 'scan');
+
       return NextResponse.json({ jobs: savedJobs });
+
     }
 
     return NextResponse.json({ jobs: [] });

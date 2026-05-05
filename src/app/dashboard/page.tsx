@@ -70,15 +70,24 @@ export default function DashboardPage() {
         })
       });
       const data = await response.json();
-      if (data.jobs) {
-        // Merge with existing jobs, but avoid duplicates
-        setJobs(prev => {
-          const existingIds = new Set(prev.map(j => j.id));
-          const newJobs = data.jobs.filter((j: Job) => !existingIds.has(j.id));
-          return [...prev, ...newJobs];
+      if (response.ok) {
+        if (data.jobs) {
+          // Merge with existing jobs, but avoid duplicates
+          setJobs(prev => {
+            const existingIds = new Set(prev.map(j => j.id));
+            const newJobs = data.jobs.filter((j: Job) => !existingIds.has(j.id));
+            return [...prev, ...newJobs];
+          });
+          setHasScanned(true);
+        }
+      } else {
+        addNotification({
+          title: data.error || "Scan Failed",
+          message: data.message || "Something went wrong while scanning for jobs.",
+          type: "intel"
         });
-        setHasScanned(true);
       }
+
     } catch (error) {
       console.error("Scan failed:", error);
     } finally {
@@ -254,11 +263,12 @@ export default function DashboardPage() {
       } else {
         const errorData = await response.json();
         addNotification({
-          title: "Optimization Failed",
-          message: errorData.error || "Could not optimize resume. Please check your AI key or resume format.",
+          title: errorData.error || "Optimization Failed",
+          message: errorData.message || "Could not optimize resume. Please check your AI key or resume format.",
           type: "intel"
         });
       }
+
     } catch (error) {
       console.error("Optimization failed:", error);
       addNotification({
@@ -303,9 +313,17 @@ export default function DashboardPage() {
         body: JSON.stringify({ title: job.title, company: job.company, description: job.description })
       });
       const data = await response.json();
-      if (data.brief) {
+      if (response.ok) {
         setInterviewBrief(data.brief);
+      } else {
+        addNotification({
+          title: data.error || "Briefing Failed",
+          message: data.message || "Could not generate intel brief.",
+          type: "intel"
+        });
+        setBriefingJob(null);
       }
+
     } catch (error) {
       console.error("Briefing failed:", error);
     } finally {
@@ -324,9 +342,17 @@ export default function DashboardPage() {
         body: JSON.stringify({ title: job.title, company: job.company, matchScore: job.matchScore })
       });
       const data = await response.json();
-      if (data.playbook) {
+      if (response.ok) {
         setPlaybookData(data.playbook);
+      } else {
+        addNotification({
+          title: data.error || "Playbook Failed",
+          message: data.message || "Could not generate negotiation playbook.",
+          type: "intel"
+        });
+        setPlaybookJob(null);
       }
+
     } catch (error) {
       console.error("Playbook failed:", error);
     } finally {

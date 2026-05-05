@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { generateNegotiationPlaybook } from "@/lib/gemini";
 import { prisma } from "@/lib/prisma";
+import { checkUsageLimit } from "@/lib/usage";
+
 
 export async function POST(req: Request) {
   try {
@@ -10,6 +12,16 @@ export async function POST(req: Request) {
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const usage = await checkUsageLimit(session.user.email, 'playbook');
+    if (!usage.allowed) {
+      return NextResponse.json({ 
+        error: "Feature Locked", 
+        message: "Negotiation Playbooks are exclusive to Elite and Professional members.",
+        code: "LIMIT_REACHED"
+      }, { status: 403 });
+    }
+
 
     const { title, company, matchScore } = await req.json();
 

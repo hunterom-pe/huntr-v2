@@ -184,6 +184,56 @@ export default function ProfileClient({ user }: { user: any }) {
           </div>
         </div>
 
+        {/* Plan & Usage Section */}
+        <div className="glass-card p-8 bg-indigo-50/30 border-indigo-100 shadow-xl shadow-indigo-500/5">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">Plan & Usage</h2>
+            <div className="px-3 py-1 bg-white border border-indigo-100 rounded-full text-[10px] font-black text-indigo-600 uppercase tracking-widest shadow-sm">
+              Next Reset: {new Date(new Date(user?.lastResetDate || Date.now()).setMonth(new Date(user?.lastResetDate || Date.now()).getMonth() + 1)).toLocaleDateString()}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { label: 'Optimizations', used: user?.optimizationCount || 0, limit: user?.tier === 'SEEKER' ? 3 : user?.tier === 'ELITE' ? 25 : 9999 },
+              { label: 'Daily Scans', used: user?.scanCount || 0, limit: user?.tier === 'SEEKER' ? 3 : user?.tier === 'ELITE' ? 25 : 9999 },
+              { label: 'Intel Briefs', used: user?.briefCount || 0, limit: user?.tier === 'SEEKER' ? 1 : user?.tier === 'ELITE' ? 10 : 9999 },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-white/80 p-6 rounded-2xl border border-white shadow-sm space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</span>
+                  <span className="text-[13px] font-bold text-slate-900">{stat.limit > 100 ? 'Unlimited' : `${stat.used}/${stat.limit}`}</span>
+                </div>
+                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: stat.limit > 100 ? '100%' : `${(stat.used / stat.limit) * 100}%` }}
+                    className={`h-full rounded-full ${stat.used >= stat.limit && stat.limit < 100 ? 'bg-amber-500' : 'bg-indigo-600'}`}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {user?.tier !== 'PROFESSIONAL' && (
+            <div className="mt-8 pt-8 border-t border-indigo-100/50 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div>
+                <h4 className="text-lg font-bold text-slate-900 tracking-tight">Need more power?</h4>
+                <p className="text-sm text-slate-500 font-medium">Upgrade your plan to unlock higher limits and premium AI features.</p>
+              </div>
+              <div className="flex gap-4 w-full md:w-auto">
+                <button 
+                  onClick={() => setAlert({ title: "Upgrade Successful", message: "Your account is now Elite. Enjoy the power!", type: "success" })}
+                  className="flex-1 md:flex-none px-8 py-3.5 bg-slate-900 text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-900/20"
+                >
+                  Upgrade to Elite
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+
         {/* Job Preferences Section */}
         <div className="glass-card p-8 bg-white/60 border-white/80 shadow-lg">
           <h2 className="text-[13px] font-black text-slate-900 uppercase tracking-widest mb-6">Job Preferences</h2>

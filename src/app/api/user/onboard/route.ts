@@ -11,7 +11,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { jobTitle, location } = await req.json();
+    const { jobTitle, location, tier } = await req.json();
 
     if (!jobTitle || !location) {
       return NextResponse.json(
@@ -21,13 +21,16 @@ export async function POST(req: Request) {
     }
 
     const updatedUser = await prisma.user.update({
+
       where: { email: session.user.email },
       data: {
         jobTitle: jobTitle.trim(),
         location: location.trim(),
         resumePath: "uploaded_resume.docx", // Mocking the resume path for now
+        tier: tier || "SEEKER",
       },
     });
+
 
     return NextResponse.json({ success: true, user: updatedUser });
   } catch (error) {

@@ -14,7 +14,9 @@ export default function OnboardingPage() {
   const [analysisStatus, setAnalysisStatus] = useState("");
   const [targetRole, setTargetRole] = useState("");
   const [location, setLocation] = useState("");
+  const [selectedTier, setSelectedTier] = useState<"SEEKER" | "ELITE" | "PROFESSIONAL">("SEEKER");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [alert, setAlert] = useState<{ title: string; message: string; type: 'success' | 'error' | 'warning' } | null>(null);
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -38,8 +40,9 @@ export default function OnboardingPage() {
       const res = await fetch("/api/user/onboard", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jobTitle: targetRole, location }),
+        body: JSON.stringify({ jobTitle: targetRole, location, tier: selectedTier }),
       });
+
 
       if (res.ok) {
         router.push("/dashboard?scan=true");
@@ -132,8 +135,9 @@ export default function OnboardingPage() {
             <motion.div key="step1" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, y: -20, filter: "blur(10px)" }} className="space-y-8">
               <div className="text-center space-y-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-600 text-[10px] font-black tracking-[0.2em] uppercase mb-2">
-                  Step 1 of 2
+                  Step 1 of 3
                 </div>
+
                 <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">
                   Upload your resume
                 </h1>
@@ -223,15 +227,80 @@ export default function OnboardingPage() {
                 </div>
 
                 <button 
-                  onClick={handleCompleteOnboarding} 
-                  disabled={isSubmitting || !targetRole || !location}
+                  onClick={() => setStep(3)} 
+                  disabled={!targetRole || !location}
                   className="w-full btn-primary py-5 text-sm font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 rounded-xl disabled:opacity-50 mt-4 shadow-[0_0_40px_rgba(37,99,235,0.2)] hover:shadow-[0_0_60px_rgba(37,99,235,0.3)] transition-all duration-300"
                 >
-                  {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <>Continue to Dashboard <ArrowRight size={20} /></>}
+                  Continue to Plans <ArrowRight size={20} />
                 </button>
               </div>
             </motion.div>
           )}
+
+          {step === 3 && (
+            <motion.div key="step3" initial={{ opacity: 0, y: 20, filter: "blur(10px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} className="space-y-8">
+
+              <div className="text-center space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-600 text-[10px] font-black tracking-[0.2em] uppercase mb-2">
+                  Final Step
+                </div>
+                <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">
+                  Choose your speed
+                </h1>
+                <p className="text-lg text-slate-500 font-medium max-w-md mx-auto">
+                  Select the membership that fits your career goals. You can change this anytime.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                {[
+                  { id: 'SEEKER', name: 'Seeker', price: 'Free', desc: 'Core job search tools', perks: ['3 Optimizations/mo', 'Basic Job Search'] },
+                  { id: 'ELITE', name: 'Elite', price: '$19', desc: 'Accelerated placement', perks: ['25 Optimizations/mo', 'Intel Briefs', 'Negotiation Playbooks'] },
+                  { id: 'PROFESSIONAL', name: 'Professional', price: '$49', desc: 'White-glove career hunt', perks: ['Unlimited Everything', 'Priority Support', 'Strategy Call'] }
+                ].map((plan) => (
+                  <button
+                    key={plan.id}
+                    onClick={() => setSelectedTier(plan.id as any)}
+                    className={`relative p-8 rounded-[2rem] border-2 text-left transition-all duration-500 group ${
+                      selectedTier === plan.id 
+                      ? 'bg-white border-blue-500 shadow-2xl shadow-blue-500/10 scale-[1.02]' 
+                      : 'bg-white/50 border-slate-100 hover:border-slate-200 hover:bg-white'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center mb-4">
+                      <div>
+                        <h3 className="text-xl font-black text-slate-900">{plan.name}</h3>
+                        <p className="text-sm font-medium text-slate-400">{plan.desc}</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-black text-slate-900">{plan.price}</div>
+                        {plan.price !== 'Free' && <div className="text-[10px] font-bold text-slate-400 uppercase">per month</div>}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {plan.perks.map(perk => (
+                        <span key={perk} className="px-3 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-wider">{perk}</span>
+                      ))}
+                    </div>
+                    {selectedTier === plan.id && (
+                      <motion.div layoutId="activePlan" className="absolute -top-2 -right-2 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg border-4 border-white">
+                        <CheckCircle2 size={16} />
+                      </motion.div>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <button 
+                onClick={handleCompleteOnboarding} 
+                disabled={isSubmitting}
+                className="w-full btn-primary py-5 text-sm font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 rounded-xl disabled:opacity-50 shadow-[0_0_40px_rgba(37,99,235,0.2)]"
+              >
+                {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <>Launch my Career <ArrowRight size={20} /></>}
+              </button>
+            </motion.div>
+          )}
+
         </AnimatePresence>
       </div>
 
