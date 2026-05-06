@@ -33,7 +33,8 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
     <div className="min-h-screen flex p-4 md:p-8 gap-8 overflow-hidden">
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex flex-col w-72 h-[calc(100vh-3rem)] sticky top-6 z-20">
-        <div className="glass-panel h-full flex flex-col p-6 border-white/60 shadow-2xl shadow-slate-200/50">
+        <div className="glass-panel h-full flex flex-col p-6 border-white/60 shadow-2xl shadow-slate-200/50 overflow-y-auto scrollbar-hide">
+
           <div className="flex items-center pt-10 mb-32 px-4">
             <Link href="/" className="flex items-center group">
               <span className="logo-text !text-3xl tracking-[0.3em]">
@@ -64,7 +65,7 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
             })}
           </nav>
 
-          <div className="pt-8 border-t border-slate-200/40 mt-auto">
+          <div className="pt-8 border-t border-slate-200/40 mt-auto pb-6">
             <div className="glass-card p-6 rounded-[24px] mb-8 bg-blue-50/20 border-blue-100/30">
               <div className="label-mono !text-[9px] mb-3 !text-blue-600">Engine Status</div>
               <div className="flex items-center gap-3">
@@ -75,12 +76,13 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
 
             <button 
               onClick={() => window.location.href = "/login"}
-              className="flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all border border-transparent hover:border-red-100"
+              className="flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all border border-transparent hover:border-red-100 mb-4"
             >
               <LogOut size={20} />
               Log Out
             </button>
           </div>
+
         </div>
       </aside>
 
