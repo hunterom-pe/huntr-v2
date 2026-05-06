@@ -47,9 +47,10 @@ export async function sendWelcomeEmail(toEmail: string, userName?: string | null
             Access The Dashboard
           </a>
           
-          <div style="margin-top: 80px; padding-top: 32px; border-t: 1px solid #f1f5f9;">
+          <div style="margin-top: 80px; padding-top: 32px; border-top: 1px solid #f1f5f9;">
             <p style="color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; line-height: 1.8;">
               © 2026 HUNTR SYSTEMS &bull; PRECISION QA CONSULTING<br/>
+              SUBSIDIARY OF PRECISIONQACONSULTING.COM<br/>
               SOC2 COMPLIANT &bull; AES-256 ENCRYPTED
             </p>
           </div>

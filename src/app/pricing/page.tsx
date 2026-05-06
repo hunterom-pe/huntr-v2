@@ -3,10 +3,41 @@
 import Link from "next/link";
 import { Check, ArrowRight, Sparkles, Zap, Shield, LayoutDashboard } from "lucide-react";
 import { useSession } from "next-auth/react";
-
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function PricingPage() {
   const { data: session } = useSession();
+  const router = useRouter();
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleCheckout = async (plan: 'ELITE' | 'PROFESSIONAL') => {
+    if (!session) {
+      router.push("/login?callbackUrl=/pricing");
+      return;
+    }
+
+    setLoading(plan);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Failed to initiate checkout. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong.");
+    } finally {
+      setLoading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#fafafa] selection:bg-blue-200">
@@ -97,9 +128,13 @@ export default function PricingPage() {
               <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mt-2">Early Adopter Pricing</p>
             </div>
             <p className="text-[14px] text-slate-300 font-medium mb-8 leading-relaxed">The standard for serious job seekers. Full AI intelligence suite.</p>
-            <Link href="/onboarding" className="w-full py-4 mb-8 flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-[12px] font-black uppercase tracking-widest transition-colors shadow-lg shadow-blue-600/30">
-              Go Elite <ArrowRight size={16} />
-            </Link>
+            <button 
+              onClick={() => handleCheckout('ELITE')}
+              disabled={loading !== null}
+              className="w-full py-4 mb-8 flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-2xl text-[12px] font-black uppercase tracking-widest transition-colors shadow-lg shadow-blue-600/30"
+            >
+              {loading === 'ELITE' ? 'Initializing...' : 'Go Elite'} <ArrowRight size={16} />
+            </button>
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-[14px] text-white font-medium">
                 <Check className="text-blue-400 mt-0.5 shrink-0" size={18} /> Unlimited Job Tracking
@@ -132,9 +167,13 @@ export default function PricingPage() {
             </div>
 
             <p className="text-[14px] text-slate-500 font-medium mb-8 leading-relaxed">For high-level pivots and multi-role career management.</p>
-            <Link href="/onboarding" className="btn-glass w-full py-4 mb-8 flex justify-center text-[12px] font-black uppercase tracking-widest text-slate-600 hover:text-slate-900">
-              Start Professional
-            </Link>
+            <button 
+              onClick={() => handleCheckout('PROFESSIONAL')}
+              disabled={loading !== null}
+              className="btn-glass w-full py-4 mb-8 flex justify-center text-[12px] font-black uppercase tracking-widest text-slate-600 hover:text-slate-900 disabled:opacity-50"
+            >
+              {loading === 'PROFESSIONAL' ? 'Initializing...' : 'Start Professional'}
+            </button>
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-[14px] text-slate-600 font-medium">
                 <Check className="text-blue-500 mt-0.5 shrink-0" size={18} /> Everything in Elite
