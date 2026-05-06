@@ -234,7 +234,15 @@ export default function IntelligencePage() {
               ))}
             </div>
             
-            <button className="w-full py-4 bg-slate-50 text-slate-900 text-[11px] font-black uppercase tracking-widest rounded-2xl border border-slate-100 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all flex items-center justify-center gap-3">
+            <button 
+              onClick={async () => {
+                const res = await fetch("/api/create-portal-session", { method: "POST" });
+                const data = await res.json();
+                if (data.url) window.location.href = data.url;
+                else window.location.href = '/pricing';
+              }}
+              className="w-full py-4 bg-slate-50 text-slate-900 text-[11px] font-black uppercase tracking-widest rounded-2xl border border-slate-100 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all flex items-center justify-center gap-3"
+            >
               Upgrade Subscription <ArrowRight size={14} />
             </button>
           </div>

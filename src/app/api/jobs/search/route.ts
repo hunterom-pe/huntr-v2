@@ -90,35 +90,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "AI failed to analyze your resume. Please try again in a moment." }, { status: 422 });
     }
 
-      // 4. Surgical XML Replacement
-      console.log("Optimization Step 4: Performing surgical XML replacement");
+      // 4. Surgical XML Replacement (Surgical 2.0)
+      console.log("Optimization Step 4: Performing surgical XML replacement (Surgical 2.0)");
       const zip = new PizZip(resumeBuffer);
       let xml = zip.file("word/document.xml")?.asText();
 
       if (!xml) throw new Error("Could not read document XML");
 
-      const getCharPattern = (c: string) => {
-        // Escape special regex characters
-        const escaped = c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        // If it's a non-alphanumeric character (like a space or hyphen), 
-        // we match any non-alphanumeric character OR any XML tag
-        if (/[^a-zA-Z0-9]/.test(c)) return `(?:[^a-zA-Z0-9]|<[^>]+>)*?`;
-        
-        // Otherwise, match the character itself but allow interleaving tags (for bolding/styles)
-        return escaped;
-      };
-
-      const createSurgicalRegex = (text: string) => {
-        // 2. Normalize and split into words to allow flexible whitespace between them
-        const words = text.trim().split(/\s+/);
-        
-        const pattern = words.map((word) => {
-          // For each word, allow tags BETWEEN characters (in case of bolding/formatting)
-          return word.split('').map(c => getCharPattern(c)).join('(?:<[^>]+>)*?');
-        }).join('(?:<[^>]+>|\\s)+?'); // Allow tags OR any whitespace between words
-        
-        return new RegExp(pattern, 'gi'); // Case-insensitive matching
-      };
+      // --- DEBUG DUMP ---
+      try {
+        await fs.mkdir(path.join(process.cwd(), "scratch"), { recursive: true });
+        await fs.writeFile(path.join(process.cwd(), "scratch/debug_document.xml"), xml);
+        console.log("DEBUG: XML dumped to scratch/debug_document.xml");
+      } catch (e) {
+        console.error("Debug dump failed:", e);
+      }
 
       const xmlEscape = (str: string) => {
         return str
@@ -129,93 +115,64 @@ export async function POST(req: Request) {
           .replace(/'/g, '&apos;');
       };
 
-      const stripMarkdown = (text: string) => text.replace(/[*_~`]/g, '');
-      
-      const cleanAnchor = (text: string) => {
-        return stripMarkdown(text)
-          .replace(/^(PROFESSIONAL\s+)?SUMMARY:?\s*/i, '')
-          .replace(/^(PROFESSIONAL\s+)?EXPERIENCE:?\s*/i, '')
-          .replace(/^(CORE\s+)?SKILLS:?\s*/i, '')
-          .trim()
-          .substring(0, 30);
-      };
+      const getCleanText = (p: string) => p.replace(/<[^>]+>/g, "").trim();
 
-       if (opt.newSummary) {
-        console.log("Surgical Injection: Ironclad Map active...");
+      const paragraphs = xml.split("</w:p>");
+      let updatedParagraphs = [...paragraphs];
+
+      // 4a. Update Summary
+      if (opt.newSummary) {
+        console.log("Surgical Injection: Hunting for Summary...");
+        let summaryIdx = -1;
         
-        const paragraphs = xml.split("</w:p>");
-        
-        const trace = paragraphs.slice(0, 30).map((p, i) => `Para ${i}: ${p.replace(/<[^>]+>/g, "").trim()}`).join("\n");
-        // Log removed for production
-        
-        const headers: { [key: string]: number } = {};
-        
-        // 1. Map every header in the document (Fuzzy match for XML tags inside headers)
+        // Strategy: Look for the "PROFESSIONAL SUMMARY" header, then find the first significant paragraph after it
         for (let i = 0; i < paragraphs.length; i++) {
-          const cleanText = paragraphs[i].replace(/<[^>]+>/g, "").trim();
-          if (/PROFESSIONAL\s+SUMMARY/i.test(cleanText)) headers['summary'] = i;
-          if (/TECHNICAL\s+SKILLS/i.test(cleanText)) headers['skills'] = i;
-          if (/PROFESSIONAL\s+EXPERIENCE/i.test(cleanText)) headers['experience'] = i;
-          if (/EDUCATION/i.test(cleanText)) headers['education'] = i;
-          if (/CERTIFICATIONS/i.test(cleanText)) headers['certifications'] = i;
-        }
-
-        // Landmark logging removed for production
-
-        if (headers['summary'] !== undefined) {
-          const nextHeaderIdx = headers['skills'] ?? headers['experience'] ?? headers['education'] ?? paragraphs.length;
-          
-          // Capture original formatting
-          const targetPara = paragraphs[headers['summary'] + 1] || paragraphs[headers['summary']];
-          const pPrMatch = targetPara.match(/<w:pPr>.*?<\/w:pPr>/);
-          const pPr = pPrMatch ? pPrMatch[0] : '<w:pPr><w:jc w:val="both"/></w:pPr>';
-
-          const before = paragraphs.slice(0, headers['summary'] + 1);
-          const after = paragraphs.slice(nextHeaderIdx);
-          
-          const newSummaryPara = `<w:p>${pPr}<w:r><w:t>${xmlEscape(opt.newSummary)}</w:t></w:r></w:p>`;
-          
-          xml = before.join("</w:p>") + "</w:p>" + newSummaryPara + after.join("</w:p>");
-          console.log("FORTRESS: Summary section locked and updated.");
-        }
-      }
-
-      // 4b. Re-map for bullets (ensures we are working with the fresh XML)
-      const freshParas = xml.split("</w:p>");
-      const freshHeaders: { [key: string]: number } = {};
-      for (let i = 0; i < freshParas.length; i++) {
-        const cleanText = freshParas[i].replace(/<[^>]+>/g, "").trim();
-        if (/PROFESSIONAL\s+EXPERIENCE/i.test(cleanText)) freshHeaders['experience'] = i;
-        if (/EDUCATION/i.test(cleanText)) freshHeaders['education'] = i;
-      }
-
-      // Replace Bullets ONLY inside the Experience section
-      if (opt.bulletReplacements && opt.bulletReplacements.length > 0 && freshHeaders['experience'] !== undefined) {
-        const expStart = freshHeaders['experience'];
-        const expEnd = freshHeaders['education'] || freshParas.length;
-        
-        console.log(`FORTRESS: Experience Section locked between ${expStart} and ${expEnd}`);
-        
-        const expParas = freshParas.slice(expStart, expEnd);
-        let expXml = expParas.join("</w:p>") + "</w:p>";
-
-        for (const [bIdx, replacement] of opt.bulletReplacements.entries()) {
-          if (replacement.original && replacement.new && replacement.original !== replacement.new) {
-            const bAnchor = cleanAnchor(replacement.original);
-            const bRegex = createSurgicalRegex(bAnchor);
-            
-            if (bRegex.test(expXml)) {
-              console.log(`  - Bullet ${bIdx + 1}: Found inside Experience Fortress. Replacing text only.`);
-              expXml = expXml.replace(bRegex, `<w:t>${xmlEscape(replacement.new)}</w:t>`);
+          const clean = getCleanText(paragraphs[i]);
+          if (/PROFESSIONAL\s+SUMMARY/i.test(clean) || /^SUMMARY:?$/i.test(clean)) {
+            // Find next paragraph that isn't empty
+            for (let j = i + 1; j < i + 5 && j < paragraphs.length; j++) {
+              if (getCleanText(paragraphs[j]).length > 20) {
+                summaryIdx = j;
+                break;
+              }
             }
+            if (summaryIdx !== -1) break;
           }
         }
 
-        // Stitch the document back together
-        const beforeExp = freshParas.slice(0, expStart);
-        const afterExp = freshParas.slice(expEnd);
-        xml = beforeExp.join("</w:p>") + "</w:p>" + expXml + afterExp.join("</w:p>");
+        if (summaryIdx !== -1) {
+          console.log(`FORTRESS: Summary found at para ${summaryIdx}. Updating.`);
+          const targetPara = paragraphs[summaryIdx];
+          const pPrMatch = targetPara.match(/<w:pPr>.*?<\/w:pPr>/);
+          const pPr = pPrMatch ? pPrMatch[0] : '';
+          updatedParagraphs[summaryIdx] = `<w:p>${pPr}<w:r><w:t>${xmlEscape(opt.newSummary)}</w:t></w:r>`;
+        }
       }
+
+      // 4b. Update Bullets
+      if (opt.bulletReplacements && opt.bulletReplacements.length > 0) {
+        console.log(`Surgical Injection: Processing ${opt.bulletReplacements.length} bullets...`);
+        
+        for (const replacement of opt.bulletReplacements) {
+          if (!replacement.original || !replacement.new || replacement.original === replacement.new) continue;
+          
+          const anchor = replacement.original.trim().substring(0, 40).toLowerCase();
+          
+          for (let i = 0; i < updatedParagraphs.length; i++) {
+            const clean = getCleanText(updatedParagraphs[i]).toLowerCase();
+            if (clean.includes(anchor)) {
+              console.log(`  - Match found: [${anchor}...] in para ${i}`);
+              const targetPara = updatedParagraphs[i];
+              const pPrMatch = targetPara.match(/<w:pPr>.*?<\/w:pPr>/);
+              const pPr = pPrMatch ? pPrMatch[0] : '';
+              updatedParagraphs[i] = `<w:p>${pPr}<w:r><w:t>${xmlEscape(replacement.new)}</w:t></w:r>`;
+              break; // Only replace the first match for this bullet
+            }
+          }
+        }
+      }
+
+      xml = updatedParagraphs.join("</w:p>");
 
       // 5. Re-zip and return
       zip.file("word/document.xml", xml);

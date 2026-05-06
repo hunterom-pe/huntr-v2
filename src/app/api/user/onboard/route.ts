@@ -34,8 +34,6 @@ export async function POST(req: Request) {
       data: {
         jobTitle: jobTitle.trim(),
         location: location.trim(),
-        // Only update tier if explicitly provided, otherwise keep existing
-        tier: tier || existingUser.tier,
       },
     });
 

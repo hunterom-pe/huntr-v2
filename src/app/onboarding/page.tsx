@@ -43,10 +43,25 @@ export default function OnboardingPage() {
         body: JSON.stringify({ jobTitle: targetRole, location, tier: selectedTier }),
       });
 
-
       if (res.ok) {
-        router.push("/dashboard?scan=true");
-        router.refresh();
+        if (selectedTier === 'SEEKER') {
+          router.push("/dashboard?scan=true");
+          router.refresh();
+        } else {
+          // Trigger Stripe Checkout for paid tiers
+          const checkoutRes = await fetch("/api/checkout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ plan: selectedTier }),
+          });
+          const checkoutData = await checkoutRes.json();
+          if (checkoutData.url) {
+            window.location.href = checkoutData.url;
+          } else {
+            router.push("/dashboard?scan=true");
+            router.refresh();
+          }
+        }
       } else {
         const data = await res.json();
         setAlert({

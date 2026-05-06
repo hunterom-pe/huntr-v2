@@ -70,13 +70,23 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token && session.user) {
         (session.user as any).id = token.sub;
+        (session.user as any).tier = token.tier;
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.sub = user.id;
+        // Fetch fresh tier on initial sign in
+        const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
+        token.tier = dbUser?.tier || "SEEKER";
       }
+
+      // Handle session update triggers (optional but good practice)
+      if (trigger === "update" && session?.tier) {
+        token.tier = session.tier;
+      }
+      
       return token;
     },
   },
