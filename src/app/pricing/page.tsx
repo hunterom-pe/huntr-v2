@@ -127,7 +127,9 @@ export default function PricingPage() {
             <div className="mb-6">
               <span className="text-5xl font-black text-slate-900">$29</span>
               <span className="text-slate-500 font-medium"> / month</span>
+              <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-2">Early Adopter Pricing</p>
             </div>
+
             <p className="text-[14px] text-slate-500 font-medium mb-8 leading-relaxed">For high-level pivots and multi-role career management.</p>
             <Link href="/onboarding" className="btn-glass w-full py-4 mb-8 flex justify-center text-[12px] font-black uppercase tracking-widest text-slate-600 hover:text-slate-900">
               Start Professional
