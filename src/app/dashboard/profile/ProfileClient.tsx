@@ -39,7 +39,6 @@ export default function ProfileClient({ user }: { user: any }) {
     setIsScanning(true);
     
     try {
-      console.log("DIAGNOSTIC: Initiating rescan at /api/user/onboard...");
       const response = await fetch("/api/user/onboard", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -50,11 +49,9 @@ export default function ProfileClient({ user }: { user: any }) {
       });
       
       if (response.ok) {
-        console.log("DIAGNOSTIC: Rescan settings saved. Redirecting...");
         window.location.href = "/dashboard?scan=true";
       } else {
         const errData = await response.json();
-        console.error("DIAGNOSTIC: Rescan failed:", errData);
         setAlert({
           title: "Update Failed",
           message: "Could not save your new search preferences.",
@@ -63,7 +60,7 @@ export default function ProfileClient({ user }: { user: any }) {
         setIsScanning(false);
       }
     } catch (error) {
-      console.error("DIAGNOSTIC: Network error during rescan:", error);
+      console.error("Rescan error:", error);
       setIsScanning(false);
     }
   };
@@ -127,24 +124,20 @@ export default function ProfileClient({ user }: { user: any }) {
     formData.append("file", fileToUpload);
     
     try {
-      console.log("DIAGNOSTIC: Starting resume upload to /api/upload...");
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
       
       const data = await res.json();
-      console.log("DIAGNOSTIC: Server response:", data);
 
       if (res.ok) {
-        console.log("DIAGNOSTIC: Upload successful!");
         setAlert({
           title: "Upload Successful",
           message: "Your resume has been securely stored and indexed for matching.",
           type: "success"
         });
       } else {
-        console.error("DIAGNOSTIC: Upload failed with status", res.status, data);
         setAlert({
           title: "Upload Failed",
           message: data.error || "We encountered an error while securing your file. Please try again.",
@@ -152,7 +145,7 @@ export default function ProfileClient({ user }: { user: any }) {
         });
       }
     } catch (err) {
-      console.error("DIAGNOSTIC: Network/System error during upload:", err);
+      console.error("Upload error:", err);
       setAlert({
         title: "System Error",
         message: "An unexpected error occurred during the upload process.",
@@ -449,7 +442,7 @@ export default function ProfileClient({ user }: { user: any }) {
         <AnimatePresence>
           {/* Global Alert Modal */}
           {alert && (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 h-screen overflow-hidden">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/10 backdrop-blur-md" onClick={() => setAlert(null)} />
               <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} className="glass-panel w-full max-w-md bg-white p-10 relative z-10 shadow-2xl border-white text-center">
                 <div className={cn(
@@ -469,7 +462,7 @@ export default function ProfileClient({ user }: { user: any }) {
 
           {/* Confirm Reset Modal */}
           {showConfirmReset && (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 h-screen overflow-hidden">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/10 backdrop-blur-md" onClick={() => setShowConfirmReset(false)} />
               <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} className="glass-panel w-full max-w-md bg-white p-10 relative z-10 shadow-2xl border-white text-center">
                 <div className="w-20 h-20 bg-red-50 rounded-[28px] flex items-center justify-center mx-auto mb-8 border border-red-100">
