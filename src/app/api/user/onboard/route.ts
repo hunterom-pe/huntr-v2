@@ -34,8 +34,13 @@ export async function POST(req: Request) {
       data: {
         jobTitle: jobTitle.trim(),
         location: location.trim(),
+        // We only set the tier to SEEKER here. 
+        // Paid tiers (ELITE/PROFESSIONAL) are handled by the Stripe webhook after successful payment.
+        tier: tier === 'SEEKER' ? 'SEEKER' : existingUser.tier,
       },
     });
+
+    console.log(`[ONBOARD] User ${session.user.email} updated: ${jobTitle} in ${location} (${tier} selected)`);
 
     return NextResponse.json({ success: true, user: updatedUser });
   } catch (error) {

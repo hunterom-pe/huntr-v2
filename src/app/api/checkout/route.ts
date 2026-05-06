@@ -21,34 +21,34 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid plan selected" }, { status: 400 });
     }
 
-    // Mapping plans to prices (You will replace these with real Price IDs from Stripe Dashboard)
-    const priceMap: Record<string, number> = {
-      'ELITE': 1500, // $15.00
-      'PROFESSIONAL': 2900, // $29.00
+    // Mapping plans to actual Price IDs from Stripe Dashboard
+    const priceMap: Record<string, string> = {
+      'ELITE': 'price_1TUA0pLkFDyP0eAeJzpBV0ob',
+      'PROFESSIONAL': 'price_1TUA1GLkFDyP0eAeyylI7i6f',
     };
+
+    // Determine the base URL for redirects. Use NEXTAUTH_URL or the request origin.
+    const baseUrl = process.env.NEXTAUTH_URL || req.headers.get('origin');
+    
+    if (!baseUrl) {
+      console.error("Could not determine base URL for Stripe redirect.");
+      return NextResponse.json({ error: "Configuration error: Missing base URL" }, { status: 500 });
+    }
+
+    console.log(`[STRIPE] Creating checkout session for ${session.user.email} (Plan: ${plan}, Price: ${priceMap[plan]})`);
 
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       allow_promotion_codes: true,
       line_items: [
         {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: `Huntr ${plan} Membership`,
-              description: plan === 'ELITE' ? 'Unlimited optimizations & tactical briefs' : 'Full career management suite',
-            },
-            unit_amount: priceMap[plan],
-            recurring: {
-              interval: 'month',
-            },
-          },
+          price: priceMap[plan],
           quantity: 1,
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.NEXTAUTH_URL}/dashboard?checkout=success`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/pricing?checkout=cancelled`,
+      success_url: `${baseUrl}/dashboard?checkout=success`,
+      cancel_url: `${baseUrl}/pricing?checkout=cancelled`,
       customer_email: session.user.email,
       metadata: {
         userId: (session.user as any).id,
@@ -56,9 +56,13 @@ export async function POST(req: Request) {
       },
     });
 
+    console.log(`[STRIPE] Session created: ${checkoutSession.id}`);
     return NextResponse.json({ url: checkoutSession.url });
   } catch (error: any) {
     console.error("Stripe Checkout Error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ 
+      error: "Could not initiate checkout", 
+      details: error.message 
+    }, { status: 500 });
   }
 }

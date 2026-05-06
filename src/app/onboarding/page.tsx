@@ -54,12 +54,19 @@ export default function OnboardingPage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ plan: selectedTier }),
           });
+          
           const checkoutData = await checkoutRes.json();
+          
           if (checkoutData.url) {
             window.location.href = checkoutData.url;
           } else {
-            router.push("/dashboard?scan=true");
-            router.refresh();
+            // Show error instead of silently skipping
+            setAlert({
+              title: "Payment Setup Failed",
+              message: checkoutData.error || "We couldn't connect to Stripe. Please try again or contact support.",
+              type: "error"
+            });
+            setIsSubmitting(false);
           }
         }
       } else {
