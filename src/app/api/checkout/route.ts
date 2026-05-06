@@ -31,12 +31,17 @@ export async function POST(req: Request) {
     // We prioritize NEXTAUTH_URL, then the request's own origin.
     const url = new URL(req.url);
     const origin = req.headers.get('origin') || `${url.protocol}//${req.headers.get('host')}`;
-    const baseUrl = process.env.NEXTAUTH_URL || origin;
+    let baseUrl = process.env.NEXTAUTH_URL || origin;
+    
+    // Auto-fix missing protocol in NEXTAUTH_URL
+    if (baseUrl && !baseUrl.startsWith('http')) {
+      baseUrl = `https://${baseUrl}`;
+    }
     
     if (!baseUrl || !baseUrl.startsWith('http')) {
       return NextResponse.json({ 
         error: "Configuration error", 
-        details: `Invalid Base URL: ${baseUrl}. Please ensure NEXTAUTH_URL is set with https://` 
+        details: `Invalid Base URL: ${baseUrl}. Please ensure NEXTAUTH_URL includes https://` 
       }, { status: 500 });
     }
 
