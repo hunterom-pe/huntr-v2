@@ -191,10 +191,7 @@ export async function generateInterviewBrief(jobTitle: string, companyName: stri
   `;
 
   try {
-    console.log(`Generating interview brief for ${jobTitle} at ${companyName}...`);
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const { text } = await runWithRotation(genAI, prompt);
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
@@ -264,10 +261,7 @@ export async function generateNegotiationPlaybook(jobTitle: string, companyName:
   `;
 
   try {
-    console.log(`Generating negotiation playbook for ${jobTitle} at ${companyName}...`);
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const { text } = await runWithRotation(genAI, prompt);
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
@@ -336,9 +330,8 @@ export async function generateStrategicAudit(resumeText: string, jobTitle: strin
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text().trim();
+    const { text } = await runWithRotation(genAI, prompt);
+    return text.trim();
   } catch (error: any) {
     console.error("AI Strategic Audit Error:", error.message || error);
     return "Your search is currently focused on high-match roles. Continue gathering signals to generate a deep-learning pivot recommendation.";
