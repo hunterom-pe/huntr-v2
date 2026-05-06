@@ -53,8 +53,9 @@ export default function DashboardPage() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [jobType, setJobType] = useState<string>("all");
   const [remoteOnly, setRemoteOnly] = useState(false);
-  const { addNotification } = useNotifications();
+  const { notifications, addNotification, markAsRead } = useNotifications();
   const router = useRouter();
+
 
   const startScan = async (page = 0) => {
     setIsScanning(true);
@@ -698,6 +699,38 @@ export default function DashboardPage() {
         copyToClipboard={copyToClipboard}
         hasCopied={hasCopied}
       />
+
+      {/* Notifications Stack */}
+      <div className="fixed bottom-8 right-8 z-[200] space-y-4 w-full max-w-sm">
+        <AnimatePresence>
+          {notifications.filter(n => !n.read).map((n) => (
+            <motion.div
+              key={n.id}
+              initial={{ opacity: 0, x: 20, scale: 0.9 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+              className="glass-panel !p-6 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] border-white/80 flex gap-4 items-start relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-1 h-full bg-blue-600" />
+              <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
+                <Sparkles size={20} className="text-blue-600" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">{n.title}</h4>
+                <p className="text-[13px] text-slate-500 font-medium leading-relaxed">{n.message}</p>
+              </div>
+              <button 
+                onClick={() => markAsRead(n.id)}
+                className="absolute top-4 right-4 text-slate-300 hover:text-slate-900 transition-colors"
+              >
+                <X size={14} />
+              </button>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
     </>
+
   );
 }
