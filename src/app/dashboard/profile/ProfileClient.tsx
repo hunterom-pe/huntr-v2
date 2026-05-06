@@ -39,6 +39,7 @@ export default function ProfileClient({ user }: { user: any }) {
     setIsScanning(true);
     
     try {
+      console.log("DIAGNOSTIC: Initiating rescan at /api/user/onboard...");
       const response = await fetch("/api/user/onboard", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -49,10 +50,20 @@ export default function ProfileClient({ user }: { user: any }) {
       });
       
       if (response.ok) {
+        console.log("DIAGNOSTIC: Rescan settings saved. Redirecting...");
         window.location.href = "/dashboard?scan=true";
+      } else {
+        const errData = await response.json();
+        console.error("DIAGNOSTIC: Rescan failed:", errData);
+        setAlert({
+          title: "Update Failed",
+          message: "Could not save your new search preferences.",
+          type: "error"
+        });
+        setIsScanning(false);
       }
     } catch (error) {
-      console.error(error);
+      console.error("DIAGNOSTIC: Network error during rescan:", error);
       setIsScanning(false);
     }
   };
@@ -113,25 +124,32 @@ export default function ProfileClient({ user }: { user: any }) {
     formData.append("file", selectedFile);
     
     try {
+      console.log("DIAGNOSTIC: Starting resume upload to /api/upload...");
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
+      
+      const data = await res.json();
+      console.log("DIAGNOSTIC: Server response:", data);
+
       if (res.ok) {
+        console.log("DIAGNOSTIC: Upload successful!");
         setAlert({
           title: "Upload Successful",
           message: "Your resume has been securely stored and indexed for matching.",
           type: "success"
         });
       } else {
+        console.error("DIAGNOSTIC: Upload failed with status", res.status, data);
         setAlert({
           title: "Upload Failed",
-          message: "We encountered an error while securing your file. Please try again.",
+          message: data.error || "We encountered an error while securing your file. Please try again.",
           type: "error"
         });
       }
     } catch (err) {
-      console.error(err);
+      console.error("DIAGNOSTIC: Network/System error during upload:", err);
       setAlert({
         title: "System Error",
         message: "An unexpected error occurred during the upload process.",
