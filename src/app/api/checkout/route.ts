@@ -51,7 +51,7 @@ export async function POST(req: Request) {
       cancel_url: `${baseUrl}/pricing?checkout=cancelled`,
       customer_email: session.user.email,
       metadata: {
-        userId: (session.user as any).id,
+        userId: (session.user as any).id || 'unknown',
         plan: plan,
       },
     });

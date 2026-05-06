@@ -60,10 +60,10 @@ export default function OnboardingPage() {
           if (checkoutData.url) {
             window.location.href = checkoutData.url;
           } else {
-            // Show error instead of silently skipping
+            // Show error details if available
             setAlert({
               title: "Payment Setup Failed",
-              message: checkoutData.error || "We couldn't connect to Stripe. Please try again or contact support.",
+              message: checkoutData.details || checkoutData.error || "We couldn't connect to Stripe. Please try again or contact support.",
               type: "error"
             });
             setIsSubmitting(false);
