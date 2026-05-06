@@ -17,9 +17,24 @@ function cn(...inputs: ClassValue[]) {
 export function DashboardLayoutClient({ children, user }: { children: React.ReactNode, user?: { name?: string | null, email?: string | null, tier?: string } }) {
 
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, addNotification } = useNotifications();
+
+  useEffect(() => {
+    if (searchParams.get('checkout') === 'success') {
+      addNotification({
+        title: "Elite Activated",
+        message: "Welcome to the inner circle. Your surgical tools are now fully unlocked.",
+        type: "report"
+      });
+      // Clean up the URL
+      router.replace(pathname);
+    }
+  }, [searchParams, addNotification, router, pathname]);
+
   const displayName = user?.name || user?.email?.split('@')[0] || "User";
   const initials = displayName.substring(0, 2).toUpperCase();
 
