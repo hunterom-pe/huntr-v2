@@ -225,14 +225,26 @@ export default function ProfileClient({ user }: { user: any }) {
                 <h4 className="text-lg font-bold text-slate-900 tracking-tight">Need more power?</h4>
                 <p className="text-sm text-slate-500 font-medium">Upgrade your plan to unlock higher limits and premium AI features.</p>
               </div>
-              <div className="flex gap-4 w-full md:w-auto">
+              <div className="flex flex-wrap gap-4 w-full md:w-auto">
+                {user?.tier !== 'SEEKER' && (
+                  <button 
+                    onClick={async () => {
+                      const res = await fetch("/api/create-portal-session", { method: "POST" });
+                      const data = await res.json();
+                      if (data.url) window.location.href = data.url;
+                      else alert("Could not open billing portal.");
+                    }}
+                    className="flex-1 md:flex-none px-8 py-3.5 border border-indigo-200 text-indigo-600 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-indigo-50 transition-all"
+                  >
+                    Manage Subscription
+                  </button>
+                )}
                 <button 
                   onClick={() => window.location.href = '/pricing'}
                   className="flex-1 md:flex-none px-8 py-3.5 bg-slate-900 text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-900/20"
                 >
-                  Upgrade to Elite
+                  {user?.tier === 'SEEKER' ? 'Upgrade to Elite' : 'View Other Plans'}
                 </button>
-
               </div>
             </div>
           )}
