@@ -239,6 +239,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ jobs: fallbackJobs });
     }
 
+    const isRemoteKeyword = location.toLowerCase().includes("remote") || location.toLowerCase().includes("wfh") || location.toLowerCase().includes("anywhere");
     const isRemoteOnly = body.remoteOnly === true || isRemoteKeyword;
     const isUSA = location.toLowerCase() === "usa" || location.toLowerCase() === "united states" || isRemoteKeyword;
     
