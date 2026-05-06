@@ -254,10 +254,11 @@ export default function OnboardingPage() {
 
               <div className="grid grid-cols-1 gap-4">
                 {[
-                  { id: 'SEEKER', name: 'Seeker', price: 'Free', desc: 'Core job search tools', perks: ['3 Optimizations/mo', 'Basic Job Search'] },
-                  { id: 'ELITE', name: 'Elite', price: '$19', desc: 'Accelerated placement', perks: ['25 Optimizations/mo', 'Intel Briefs', 'Negotiation Playbooks'] },
-                  { id: 'PROFESSIONAL', name: 'Professional', price: '$49', desc: 'White-glove career hunt', perks: ['Unlimited Everything', 'Priority Support', 'Strategy Call'] }
+                  { id: 'SEEKER', name: 'Seeker', price: 'Free', desc: 'Core job search tools', perks: ['1 Optimization/mo', '3 Daily Scans'] },
+                  { id: 'ELITE', name: 'Elite', price: '$15', desc: 'Accelerated placement', perks: ['100 Optimizations/mo', 'Intel Briefs', 'Negotiation Playbooks'] },
+                  { id: 'PROFESSIONAL', name: 'Professional', price: '$29', desc: 'White-glove career hunt', perks: ['Unlimited Everything', 'Priority Support', 'Strategy Call'] }
                 ].map((plan) => (
+
                   <button
                     key={plan.id}
                     onClick={() => setSelectedTier(plan.id as any)}
