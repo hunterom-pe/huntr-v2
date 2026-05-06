@@ -30,10 +30,16 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const addNotification = (notif: Omit<Notification, "id" | "read" | "date">) => {
+    const id = Math.random().toString(36).substr(2, 9);
     setNotifications((prev) => [
-      { ...notif, id: Math.random().toString(36).substr(2, 9), read: false, date: new Date() },
+      { ...notif, id, read: false, date: new Date() },
       ...prev,
     ]);
+
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+      markAsRead(id);
+    }, 3000);
   };
 
   const markAsRead = (id: string) => {

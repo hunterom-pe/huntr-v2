@@ -1,4 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import path from "path";
+import fs from "fs/promises";
 
 export async function optimizeResumeContent(resumeText: string, jobDescription: string) {
   // Demo Mode Fallback: If no API key is provided, return a realistic mock response instantly
@@ -20,7 +22,6 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
   }
 
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
   const prompt = `
     You are an expert career coach. Your goal is ATS Optimization (Precise Mapping).
@@ -30,11 +31,12 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
     1. Swap the candidate's words for the job description's keywords where the meaning is identical.
     2. Focus on the "Summary", "Core Competencies", and "Professional Experience" sections.
     3. Do NOT invent new skills or experience.
-    4. Ensure the "original" text matches EXACTLY what is in the resume.
+    4. Ensure the "original" text matches EXACTLY what is in the resume. This is CRITICAL for our surgical replacement engine. Copy the text character-for-character including punctuation.
     5. Focus on mirroring specific tools (e.g. TFS, SQL Server, Postman) and methodologies mentioned in the JD.
     
     ORIGINAL RESUME:
     ${resumeText}
+    MANDATORY ACTION: You must optimize the resume. Even if the resume is already strong, find ways to mirror the JD's specific adjectives and technical nouns. Do not return placeholders.
     
     JOB DESCRIPTION:
     ${jobDescription}
@@ -49,30 +51,51 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
     }
   `;
 
-  try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-    console.log("AI RAW RESPONSE:", text);
-    
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      try {
-        const parsed = JSON.parse(jsonMatch[0]);
-        console.log("AI PARSED OBJECT:", JSON.stringify(parsed, null, 2));
-        return parsed;
-      } catch (parseError) {
-        console.error("JSON Parse Error:", parseError);
+  const modelsToTry = [
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-lite",
+    "gemini-2.5-pro"
+  ];
+
+  let lastError = null;
+
+  for (const modelName of modelsToTry) {
+    try {
+      console.log(`Attempting optimization with model: ${modelName}`);
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      
+      // BULLETPROOF LOGGING
+      const logPath = path.join(process.cwd(), "scratch/engine_debug.log");
+      const logEntry = `\n--- AI SUCCESS WITH ${modelName} AT ${new Date().toISOString()} ---\nRAW RESPONSE:\n${text}\n---------------------------\n`;
+      await fs.appendFile(logPath, logEntry).catch(() => {});
+      
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          const opt = JSON.parse(jsonMatch[0]);
+          return opt;
+        } catch (e: any) {
+          await fs.appendFile(logPath, `JSON PARSE FAILED (${modelName}): ${e.message}\n`).catch(() => {});
+        }
       }
+    } catch (error: any) {
+      lastError = error;
+      console.warn(`Model ${modelName} failed: ${error.message}`);
+      const logPath = path.join(process.cwd(), "scratch/engine_debug.log");
+      await fs.appendFile(logPath, `MODEL ${modelName} FAILED: ${error.message}\n`).catch(() => {});
+      // If it's a 404 or 429, continue to next model
+      continue;
     }
-    throw new Error("Failed to parse AI response");
-  } catch (error: any) {
-    return {
-      originalSummary: "NO_CHANGES_REQUIRED_FALLBACK_PLACEHOLDER",
-      newSummary: "NO_CHANGES_REQUIRED_FALLBACK_PLACEHOLDER",
-      bulletReplacements: []
-    };
   }
+
+  // If we reach here, all models failed
+  const logPath = path.join(process.cwd(), "scratch/engine_debug.log");
+  await fs.appendFile(logPath, `CRITICAL ERROR: All models failed. Last error: ${lastError?.message}\n`).catch(() => {});
+  return { originalSummary: "", newSummary: "", bulletReplacements: [] };
 }
 
 export async function generateFollowUpEmail(jobTitle: string, companyName: string) {
@@ -95,7 +118,6 @@ Best regards,
   }
 
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
   const prompt = `
     You are a professional career advisor. 
@@ -156,7 +178,6 @@ export async function generateInterviewBrief(jobTitle: string, companyName: stri
   }
 
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
   const prompt = `
     You are an elite interview coach. Generate a "Surgical Intelligence Brief" for a candidate interviewing for the position of "${jobTitle}" at "${companyName}".
@@ -228,7 +249,6 @@ export async function generateNegotiationPlaybook(jobTitle: string, companyName:
   }
 
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
   const prompt = `
     You are an elite career negotiator. Generate a "Negotiation Playbook" for a candidate who just received an offer for "${jobTitle}" at "${companyName}" in "${location}".
@@ -292,7 +312,6 @@ export async function generateStrategicAudit(resumeText: string, jobTitle: strin
   }
 
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
   const insightsText = rejectionInsights.length > 0 
     ? rejectionInsights.join("\n- ")

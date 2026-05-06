@@ -55,9 +55,10 @@ export function JobCard({
         <div className="flex flex-col md:flex-row gap-10 items-start md:items-center mb-8">
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-4">
-              <h4 className="text-2xl font-extrabold text-slate-800 tracking-tight leading-tight">{job.title}</h4>
-              <div className="px-4 py-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-[10px] font-extrabold rounded-xl uppercase tracking-[0.2em] shadow-xl shadow-indigo-600/20 shrink-0">
-                {job.matchScore}% DNA Match
+              <h4 className="text-2xl font-extrabold text-slate-800 tracking-tight leading-tight group-hover:text-blue-600 transition-colors">{job.title}</h4>
+              <div className="px-4 py-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 text-white text-[10px] font-extrabold rounded-xl uppercase tracking-[0.2em] shadow-xl shadow-blue-600/30 shrink-0 relative overflow-hidden group/score">
+                <div className="absolute inset-0 bg-white/20 shimmer group-hover/score:opacity-100 opacity-0 transition-opacity" />
+                <span className="relative z-10">{job.matchScore}% DNA Match</span>
               </div>
             </div>
             <p className="label-mono !text-blue-600 opacity-90">{job.company} <span className="mx-3 text-slate-300 opacity-40">/</span> {job.location}</p>
@@ -83,7 +84,7 @@ export function JobCard({
           </div>
         </div>
 
-        <p className="text-slate-500 leading-relaxed text-[16px] font-medium mb-10 line-clamp-3 opacity-90">{job.description}</p>
+        <p className="text-slate-500 leading-relaxed text-[16px] font-medium mb-10 line-clamp-5 opacity-90">{job.description}</p>
 
          <div className="flex flex-col sm:flex-row gap-6 items-stretch sm:items-center justify-between pt-10 border-t border-slate-200/40">
           <div className="flex gap-4">
@@ -95,8 +96,20 @@ export function JobCard({
                 <BrainCircuit size={18} className="text-white/80" /> Log Intelligence
               </button>
             ) : (
-              <button onClick={() => handleOptimize(job.id)} disabled={optimizingId === job.id} className="btn-primary py-4 px-10 flex items-center justify-center gap-3">
-                {optimizingId === job.id ? <><Loader2 className="animate-spin" size={18} /> Optimizing...</> : <><Sparkles size={18} className="text-white/80" /> Optimize Resume</>}
+              <button 
+                onClick={() => handleOptimize(job.id)} 
+                disabled={optimizingId === job.id} 
+                className="btn-primary py-4 px-10 flex items-center justify-center gap-3 relative overflow-hidden"
+              >
+                {optimizingId === job.id ? (
+                  <><Loader2 className="animate-spin" size={18} /> Optimizing...</>
+                ) : (
+                  <>
+                    <div className="absolute inset-0 bg-white/10 shimmer opacity-30" />
+                    <Sparkles size={18} className="text-white/80 relative z-10" /> 
+                    <span className="relative z-10">Optimize Resume</span>
+                  </>
+                )}
               </button>
             )}
             <a href={job.applyLink !== '#' ? job.applyLink : undefined} target="_blank" rel="noreferrer" className="btn-glass py-4 px-10 flex items-center justify-center gap-3">

@@ -138,7 +138,7 @@ export function IntelModals({
 
               <div className="mt-8 flex justify-between items-center">
                 <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2">
-                  <Sparkles size={14} className="text-blue-400" /> AI Generated via Gemini 1.5
+                  <Sparkles size={14} className="text-blue-400" /> Intelligence by Huntr AI
                 </p>
                 <div className="flex gap-4">
                   <button onClick={() => setFollowUpJob(null)} className="btn-glass px-8">Close</button>
@@ -259,7 +259,7 @@ export function IntelModals({
 
               <div className="mt-10 pt-8 border-t border-slate-200/40 flex justify-between items-center shrink-0">
                 <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2">
-                  <Sparkles size={14} className="text-indigo-400" /> Compiled via Gemini Pro 1.5
+                  <Sparkles size={14} className="text-indigo-400" /> Compiled via Huntr Intelligence Hub
                 </p>
                 <div className="flex gap-4">
                   <button onClick={() => setBriefingJob(null)} className="btn-glass px-10">Dismiss</button>

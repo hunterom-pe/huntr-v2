@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useNotifications } from "@/lib/NotificationContext";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { motion, AnimatePresence } from "framer-motion";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -37,7 +38,7 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
 
           <div className="flex items-center pt-10 mb-32 px-4">
             <Link href="/" className="flex items-center group">
-              <span className="logo-text !text-3xl tracking-[0.3em]">
+              <span className="logo-text !text-3xl tracking-[0.3em] shimmer-text">
                 HUNTR
               </span>
             </Link>
@@ -52,13 +53,13 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-5 px-6 py-4 rounded-2xl transition-all duration-300 text-[11px] font-extrabold uppercase tracking-[0.3em]",
+                    "flex items-center gap-5 px-6 py-4 rounded-2xl transition-all duration-300 text-[11px] font-extrabold uppercase tracking-[0.3em] relative group",
                     isActive 
-                      ? "bg-blue-600 text-white shadow-2xl shadow-blue-600/30 translate-x-2" 
+                      ? "bg-blue-600 text-white shadow-2xl shadow-blue-600/40 translate-x-2 active-glow" 
                       : "text-slate-400 hover:bg-blue-50/50 hover:text-blue-600 border border-transparent hover:border-blue-100/50"
                   )}
                 >
-                  <Icon size={18} className={cn(isActive ? "text-blue-400" : "text-slate-400")} />
+                  <Icon size={18} className={cn(isActive ? "text-blue-400" : "text-slate-400 group-hover:text-blue-500 transition-colors")} />
                   {item.name}
                 </Link>
               );
@@ -93,13 +94,18 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
 
           <div className="flex items-center gap-8">
             {user?.tier === 'SEEKER' && (
-              <Link 
-                href="/pricing"
-                className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <Zap size={12} />
-                Go Elite
-              </Link>
+                <Link 
+                  href="/pricing"
+                  className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-500 hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/20"
+                >
+                  <Zap size={12} className="fill-current" />
+                  Go Elite
+                </Link>
+              </motion.div>
             )}
 
             <div className="relative">
@@ -169,7 +175,17 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
         </header>
 
         <main className="glass-panel flex-1 p-8 md:p-12 overflow-y-auto border-white/60 shadow-2xl shadow-slate-200/50 scrollbar-hide">
-          {children}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 10, scale: 0.99 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.99 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 

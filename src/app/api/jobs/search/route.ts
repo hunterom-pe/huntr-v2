@@ -11,6 +11,7 @@ import fs from "fs/promises";
 import path from "path";
 import { checkUsageLimit, incrementUsage } from "@/lib/usage";
 
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
@@ -96,17 +97,27 @@ export async function POST(req: Request) {
 
       if (!xml) throw new Error("Could not read document XML");
 
-      const createSurgicalRegex = (text: string) => {
-        const pattern = text.split('').map((c, i) => {
-          const escaped = c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          if (i < text.length - 1) {
-            return `${escaped}(?:(?!<\/w:p>)<[^>]+>|\\s)*?`;
-          }
-          return escaped;
-        }).join('');
+      const getCharPattern = (c: string) => {
+        // Escape special regex characters
+        const escaped = c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // If it's a non-alphanumeric character (like a space or hyphen), 
+        // we match any non-alphanumeric character OR any XML tag
+        if (/[^a-zA-Z0-9]/.test(c)) return `(?:[^a-zA-Z0-9]|<[^>]+>)*?`;
         
-        // Capture the start-tag/prefix, the pattern match, and the suffix/end-tag
-        return new RegExp(`(<w:t[^>]*>[^<]*?)(${pattern})([^<]*?<\/w:t>)`, 'g');
+        // Otherwise, match the character itself but allow interleaving tags (for bolding/styles)
+        return escaped;
+      };
+
+      const createSurgicalRegex = (text: string) => {
+        // 2. Normalize and split into words to allow flexible whitespace between them
+        const words = text.trim().split(/\s+/);
+        
+        const pattern = words.map((word) => {
+          // For each word, allow tags BETWEEN characters (in case of bolding/formatting)
+          return word.split('').map(c => getCharPattern(c)).join('(?:<[^>]+>)*?');
+        }).join('(?:<[^>]+>|\\s)+?'); // Allow tags OR any whitespace between words
+        
+        return new RegExp(pattern, 'gi'); // Case-insensitive matching
       };
 
       const xmlEscape = (str: string) => {
@@ -118,45 +129,99 @@ export async function POST(req: Request) {
           .replace(/'/g, '&apos;');
       };
 
-      const isFallback = opt.originalSummary === "NO_CHANGES_REQUIRED_FALLBACK_PLACEHOLDER";
+      const stripMarkdown = (text: string) => text.replace(/[*_~`]/g, '');
+      
+      const cleanAnchor = (text: string) => {
+        return stripMarkdown(text)
+          .replace(/^(PROFESSIONAL\s+)?SUMMARY:?\s*/i, '')
+          .replace(/^(PROFESSIONAL\s+)?EXPERIENCE:?\s*/i, '')
+          .replace(/^(CORE\s+)?SKILLS:?\s*/i, '')
+          .trim()
+          .substring(0, 30);
+      };
 
-      if (!isFallback && opt.originalSummary && opt.newSummary && opt.originalSummary !== opt.newSummary) {
-        console.log("Searching for summary match (Surgical)...");
-        const summaryRegex = createSurgicalRegex(opt.originalSummary);
+       if (opt.newSummary) {
+        console.log("Surgical Injection: Ironclad Map active...");
         
-        let matchFound = false;
-        xml = xml.replace(summaryRegex, (fullMatch, prefix, match, suffix) => {
-          if (matchFound) return fullMatch; 
-          matchFound = true;
-          console.log(`SUCCESS: Match found for summary!`);
-          return `${prefix}${xmlEscape(opt.newSummary)}${suffix}`;
-        });
+        const paragraphs = xml.split("</w:p>");
+        
+        const trace = paragraphs.slice(0, 30).map((p, i) => `Para ${i}: ${p.replace(/<[^>]+>/g, "").trim()}`).join("\n");
+        // Log removed for production
+        
+        const headers: { [key: string]: number } = {};
+        
+        // 1. Map every header in the document (Fuzzy match for XML tags inside headers)
+        for (let i = 0; i < paragraphs.length; i++) {
+          const cleanText = paragraphs[i].replace(/<[^>]+>/g, "").trim();
+          if (/PROFESSIONAL\s+SUMMARY/i.test(cleanText)) headers['summary'] = i;
+          if (/TECHNICAL\s+SKILLS/i.test(cleanText)) headers['skills'] = i;
+          if (/PROFESSIONAL\s+EXPERIENCE/i.test(cleanText)) headers['experience'] = i;
+          if (/EDUCATION/i.test(cleanText)) headers['education'] = i;
+          if (/CERTIFICATIONS/i.test(cleanText)) headers['certifications'] = i;
+        }
 
-        if (!matchFound) {
-          console.warn("WARNING: No match found for summary.");
+        // Landmark logging removed for production
+
+        if (headers['summary'] !== undefined) {
+          const nextHeaderIdx = headers['skills'] ?? headers['experience'] ?? headers['education'] ?? paragraphs.length;
+          
+          // Capture original formatting
+          const targetPara = paragraphs[headers['summary'] + 1] || paragraphs[headers['summary']];
+          const pPrMatch = targetPara.match(/<w:pPr>.*?<\/w:pPr>/);
+          const pPr = pPrMatch ? pPrMatch[0] : '<w:pPr><w:jc w:val="both"/></w:pPr>';
+
+          const before = paragraphs.slice(0, headers['summary'] + 1);
+          const after = paragraphs.slice(nextHeaderIdx);
+          
+          const newSummaryPara = `<w:p>${pPr}<w:r><w:t>${xmlEscape(opt.newSummary)}</w:t></w:r></w:p>`;
+          
+          xml = before.join("</w:p>") + "</w:p>" + newSummaryPara + after.join("</w:p>");
+          console.log("FORTRESS: Summary section locked and updated.");
         }
       }
 
-      // Replace Bullets
-      if (opt.bulletReplacements && opt.bulletReplacements.length > 0) {
-        console.log(`Optimization Step 5: Processing ${opt.bulletReplacements.length} bullets`);
+      // 4b. Re-map for bullets (ensures we are working with the fresh XML)
+      const freshParas = xml.split("</w:p>");
+      const freshHeaders: { [key: string]: number } = {};
+      for (let i = 0; i < freshParas.length; i++) {
+        const cleanText = freshParas[i].replace(/<[^>]+>/g, "").trim();
+        if (/PROFESSIONAL\s+EXPERIENCE/i.test(cleanText)) freshHeaders['experience'] = i;
+        if (/EDUCATION/i.test(cleanText)) freshHeaders['education'] = i;
+      }
+
+      // Replace Bullets ONLY inside the Experience section
+      if (opt.bulletReplacements && opt.bulletReplacements.length > 0 && freshHeaders['experience'] !== undefined) {
+        const expStart = freshHeaders['experience'];
+        const expEnd = freshHeaders['education'] || freshParas.length;
+        
+        console.log(`FORTRESS: Experience Section locked between ${expStart} and ${expEnd}`);
+        
+        const expParas = freshParas.slice(expStart, expEnd);
+        let expXml = expParas.join("</w:p>") + "</w:p>";
+
         for (const [bIdx, replacement] of opt.bulletReplacements.entries()) {
           if (replacement.original && replacement.new && replacement.original !== replacement.new) {
-            const bulletRegex = createSurgicalRegex(replacement.original);
-            let bMatchFound = false;
-
-            xml = xml.replace(bulletRegex, (fullMatch, prefix, match, suffix) => {
-              if (bMatchFound) return fullMatch;
-              bMatchFound = true;
-              console.log(`  - Bullet ${bIdx + 1}: Match replaced.`);
-              return `${prefix}${xmlEscape(replacement.new)}${suffix}`;
-            });
+            const bAnchor = cleanAnchor(replacement.original);
+            const bRegex = createSurgicalRegex(bAnchor);
+            
+            if (bRegex.test(expXml)) {
+              console.log(`  - Bullet ${bIdx + 1}: Found inside Experience Fortress. Replacing text only.`);
+              expXml = expXml.replace(bRegex, `<w:t>${xmlEscape(replacement.new)}</w:t>`);
+            }
           }
         }
+
+        // Stitch the document back together
+        const beforeExp = freshParas.slice(0, expStart);
+        const afterExp = freshParas.slice(expEnd);
+        xml = beforeExp.join("</w:p>") + "</w:p>" + expXml + afterExp.join("</w:p>");
       }
 
       // 5. Re-zip and return
       zip.file("word/document.xml", xml);
+      
+      // --- FINAL DEBUG REMOVED ---
+
       const outputBuffer = zip.generate({ type: "nodebuffer" });
 
       const finalFilename = `Optimized_Resume_${Date.now()}.docx`;
@@ -170,6 +235,9 @@ export async function POST(req: Request) {
         headers: {
           "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
           "Content-Disposition": `attachment; filename="${finalFilename}"`,
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0"
         },
       });
     }

@@ -50,7 +50,7 @@ export default function IntelligencePage() {
     <div className="space-y-12">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-2">
-          <h1 className="heading-editorial">Intelligence Hub</h1>
+          <h1 className="heading-editorial shimmer-text inline-block">Intelligence Hub</h1>
           <p className="label-mono opacity-70">Strategic search audit and market analysis</p>
         </div>
         <div className="flex items-center gap-3 px-6 py-3 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100/50">
@@ -174,8 +174,8 @@ export default function IntelligencePage() {
         {/* AI Strategic Insight & Usage */}
         <div className="lg:col-span-5 space-y-10">
           <motion.div 
-            whileHover={{ y: -5 }}
-            className="glass-panel p-10 bg-gradient-to-br from-slate-900 to-slate-800 border-none relative overflow-hidden"
+            whileHover={{ y: -5, scale: 1.01 }}
+            className="glass-panel p-10 bg-gradient-to-br from-slate-900 to-slate-800 border-none relative overflow-hidden active-glow"
           >
             <div className="absolute top-0 right-0 p-8 opacity-10">
               <Zap size={120} className="text-white" />

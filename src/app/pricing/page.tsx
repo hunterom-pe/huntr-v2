@@ -43,7 +43,7 @@ export default function PricingPage() {
       {/* Hero Section */}
       <div className="pt-40 pb-20 px-6 text-center">
         <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-6">
-          Invest in your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">future</span>.
+          Invest in your <span className="shimmer-text">future</span>.
         </h1>
         <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto font-medium leading-relaxed">
           Choose the plan that fits your job hunt. Upgrade, downgrade, or cancel anytime.
@@ -82,7 +82,8 @@ export default function PricingPage() {
           </div>
 
           {/* Elite Tier (Middle - Highlighted) */}
-          <div className="glass-card p-12 bg-slate-900 border-slate-800 rounded-[32px] shadow-2xl shadow-blue-900/20 relative transform md:-translate-y-4">
+          <div className="glass-card p-12 bg-slate-900 border-slate-800 rounded-[32px] shadow-2xl shadow-blue-900/20 relative transform md:-translate-y-4 active-glow group">
+            <div className="absolute inset-0 bg-white/5 shimmer opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-[32px]" />
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-blue-500/30">
               Most Popular
             </div>
