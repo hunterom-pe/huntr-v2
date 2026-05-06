@@ -232,7 +232,7 @@ export default function ProfileClient({ user }: { user: any }) {
                       const res = await fetch("/api/create-portal-session", { method: "POST" });
                       const data = await res.json();
                       if (data.url) window.location.href = data.url;
-                      else alert("Could not open billing portal.");
+                      else setAlert({ title: "Portal Error", message: "Could not open your billing portal. Please try again later.", type: "error" });
                     }}
                     className="flex-1 md:flex-none px-8 py-3.5 border border-indigo-200 text-indigo-600 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-indigo-50 transition-all"
                   >
