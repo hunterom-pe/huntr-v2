@@ -1,6 +1,4 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import path from "path";
-import fs from "fs/promises";
 
 // Helper for model rotation and auto-retry
 async function runWithRotation(genAI: any, prompt: string) {
@@ -83,17 +81,12 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
   try {
     const { text, modelName } = await runWithRotation(genAI, prompt);
     
-    // BULLETPROOF LOGGING
-    const logPath = path.join(process.cwd(), "scratch/engine_debug.log");
-    const logEntry = `\n--- AI SUCCESS WITH ${modelName} AT ${new Date().toISOString()} ---\nRAW RESPONSE:\n${text}\n---------------------------\n`;
-    await fs.appendFile(logPath, logEntry).catch(() => {});
-    
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       try {
         return JSON.parse(jsonMatch[0]);
       } catch (e: any) {
-        await fs.appendFile(logPath, `JSON PARSE FAILED (${modelName}): ${e.message}\n`).catch(() => {});
+        console.error(`JSON PARSE FAILED (${modelName}): ${e.message}`);
       }
     }
     throw new Error("No JSON found in AI response");
