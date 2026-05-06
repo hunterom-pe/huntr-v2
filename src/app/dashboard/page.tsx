@@ -25,7 +25,10 @@ interface Job {
   status: 'WISHLIST' | 'APPLIED' | 'INTERVIEWING' | 'OFFER' | 'REJECTED';
   isSaved?: boolean;
   applyLink?: string;
+  rejectionReason?: string;
+  rejectionNotes?: string;
 }
+
 
 export default function DashboardPage() {
   const [currentPage, setCurrentPage] = useState(0);
@@ -48,7 +51,9 @@ export default function DashboardPage() {
 
   const [isGeneratingPlaybook, setIsGeneratingPlaybook] = useState(false);
   const [viewJob, setViewJob] = useState<Job | null>(null);
+  const [rejectionJob, setRejectionJob] = useState<Job | null>(null);
   const [hasCopied, setHasCopied] = useState(false);
+
   const [isBrowser, setIsBrowser] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [jobType, setJobType] = useState<string>("all");
@@ -201,6 +206,21 @@ export default function DashboardPage() {
         }
       }
     };
+
+    const handleSaveRejection = async (id: string, reason: string, notes: string) => {
+      setJobs(prev => prev.map(job => job.id === id ? { ...job, rejectionReason: reason, rejectionNotes: notes } : job));
+      
+      try {
+        await fetch("/api/jobs/update-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, rejectionReason: reason, rejectionNotes: notes })
+        });
+      } catch (error) {
+        console.error("Failed to save rejection intelligence:", error);
+      }
+    };
+
 
     const handleDelete = (id: string) => {
       setDeleteConfirmId(id);
@@ -457,7 +477,14 @@ export default function DashboardPage() {
         });
       }
     }
+    if (destination.droppableId === 'REJECTED') {
+      const job = jobs.find(j => j.id === draggableId);
+      if (job) {
+        setRejectionJob(job);
+      }
+    }
   };
+
 
 
 
@@ -682,6 +709,7 @@ export default function DashboardPage() {
                                 handleToggleSave={handleToggleSave}
                                 handleStatusChange={handleStatusChange}
                                 handleOptimize={handleOptimize}
+                                onOpenPostMortem={setRejectionJob}
                               />
 
                             </div>
@@ -733,7 +761,9 @@ export default function DashboardPage() {
                 handleFollowUp={handleFollowUp}
                 handleGenerateBrief={handleGenerateBrief}
                 handleGeneratePlaybook={handleGeneratePlaybook}
+                onOpenPostMortem={setRejectionJob}
               />
+
 
             </div>
           </div>
@@ -761,6 +791,9 @@ export default function DashboardPage() {
         confirmDelete={confirmDelete}
         copyToClipboard={copyToClipboard}
         hasCopied={hasCopied}
+        rejectionJob={rejectionJob}
+        setRejectionJob={setRejectionJob}
+        onSaveRejection={handleSaveRejection}
       />
 
       {/* Upgrade Modal */}

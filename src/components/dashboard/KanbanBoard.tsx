@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
-import { Trash2, Eye, ExternalLink, Mail, FolderOpen, DollarSign, Zap, Sparkles, Star } from "lucide-react";
+import { Trash2, Eye, ExternalLink, Mail, FolderOpen, DollarSign, Zap, Sparkles, Star, BrainCircuit } from "lucide-react";
+
 
 import { LucideIcon } from "lucide-react";
 
@@ -16,7 +17,10 @@ interface Job {
   status: 'WISHLIST' | 'APPLIED' | 'INTERVIEWING' | 'OFFER' | 'REJECTED';
   isSaved?: boolean;
   applyLink?: string;
+  rejectionReason?: string;
+  rejectionNotes?: string;
 }
+
 
 interface KanbanBoardProps {
   jobs: Job[];
@@ -25,13 +29,15 @@ interface KanbanBoardProps {
   handleFollowUp: (job: Job) => void;
   handleGenerateBrief: (job: Job) => void;
   handleGeneratePlaybook: (job: Job) => void;
+  onOpenPostMortem?: (job: Job) => void;
 }
+
 
 const kanbanColumns: { name: Job['status']; title: string; color: string; icon: LucideIcon }[] = [
   { name: 'APPLIED', title: 'Applied', color: 'blue', icon: Zap },
   { name: 'INTERVIEWING', title: 'Interviewing', color: 'amber', icon: Sparkles },
   { name: 'OFFER', title: 'Offer', color: 'emerald', icon: Star },
-  { name: 'REJECTED', title: 'Reject', color: 'slate', icon: Trash2 },
+  { name: 'REJECTED', title: 'Rejected', color: 'slate', icon: Trash2 },
 ];
 
 
@@ -41,8 +47,10 @@ export function KanbanBoard({
   setViewJob, 
   handleFollowUp, 
   handleGenerateBrief, 
-  handleGeneratePlaybook 
+  handleGeneratePlaybook,
+  onOpenPostMortem
 }: KanbanBoardProps) {
+
   return (
     <div className="space-y-8">
       {kanbanColumns.map(col => {
@@ -151,6 +159,16 @@ export function KanbanBoard({
                               <DollarSign size={12} /> Negotiate
                             </button>
                           )}
+
+                          {col.name === 'REJECTED' && (
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); onOpenPostMortem?.(job); }}
+                              className="mt-4 w-full py-2 bg-red-50 text-red-600 rounded-xl text-[10px] font-extrabold uppercase tracking-widest border border-red-100 hover:bg-red-600 hover:text-white transition-all flex items-center justify-center gap-2"
+                            >
+                              <BrainCircuit size={12} /> Post-Mortem
+                            </button>
+                          )}
+
                           </motion.div>
                         </div>
                       )}

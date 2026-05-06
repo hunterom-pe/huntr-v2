@@ -20,7 +20,8 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { id, title, company, location, description, matchScore, status, isDeleted } = body;
+    const { id, title, company, location, description, matchScore, status, isDeleted, rejectionReason, rejectionNotes } = body;
+
 
     if (!id) {
       // If no ID is provided, we must have title/company to create a new one
@@ -45,8 +46,11 @@ export async function POST(req: Request) {
             status: status || undefined,
             isDeleted: isDeleted !== undefined ? isDeleted : undefined,
             title: title || undefined,
-            company: company || undefined
+            company: company || undefined,
+            rejectionReason: rejectionReason !== undefined ? rejectionReason : undefined,
+            rejectionNotes: rejectionNotes !== undefined ? rejectionNotes : undefined
           }
+
         });
       } else if (title && company) {
         // Create new with provided ID

@@ -85,6 +85,9 @@ model Job {
   isSaved     Boolean  @default(false)
   isDeleted   Boolean  @default(false)
   userId      String
+  rejectionReason String?
+  rejectionNotes  String?
   createdAt   DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+

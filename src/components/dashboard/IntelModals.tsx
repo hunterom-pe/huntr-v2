@@ -12,7 +12,8 @@ export interface Job {
   matchScore: number;
   status: 'WISHLIST' | 'APPLIED' | 'INTERVIEWING' | 'OFFER' | 'REJECTED';
   applyLink?: string;
-
+  rejectionReason?: string;
+  rejectionNotes?: string;
 }
 
 export interface InterviewBrief {
@@ -61,7 +62,13 @@ interface IntelModalsProps {
   // Shared
   copyToClipboard: (text: string) => void;
   hasCopied: boolean;
+  
+  // Rejection
+  rejectionJob: Job | null;
+  setRejectionJob: (job: Job | null) => void;
+  onSaveRejection: (id: string, reason: string, notes: string) => void;
 }
+
 
 
 export function IntelModals({
@@ -70,8 +77,11 @@ export function IntelModals({
   playbookJob, setPlaybookJob, isGeneratingPlaybook, playbookData,
   viewJob, setViewJob,
   deleteConfirmId, setDeleteConfirmId, confirmDelete,
-  copyToClipboard, hasCopied
+  copyToClipboard, hasCopied,
+  rejectionJob, setRejectionJob, onSaveRejection
 }: IntelModalsProps) {
+
+
   return (
     <>
       {/* Follow-up Email Modal */}
@@ -435,7 +445,101 @@ export function IntelModals({
         )}
       </AnimatePresence>
 
+      {/* Post-Mortem Rejection Modal */}
+      <AnimatePresence>
+        {rejectionJob && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/30 backdrop-blur-md"
+              onClick={() => setRejectionJob(null)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="glass-panel w-full max-w-xl bg-white/95 p-10 relative z-10 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.2)] border-white overflow-hidden flex flex-col"
+            >
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-500 to-orange-500" />
+              
+              <div className="flex justify-between items-start mb-8 shrink-0">
+                <div>
+                  <div className="label-mono !text-red-600 mb-2 flex items-center gap-2">
+                    <BrainCircuit size={14} /> Post-Mortem Intelligence
+                  </div>
+                  <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">What happened?</h2>
+                  <p className="text-slate-500 mt-2 font-medium">Record feedback for {rejectionJob.company}</p>
+                </div>
+                <button onClick={() => setRejectionJob(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                  <X size={24} className="text-slate-400" />
+                </button>
+              </div>
+
+              <div className="space-y-8 overflow-y-auto pr-2 scrollbar-hide">
+                <div className="space-y-4">
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Primary Reason</label>
+                  <div className="flex flex-wrap gap-2">
+                    {['Skills Gap', 'Culture Fit', 'Compensation', 'Ghosted', 'Timing/Budget', 'Other'].map(tag => (
+                      <button
+                        key={tag}
+                        onClick={() => {
+                          const currentReasons = rejectionJob.rejectionReason ? rejectionJob.rejectionReason.split(', ') : [];
+                          let newReasons;
+                          if (currentReasons.includes(tag)) {
+                            newReasons = currentReasons.filter(r => r !== tag);
+                          } else {
+                            newReasons = [...currentReasons, tag];
+                          }
+                          const updatedJob = { ...rejectionJob, rejectionReason: newReasons.join(', ') };
+                          setRejectionJob(updatedJob);
+                        }}
+                        className={`px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border ${
+                          rejectionJob.rejectionReason?.split(', ').includes(tag) 
+                            ? "bg-red-600 text-white border-red-600 shadow-lg shadow-red-600/20" 
+                            : "bg-slate-50 text-slate-400 border-slate-100 hover:border-slate-200"
+                        }`}
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Detailed Notes</label>
+                  <textarea 
+                    className="input-glass w-full h-32 p-5 bg-slate-50/50 resize-none"
+                    placeholder="What specific feedback did they give? Any lessons for the next one?"
+                    value={rejectionJob.rejectionNotes || ""}
+                    onChange={(e) => {
+                      const updatedJob = { ...rejectionJob, rejectionNotes: e.target.value };
+                      setRejectionJob(updatedJob);
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-10 flex gap-4 shrink-0">
+                <button onClick={() => setRejectionJob(null)} className="flex-1 btn-glass">Dismiss</button>
+                <button 
+                  onClick={() => {
+                    onSaveRejection(rejectionJob.id, rejectionJob.rejectionReason || 'Other', rejectionJob.rejectionNotes || '');
+                    setRejectionJob(null);
+                  }}
+                  className="flex-1 btn-primary bg-slate-900 text-white hover:bg-black"
+                >
+                  Save Intelligence
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Custom Confirmation Modal */}
+
       <AnimatePresence>
         {deleteConfirmId && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">

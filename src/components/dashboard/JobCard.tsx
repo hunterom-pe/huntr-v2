@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 
-import { Star, Trash2, Sparkles, Loader2, ExternalLink, ArrowRight } from "lucide-react";
+import { Star, Trash2, Sparkles, Loader2, ExternalLink, ArrowRight, BrainCircuit } from "lucide-react";
 import { DraggableStateSnapshot } from "@hello-pangea/dnd";
 
 
@@ -15,8 +15,9 @@ interface Job {
   matchScore: number;
   status: 'WISHLIST' | 'APPLIED' | 'INTERVIEWING' | 'OFFER' | 'REJECTED';
   isSaved?: boolean;
-
   applyLink?: string;
+  rejectionReason?: string;
+  rejectionNotes?: string;
 }
 
 interface JobCardProps {
@@ -27,8 +28,9 @@ interface JobCardProps {
   handleToggleSave: (id: string) => void;
   handleStatusChange: (id: string, status: 'WISHLIST' | 'APPLIED' | 'INTERVIEWING' | 'OFFER' | 'REJECTED') => void;
   handleOptimize: (id: string) => void;
-
+  onOpenPostMortem?: (job: Job) => void;
 }
+
 
 
 export function JobCard({ 
@@ -38,8 +40,10 @@ export function JobCard({
   optimizingId, 
   handleToggleSave, 
   handleStatusChange, 
-  handleOptimize 
+  handleOptimize,
+  onOpenPostMortem
 }: JobCardProps) {
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -57,6 +61,16 @@ export function JobCard({
               </div>
             </div>
             <p className="label-mono !text-blue-600 opacity-90">{job.company} <span className="mx-3 text-slate-300 opacity-40">/</span> {job.location}</p>
+            {job.status === 'REJECTED' && job.rejectionReason && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {job.rejectionReason.split(', ').map(reason => (
+                  <div key={reason} className="flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-100 rounded-full text-red-600">
+                    <BrainCircuit size={10} />
+                    <span className="text-[9px] font-black uppercase tracking-widest">{reason}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex gap-3 self-end md:self-center">
             <button 
@@ -71,19 +85,31 @@ export function JobCard({
 
         <p className="text-slate-500 leading-relaxed text-[16px] font-medium mb-10 line-clamp-3 opacity-90">{job.description}</p>
 
-        <div className="flex flex-col sm:flex-row gap-6 items-stretch sm:items-center justify-between pt-10 border-t border-slate-200/40">
+         <div className="flex flex-col sm:flex-row gap-6 items-stretch sm:items-center justify-between pt-10 border-t border-slate-200/40">
           <div className="flex gap-4">
-            <button onClick={() => handleOptimize(job.id)} disabled={optimizingId === job.id} className="btn-primary py-4 px-10 flex items-center justify-center gap-3">
-              {optimizingId === job.id ? <><Loader2 className="animate-spin" size={18} /> Optimizing...</> : <><Sparkles size={18} className="text-white/80" /> Optimize Resume</>}
-            </button>
+            {job.status === 'REJECTED' ? (
+              <button 
+                onClick={() => onOpenPostMortem?.(job)} 
+                className="btn-primary py-4 px-10 flex items-center justify-center gap-3 bg-red-600 hover:bg-red-700 shadow-red-600/20"
+              >
+                <BrainCircuit size={18} className="text-white/80" /> Log Intelligence
+              </button>
+            ) : (
+              <button onClick={() => handleOptimize(job.id)} disabled={optimizingId === job.id} className="btn-primary py-4 px-10 flex items-center justify-center gap-3">
+                {optimizingId === job.id ? <><Loader2 className="animate-spin" size={18} /> Optimizing...</> : <><Sparkles size={18} className="text-white/80" /> Optimize Resume</>}
+              </button>
+            )}
             <a href={job.applyLink !== '#' ? job.applyLink : undefined} target="_blank" rel="noreferrer" className="btn-glass py-4 px-10 flex items-center justify-center gap-3">
               <ExternalLink size={18} /> View Source
             </a>
           </div>
-          <button onClick={() => handleStatusChange(job.id, 'APPLIED')} className="label-mono !text-slate-400 hover:!text-blue-600 transition-all flex items-center gap-3 group/btn cursor-grab active:cursor-grabbing">
-            Mark as Applied <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
-          </button>
+          {job.status !== 'REJECTED' && (
+            <button onClick={() => handleStatusChange(job.id, 'APPLIED')} className="label-mono !text-slate-400 hover:!text-blue-600 transition-all flex items-center gap-3 group/btn cursor-grab active:cursor-grabbing">
+              Mark as Applied <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+            </button>
+          )}
         </div>
+
       </div>
     </motion.div>
   );
