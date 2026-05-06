@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
+import { generateStrategicAudit } from "@/lib/gemini";
+import mammoth from "mammoth";
+import fs from "fs/promises";
+import path from "path";
 
 export async function GET() {
   try {
@@ -32,13 +36,59 @@ export async function GET() {
       ? Math.round(trackedJobs.reduce((acc, curr) => acc + curr.matchScore, 0) / trackedJobs.length)
       : 0;
 
-    // Simple skill extraction (mocked for now, but based on user job title)
-    const baseSkills = user.jobTitle?.toLowerCase().includes('qa') 
+    // --- REJECTION ANALYSIS ---
+    const rejectedJobs = trackedJobs.filter(j => j.status === 'REJECTED');
+    const reasonsMap: Record<string, number> = {};
+    const rejectionInsights: string[] = [];
+
+    rejectedJobs.forEach(job => {
+      if (job.rejectionReason) {
+        job.rejectionReason.split(', ').forEach(reason => {
+          reasonsMap[reason] = (reasonsMap[reason] || 0) + 1;
+        });
+      }
+      if (job.rejectionNotes) {
+        rejectionInsights.push(`[${job.company}] ${job.rejectionNotes}`);
+      }
+    });
+
+    const frictionData = Object.entries(reasonsMap)
+      .map(([name, count]) => ({ 
+        name, 
+        count, 
+        percentage: Math.round((count / rejectedJobs.length) * 100) 
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    // --- AI STRATEGIC AUDIT ---
+    let strategicInsight = "Your search is currently focused on high-match roles. Continue gathering signals to generate a deep-learning pivot recommendation.";
+    
+    if (rejectedJobs.length > 0 && user.resumePath) {
+      try {
+        let resumeText = "";
+        const fileName = path.basename(user.resumePath);
+        const filePath = path.join(process.cwd(), "storage/resumes", fileName);
+        const resumeBuffer = await fs.readFile(filePath);
+        const extracted = await mammoth.extractRawText({ buffer: resumeBuffer });
+        resumeText = extracted.value;
+
+        strategicInsight = await generateStrategicAudit(
+          resumeText, 
+          user.jobTitle || "Professional", 
+          rejectionInsights
+        );
+      } catch (e) {
+        console.error("Failed to extract resume for intel audit:", e);
+      }
+    }
+
+    // Skill signals (Dynamic fallback based on job title)
+    const baseSkills = user.jobTitle?.toLowerCase().includes('design') 
       ? [
-          { name: "Automation Testing", level: 92, trending: true },
-          { name: "Selenium / Cypress", level: 88, trending: true },
-          { name: "API Testing", level: 85, trending: false },
-          { name: "Performance Testing", level: 78, trending: true }
+          { name: "Figma Mastery", level: 95, trending: true },
+          { name: "Design Systems", level: 88, trending: true },
+          { name: "Prototyping", level: 82, trending: false },
+          { name: "User Research", level: 75, trending: true }
         ]
       : [
           { name: "React / Next.js", level: 95, trending: true },
@@ -54,7 +104,8 @@ export async function GET() {
         { label: "Profile Strength", value: avgMatch > 85 ? "Elite" : "Strong", sub: "Based on match scores", color: "indigo" }
       ],
       skills: baseSkills,
-      insight: `You have a ${avgMatch}% match rate in ${user.jobTitle || 'your field'}. We recommend targeting 3 more applications this week to maintain your momentum.`
+      friction: frictionData,
+      insight: strategicInsight
     });
   } catch (error) {
     console.error("Intelligence API Error:", error);

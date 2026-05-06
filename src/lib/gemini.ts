@@ -284,3 +284,48 @@ I'm very eager to join—please let me know if there's flexibility here.`,
     };
   }
 }
+
+export async function generateStrategicAudit(resumeText: string, jobTitle: string, rejectionInsights: string[]) {
+  if (!process.env.GEMINI_API_KEY) {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    return `Based on your recent rejections for ${jobTitle} roles, there's a recurring signal that your "Skills Gap" is the primary hurdle. We recommend emphasizing your recent projects in Next.js and System Design more prominently in your summary to better align with the roles you're targeting.`;
+  }
+
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+
+  const insightsText = rejectionInsights.length > 0 
+    ? rejectionInsights.join("\n- ")
+    : "No specific rejection notes provided yet.";
+
+  const prompt = `
+    You are an elite career strategist and recruiter. Your task is to perform a "Surgical Search Audit" for a candidate.
+    
+    CANDIDATE PROFILE:
+    Target Job Title: ${jobTitle}
+    Resume Content: ${resumeText.substring(0, 4000)}
+    
+    REJECTION SIGNALS (Post-Mortem Notes):
+    - ${insightsText}
+    
+    TASK:
+    Analyze the patterns in the rejections. Compare the feedback (if any) with the candidate's resume and target job title.
+    Provide a "Strategic Pivot" in 3-4 powerful, actionable sentences. 
+    Focus on:
+    1. Identifying the "Root Cause" of friction (e.g. skills gap, seniority mismatch, interview performance).
+    2. Suggesting a specific change (e.g. "Pivot to Mid-level roles," "Add [X] skill to your summary," "Focus on [Y] type of companies").
+    
+    Be direct, high-agency, and professional. Avoid fluff.
+    
+    Return ONLY the strategic advice text.
+  `;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text().trim();
+  } catch (error: any) {
+    console.error("AI Strategic Audit Error:", error.message || error);
+    return "Your search is currently focused on high-match roles. Continue gathering signals to generate a deep-learning pivot recommendation.";
+  }
+}

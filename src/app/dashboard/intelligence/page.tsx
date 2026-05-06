@@ -1,19 +1,27 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { TrendingUp, Target, Shield, Zap, ArrowRight, BrainCircuit, BarChart3, Clock, Sparkles, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { TrendingUp, Target, Shield, Zap, ArrowRight, BrainCircuit, BarChart3, Clock, Sparkles, Loader2, Info, Lock } from "lucide-react";
 
 export default function IntelligencePage() {
   const [data, setData] = useState<any>(null);
+  const [usage, setUsage] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchIntel = async () => {
       try {
-        const response = await fetch("/api/jobs/intelligence");
-        const json = await response.json();
-        setData(json);
+        const [intelRes, usageRes] = await Promise.all([
+          fetch("/api/jobs/intelligence"),
+          fetch("/api/user/usage")
+        ]);
+        
+        const intelJson = await intelRes.json();
+        const usageJson = await usageRes.json();
+        
+        setData(intelJson);
+        setUsage(usageJson.usage);
       } catch (error) {
         console.error("Failed to fetch intelligence:", error);
       } finally {
@@ -23,7 +31,7 @@ export default function IntelligencePage() {
     fetchIntel();
   }, []);
 
-  if (isLoading) {
+  if (isLoading || !data) {
     return (
       <div className="flex flex-col items-center justify-center py-40 space-y-4">
         <Loader2 className="animate-spin text-indigo-600" size={40} />
@@ -43,11 +51,11 @@ export default function IntelligencePage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-2">
           <h1 className="heading-editorial">Intelligence Hub</h1>
-          <p className="label-mono opacity-70">Strategic recon and market analysis</p>
+          <p className="label-mono opacity-70">Strategic search audit and market analysis</p>
         </div>
         <div className="flex items-center gap-3 px-6 py-3 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100/50">
           <Clock size={16} className="animate-pulse" />
-          <span className="label-mono !text-[11px]">Last Updated: Today, {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          <span className="label-mono !text-[11px]">Last Sync: Today, {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
       </div>
 
@@ -81,8 +89,55 @@ export default function IntelligencePage() {
       </div>
 
       <div className="grid lg:grid-cols-12 gap-10">
-        {/* Market Signals / Skills */}
-        <div className="lg:col-span-7 space-y-8">
+        {/* Search Friction Analysis */}
+        <div className="lg:col-span-7 space-y-10">
+          <div className="glass-panel p-10 space-y-10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <BarChart3 className="text-red-600" size={22} />
+                <h2 className="text-xl font-extrabold text-slate-800">Search Friction</h2>
+              </div>
+              <span className="label-mono !text-[10px] text-red-500">Rejection Audit</span>
+            </div>
+
+            {data.friction && data.friction.length > 0 ? (
+              <div className="space-y-8">
+                {data.friction.map((item: any) => (
+                  <div key={item.name} className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[13px] font-extrabold text-slate-700 flex items-center gap-2">
+                        {item.name}
+                      </span>
+                      <span className="label-mono !text-slate-900">{item.count} Signal{item.count > 1 ? 's' : ''}</span>
+                    </div>
+                    <div className="h-3 bg-slate-100 rounded-full overflow-hidden p-[2px]">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${item.percentage}%` }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        className="h-full rounded-full bg-gradient-to-r from-red-500 to-orange-500 shadow-[0_0_15px_rgba(239,68,68,0.3)]" 
+                      />
+                    </div>
+                  </div>
+                ))}
+                <p className="text-[12px] text-slate-500 font-medium leading-relaxed italic border-t border-slate-100 pt-6">
+                  <Info size={14} className="inline mr-2 text-slate-400" />
+                  These signals represent friction points identified in your Post-Mortem notes.
+                </p>
+              </div>
+            ) : (
+              <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
+                <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-slate-300">
+                  <Target size={32} />
+                </div>
+                <div className="max-w-xs">
+                  <p className="text-[13px] font-bold text-slate-400 uppercase tracking-widest mb-1">Inconclusive Data</p>
+                  <p className="text-[12px] text-slate-400 font-medium">Log your first "Post-Mortem" rejection to identify search friction patterns.</p>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="glass-panel p-10 space-y-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -113,55 +168,75 @@ export default function IntelligencePage() {
                 </div>
               ))}
             </div>
-            
-            <p className="text-[13px] text-slate-500 font-medium leading-relaxed italic">
-              AI Analysis: Market demand for skills identified in your target roles is shifting. Maintain focus on your trending proficiencies.
-            </p>
           </div>
         </div>
 
-        {/* AI Strategic Insight */}
-        <div className="lg:col-span-5 space-y-8">
+        {/* AI Strategic Insight & Usage */}
+        <div className="lg:col-span-5 space-y-10">
           <motion.div 
             whileHover={{ y: -5 }}
-            className="glass-panel p-10 bg-gradient-to-br from-indigo-600 to-violet-700 border-none relative overflow-hidden"
+            className="glass-panel p-10 bg-gradient-to-br from-slate-900 to-slate-800 border-none relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 p-8 opacity-10">
-              <BrainCircuit size={120} className="text-white" />
+              <Zap size={120} className="text-white" />
             </div>
             <div className="relative z-10 space-y-8">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
-                <Zap size={24} className="text-white" />
+              <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10">
+                <Sparkles size={24} className="text-indigo-400" />
               </div>
               <div className="space-y-3">
-                <h3 className="text-white text-2xl font-extrabold tracking-tight">Strategic Intel</h3>
-                <p className="text-indigo-50 text-[15px] font-medium leading-relaxed">
-                  {data.insight}
+                <h3 className="text-white text-2xl font-extrabold tracking-tight italic">Strategic Audit</h3>
+                <p className="text-slate-300 text-[15px] font-medium leading-relaxed">
+                  "{data.insight}"
                 </p>
               </div>
-              <button className="flex items-center gap-3 text-white font-black text-[11px] uppercase tracking-widest hover:translate-x-2 transition-transform">
-                View Target List <ArrowRight size={16} />
-              </button>
+              <div className="h-[1px] w-full bg-white/10" />
+              <p className="text-[11px] font-black uppercase tracking-widest text-indigo-400">Deep Analysis Complete</p>
             </div>
           </motion.div>
 
-          <div className="glass-panel p-8 space-y-6">
-            <div className="flex items-center gap-3">
-              <BarChart3 className="text-indigo-600" size={20} />
-              <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">Next Objectives</h3>
+          {/* Usage Command Center */}
+          <div className="glass-panel p-10 space-y-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Shield className="text-indigo-600" size={20} />
+                <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">Search Quotas</h3>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${usage?.tier === 'ELITE' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                {usage?.tier || 'Seeker'} Tier
+              </span>
             </div>
-            <div className="space-y-4">
+
+            <div className="space-y-8">
               {[
-                "Target roles with > 90% DNA Match",
-                "Follow up on 2 active applications",
-                "Review interview dossier for top leads"
-              ].map((objective, i) => (
-                <div key={i} className="flex items-center gap-4 p-4 bg-slate-50/50 rounded-xl border border-slate-100 hover:bg-white hover:shadow-lg transition-all group">
-                  <div className="w-5 h-5 rounded-md border-2 border-slate-200 group-hover:border-indigo-400 transition-colors" />
-                  <span className="text-[13px] font-medium text-slate-600">{objective}</span>
+                { label: 'Market Scans', current: usage?.scanCount, max: usage?.limits.scans, color: 'blue' },
+                { label: 'Resume Optimizations', current: usage?.optimizationCount, max: usage?.limits.optimizations, color: 'indigo' },
+                { label: 'Intelligence Briefs', current: usage?.briefCount, max: usage?.limits.briefs, color: 'violet' }
+              ].map((quota) => (
+                <div key={quota.label} className="space-y-3">
+                  <div className="flex justify-between items-center text-[11px] font-bold text-slate-600">
+                    <span>{quota.label}</span>
+                    <span>{quota.current} / {quota.max}</span>
+                  </div>
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min((quota.current / quota.max) * 100, 100)}%` }}
+                      className={`h-full bg-${quota.color}-600 rounded-full`}
+                    />
+                  </div>
+                  {quota.max === 0 && (
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase">
+                      <Lock size={10} /> Upgrade to Unlock
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
+            
+            <button className="w-full py-4 bg-slate-50 text-slate-900 text-[11px] font-black uppercase tracking-widest rounded-2xl border border-slate-100 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all flex items-center justify-center gap-3">
+              Upgrade Subscription <ArrowRight size={14} />
+            </button>
           </div>
         </div>
       </div>
