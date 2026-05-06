@@ -65,8 +65,22 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
             })}
           </nav>
 
-          <div className="pt-8 border-t border-slate-200/40 mt-auto pb-6">
-
+          <div className="pt-8 border-t border-slate-200/40 mt-auto pb-6 space-y-6">
+            {user?.tier === 'SEEKER' && (
+              <div className="glass-card p-6 rounded-[24px] bg-gradient-to-br from-blue-600 to-indigo-600 border-none shadow-xl shadow-blue-600/20 group cursor-pointer" onClick={() => window.location.href = '/pricing'}>
+                <div className="flex items-center gap-2 mb-3">
+                  <Zap className="text-blue-300 group-hover:animate-pulse" size={16} />
+                  <span className="text-[10px] font-black text-blue-100 uppercase tracking-widest">Elite Power</span>
+                </div>
+                <p className="text-[11px] text-white/90 font-bold mb-4 leading-relaxed">Unlock unlimited AI optimizations and briefs.</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Go Elite</span>
+                  <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center group-hover:bg-white group-hover:text-blue-600 transition-all">
+                    <Zap size={12} />
+                  </div>
+                </div>
+              </div>
+            )}
 
             <button 
               onClick={() => window.location.href = "/login"}
