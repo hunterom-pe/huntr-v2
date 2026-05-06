@@ -77,7 +77,7 @@ export async function POST(req: Request) {
       const out = zip.generate({ type: "nodebuffer" });
 
       await incrementUsage(session.user.email, 'optimization');
-      return new Response(out, {
+      return new Response(new Uint8Array(out), {
         headers: {
           "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
           "Content-Disposition": `attachment; filename="Optimized_Resume.docx"`
