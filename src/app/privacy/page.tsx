@@ -36,13 +36,14 @@ export default function PrivacyPolicy() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">3. How We Use Your Information</h2>
-            <p>We do not use your personal information or resume data for any purpose other than providing the core HUNTR service to you directly. Your data is never used to train external AI models, sold to advertisers, or analyzed for any secondary purposes.</p>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">3. AI Processing & Service Providers</h2>
+            <p>To provide our surgical optimization services, your document text and job descriptions are processed by Large Language Models (LLMs) via secure API (Google Gemini). We ensure that your data is handled according to strict enterprise privacy standards and is <strong>never</strong> used to train public AI models.</p>
+            <p>We also utilize trusted third-party providers for core infrastructure: <strong>Supabase</strong> (for secure cloud storage and databases) and <strong>SerpApi</strong> (for real-time job discovery data).</p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">4. Data Ownership & Sharing</h2>
-            <p>We absolutely will not share, sell, rent, or distribute any of your personal data, resumes, or job search activity to ANY third parties. You retain 100% ownership of your data and can delete your entire account history at any time from your profile settings.</p>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">4. Data Ownership & Security</h2>
+            <p>You retain 100% ownership of your data. Resumes are stored on secure, encrypted cloud infrastructure. We absolutely will not share, sell, or rent your personal data to any third parties for marketing or advertising purposes. You can delete your entire account history at any time from your profile settings.</p>
           </section>
 
           <section className="space-y-4">
@@ -52,7 +53,7 @@ export default function PrivacyPolicy() {
 
           <section className="space-y-4">
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">5. Contact Us</h2>
-            <p>If you have any questions about this Privacy Statement, please contact us at privacy@huntr.com.</p>
+            <p>If you have any questions about this Privacy Statement, please contact us at hello@precisionqaconsulting.com.</p>
           </section>
         </div>
       </main>
@@ -69,7 +70,7 @@ export default function PrivacyPolicy() {
             <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
             <Link href="/privacy" className="text-blue-600 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-blue-600 transition-colors">Terms of Service</Link>
-            <Link href="mailto:support@huntr.com" className="hover:text-blue-600 transition-colors">Contact Support</Link>
+            <Link href="mailto:hello@precisionqaconsulting.com" className="hover:text-blue-600 transition-colors">Contact Support</Link>
           </nav>
         </div>
         <div className="max-w-[1200px] mx-auto px-6 mt-8 pt-6 border-t border-slate-100 text-center">

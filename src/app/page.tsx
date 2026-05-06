@@ -290,7 +290,7 @@ export default function Home() {
             
             <div className="relative z-10 pt-8 flex flex-col sm:flex-row justify-center gap-6">
               <Link href="/login" className="btn-pill-blue !px-16 !py-6 !text-base">Create Free Account</Link>
-              <Link href="mailto:support@huntr.com" className="btn-pill-gray !px-16 !py-6 !text-base !bg-slate-50 !border-slate-200 !text-slate-600 hover:!bg-white">Contact Sales</Link>
+              <Link href="mailto:hello@precisionqaconsulting.com" className="btn-pill-gray !px-16 !py-6 !text-base !bg-slate-50 !border-slate-200 !text-slate-600 hover:!bg-white">Contact Sales</Link>
             </div>
 
             <div className="pt-12 flex justify-center items-center gap-10 text-[11px] font-black uppercase tracking-[0.3em] text-slate-400 relative z-10">
@@ -339,7 +339,7 @@ export default function Home() {
               <ul className="space-y-4 text-sm font-bold text-slate-500">
                 <li><Link href="/privacy" className="hover:text-blue-600 transition-colors">Privacy</Link></li>
                 <li><Link href="/terms" className="hover:text-blue-600 transition-colors">Terms</Link></li>
-                <li><Link href="mailto:support@huntr.com" className="hover:text-blue-600 transition-colors">Support</Link></li>
+                <li><Link href="mailto:hello@precisionqaconsulting.com" className="hover:text-blue-600 transition-colors">Support</Link></li>
               </ul>
             </div>
           </div>

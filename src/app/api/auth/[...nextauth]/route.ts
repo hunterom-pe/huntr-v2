@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { sendWelcomeEmail } from "@/lib/email";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any, // Cast needed for NextAuth v4
@@ -58,6 +59,13 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+  events: {
+    async createUser({ user }) {
+      if (user.email) {
+        await sendWelcomeEmail(user.email, user.name);
+      }
+    }
+  },
   callbacks: {
     async session({ session, token }) {
       if (token && session.user) {

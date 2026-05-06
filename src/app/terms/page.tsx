@@ -31,8 +31,9 @@ export default function TermsOfService() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">2. Data Ownership and Privacy</h2>
-            <p>You retain full ownership of all data, resumes, and personal information you provide to HUNTR. We guarantee that we will never use, share, sell, or distribute any of your data to any third party for any reason. Your information exists within HUNTR solely to automate your personal job search.</p>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">2. AI Optimization & Third-Party Services</h2>
+            <p>HUNTR utilizes state-of-the-art Artificial Intelligence (including Google Gemini) and third-party data providers (SerpApi) to automate your job search. By using the Service, you acknowledge that optimized content and job search results are provided as-is, and you are responsible for reviewing all AI-generated content before submission to third-party employers.</p>
+            <p>Our service availability is dependent on the uptime of these third-party providers. We do not use your personal data to train external AI models.</p>
           </section>
 
           <section className="space-y-4">
@@ -64,7 +65,7 @@ export default function TermsOfService() {
             <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
             <Link href="/privacy" className="hover:text-blue-600 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="text-blue-600 transition-colors">Terms of Service</Link>
-            <Link href="mailto:support@huntr.com" className="hover:text-blue-600 transition-colors">Contact Support</Link>
+            <Link href="mailto:hello@precisionqaconsulting.com" className="hover:text-blue-600 transition-colors">Contact Support</Link>
           </nav>
         </div>
         <div className="max-w-[1200px] mx-auto px-6 mt-8 pt-6 border-t border-slate-100 text-center">

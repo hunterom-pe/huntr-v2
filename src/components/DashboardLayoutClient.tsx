@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Briefcase, User, LogOut, Zap, Menu, Bell, CheckCircle2, Activity, MessageSquare, Settings } from "lucide-react";
 import { useState } from "react";
+import { signOut } from "next-auth/react";
 import { useNotifications } from "@/lib/NotificationContext";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -68,7 +69,7 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
 
           <div className="pt-8 border-t border-slate-200/40 mt-auto pb-6 space-y-6">
             <button 
-              onClick={() => window.location.href = "/login"}
+              onClick={() => signOut({ callbackUrl: "/login" })}
               className="flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all border border-transparent hover:border-red-100 mb-4"
             >
               <LogOut size={20} />

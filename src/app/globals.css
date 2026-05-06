@@ -5,6 +5,14 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+section[id] {
+  scroll-margin-top: 120px;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #0f172a;
