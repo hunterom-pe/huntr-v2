@@ -243,30 +243,38 @@ export async function POST(req: Request) {
     const isRemoteOnly = body.remoteOnly === true || isRemoteKeyword;
     const isUSA = location.toLowerCase() === "usa" || location.toLowerCase() === "united states" || isRemoteKeyword;
     
-    // For specific cities, we use the official filter. For USA/Broad, we use keywords as a fallback.
-    const query = encodeURIComponent(title);
-    const searchLocation = isUSA ? "United States" : encodeURIComponent(location);
-    
-    // Always use the official Remote filter if Remote is requested
-    const remoteParam = isRemoteOnly ? "&ltype=1" : "";
-    
-    // 2. Handle Job Type Chips
-    // Mapping: fulltime -> jt:fulltime, contract -> jt:contract, etc.
-    let chipsParam = "";
-    if (body.jobType) {
-      const typeMap: Record<string, string> = {
-        fulltime: "jt:fulltime",
-        contract: "jt:contract",
-        internship: "jt:internship"
-      };
-      const chip = typeMap[body.jobType as string];
-      if (chip) {
-        chipsParam = `&chips=${encodeURIComponent(chip)}`;
-      }
-    }
+    const searchLocation = isUSA ? "USA" : location;
+    const remoteParam = isRemoteOnly ? "1" : "";
     
     const fetchJobs = async (start: number) => {
-      const url = `https://serpapi.com/search.json?engine=google_jobs&q=${query}&location=${searchLocation}&gl=us&hl=en&start=${start}&api_key=${SERPAPI_KEY}${remoteParam}${chipsParam}`;
+      const params = new URLSearchParams({
+        engine: "google_jobs",
+        q: title,
+        location: searchLocation,
+        gl: "us",
+        hl: "en",
+        start: start.toString(),
+        api_key: SERPAPI_KEY || ""
+      });
+
+      if (remoteParam) {
+        params.append("ltype", remoteParam);
+      }
+
+      if (body.jobType) {
+        const typeMap: Record<string, string> = {
+          fulltime: "jt:fulltime",
+          contract: "jt:contract",
+          internship: "jt:internship"
+        };
+        const chip = typeMap[body.jobType as string];
+        if (chip) {
+          params.append("chips", chip);
+        }
+      }
+
+      const url = `https://serpapi.com/search.json?${params.toString()}`;
+      console.log("SerpApi Fetch URL:", url);
       const res = await fetch(url);
       if (!res.ok) return { jobs_results: [] };
       return res.json();
