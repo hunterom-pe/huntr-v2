@@ -2,6 +2,35 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import path from "path";
 import fs from "fs/promises";
 
+// Helper for model rotation and auto-retry
+async function runWithRotation(genAI: any, prompt: string) {
+  const modelsToTry = [
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-lite",
+    "gemini-2.5-pro"
+  ];
+
+  let lastError = null;
+
+  for (const modelName of modelsToTry) {
+    try {
+      console.log(`Attempting AI run with model: ${modelName}`);
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      return { text: response.text(), modelName };
+    } catch (error: any) {
+      lastError = error;
+      console.warn(`Model ${modelName} failed: ${error.message}`);
+      // If it's a 404 or 429, continue to next model
+      continue;
+    }
+  }
+
+  throw lastError || new Error("All AI models failed to respond.");
+}
+
 export async function optimizeResumeContent(resumeText: string, jobDescription: string) {
   // Demo Mode Fallback: If no API key is provided, return a realistic mock response instantly
   if (!process.env.GEMINI_API_KEY) {
@@ -21,7 +50,7 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
     };
   }
 
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
 
   const prompt = `
     You are an expert career coach. Your goal is ATS Optimization (Precise Mapping).
@@ -51,56 +80,31 @@ export async function optimizeResumeContent(resumeText: string, jobDescription: 
     }
   `;
 
-  const modelsToTry = [
-    "gemini-2.5-flash",
-    "gemini-2.0-flash",
-    "gemini-2.0-flash-lite",
-    "gemini-2.5-pro"
-  ];
-
-  let lastError = null;
-
-  for (const modelName of modelsToTry) {
-    try {
-      console.log(`Attempting optimization with model: ${modelName}`);
-      const model = genAI.getGenerativeModel({ model: modelName });
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      
-      // BULLETPROOF LOGGING
-      const logPath = path.join(process.cwd(), "scratch/engine_debug.log");
-      const logEntry = `\n--- AI SUCCESS WITH ${modelName} AT ${new Date().toISOString()} ---\nRAW RESPONSE:\n${text}\n---------------------------\n`;
-      await fs.appendFile(logPath, logEntry).catch(() => {});
-      
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        try {
-          const opt = JSON.parse(jsonMatch[0]);
-          return opt;
-        } catch (e: any) {
-          await fs.appendFile(logPath, `JSON PARSE FAILED (${modelName}): ${e.message}\n`).catch(() => {});
-        }
+  try {
+    const { text, modelName } = await runWithRotation(genAI, prompt);
+    
+    // BULLETPROOF LOGGING
+    const logPath = path.join(process.cwd(), "scratch/engine_debug.log");
+    const logEntry = `\n--- AI SUCCESS WITH ${modelName} AT ${new Date().toISOString()} ---\nRAW RESPONSE:\n${text}\n---------------------------\n`;
+    await fs.appendFile(logPath, logEntry).catch(() => {});
+    
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        return JSON.parse(jsonMatch[0]);
+      } catch (e: any) {
+        await fs.appendFile(logPath, `JSON PARSE FAILED (${modelName}): ${e.message}\n`).catch(() => {});
       }
-    } catch (error: any) {
-      lastError = error;
-      console.warn(`Model ${modelName} failed: ${error.message}`);
-      const logPath = path.join(process.cwd(), "scratch/engine_debug.log");
-      await fs.appendFile(logPath, `MODEL ${modelName} FAILED: ${error.message}\n`).catch(() => {});
-      // If it's a 404 or 429, continue to next model
-      continue;
     }
+    throw new Error("No JSON found in AI response");
+  } catch (error: any) {
+    console.error("AI Optimization Critical Failure:", error.message);
+    return { originalSummary: "", newSummary: "", bulletReplacements: [] };
   }
-
-  // If we reach here, all models failed
-  const logPath = path.join(process.cwd(), "scratch/engine_debug.log");
-  await fs.appendFile(logPath, `CRITICAL ERROR: All models failed. Last error: ${lastError?.message}\n`).catch(() => {});
-  return { originalSummary: "", newSummary: "", bulletReplacements: [] };
 }
 
 export async function generateFollowUpEmail(jobTitle: string, companyName: string) {
   if (!process.env.GEMINI_API_KEY) {
-    await new Promise(resolve => setTimeout(resolve, 800));
     return `Subject: Follow-up: ${jobTitle} application - [Your Name]
 
 Dear Hiring Team at ${companyName},
@@ -109,15 +113,13 @@ I hope this email finds you well.
 
 I'm writing to briefly follow up on my application for the ${jobTitle} position that I submitted last week. I remain very enthusiastic about the opportunity to join ${companyName} and contribute to your team.
 
-If there is any additional information I can provide to assist in the review process, please let me know. I look forward to hearing from you.
+Looking forward to hearing from you.
 
 Best regards,
-[Your Name]
-[Your Phone Number]
-[Your LinkedIn Profile]`;
+[Your Name]`;
   }
 
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
 
   const prompt = `
     You are a professional career advisor. 
@@ -133,27 +135,21 @@ Best regards,
   `;
 
   try {
-    console.log(`Generating follow-up for ${jobTitle} at ${companyName}...`);
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text().trim();
+    const { text } = await runWithRotation(genAI, prompt);
+    return text.trim();
   } catch (error: any) {
     console.error("AI Follow-up Generation Error:", error.message || error);
-    // Return fallback even if API fails (e.g. quota exceeded)
+    // Return fallback even if API fails
     return `Subject: Follow-up: ${jobTitle} application - [Your Name]
 
 Dear Hiring Team at ${companyName},
 
 I hope this email finds you well. 
 
-I'm writing to briefly follow up on my application for the ${jobTitle} position that I submitted last week. I remain very enthusiastic about the opportunity to join ${companyName} and contribute to your team.
-
-If there is any additional information I can provide to assist in the review process, please let me know. I look forward to hearing from you.
+I'm writing to briefly follow up on my application for the ${jobTitle} position. I remain very enthusiastic about the opportunity to join ${companyName}.
 
 Best regards,
-[Your Name]
-[Your Phone Number]
-[Your LinkedIn Profile]`;
+[Your Name]`;
   }
 }
 
