@@ -1,9 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Check, ArrowRight, Sparkles, Zap, Shield } from "lucide-react";
+import { Check, ArrowRight, Sparkles, Zap, Shield, LayoutDashboard } from "lucide-react";
+import { useSession } from "next-auth/react";
+
 
 export default function PricingPage() {
+  const { data: session } = useSession();
+
   return (
     <div className="min-h-screen bg-[#fafafa] selection:bg-blue-200">
       {/* Navigation */}
@@ -19,13 +23,22 @@ export default function PricingPage() {
             <Link href="/pricing" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-900">Pricing</Link>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/login" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-600 hover:text-slate-900 transition-colors">Log In</Link>
-            <Link href="/onboarding" className="btn-primary px-8 py-3.5 hidden sm:flex items-center gap-2">
-              Start Free <ArrowRight size={16} />
-            </Link>
+            {session ? (
+              <Link href="/dashboard" className="btn-primary px-8 py-3.5 flex items-center gap-2">
+                <LayoutDashboard size={16} /> Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link href="/login" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-600 hover:text-slate-900 transition-colors">Log In</Link>
+                <Link href="/onboarding" className="btn-primary px-8 py-3.5 hidden sm:flex items-center gap-2">
+                  Start Free <ArrowRight size={16} />
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
+
 
       {/* Hero Section */}
       <div className="pt-40 pb-20 px-6 text-center">
