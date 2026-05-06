@@ -66,22 +66,6 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
           </nav>
 
           <div className="pt-8 border-t border-slate-200/40 mt-auto pb-6 space-y-6">
-            {user?.tier === 'SEEKER' && (
-              <div className="glass-card p-6 rounded-[24px] bg-gradient-to-br from-blue-600 to-indigo-600 border-none shadow-xl shadow-blue-600/20 group cursor-pointer" onClick={() => window.location.href = '/pricing'}>
-                <div className="flex items-center gap-2 mb-3">
-                  <Zap className="text-blue-300 group-hover:animate-pulse" size={16} />
-                  <span className="text-[10px] font-black text-blue-100 uppercase tracking-widest">Elite Power</span>
-                </div>
-                <p className="text-[11px] text-white/90 font-bold mb-4 leading-relaxed">Unlock unlimited AI optimizations and briefs.</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Go Elite</span>
-                  <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center group-hover:bg-white group-hover:text-blue-600 transition-all">
-                    <Zap size={12} />
-                  </div>
-                </div>
-              </div>
-            )}
-
             <button 
               onClick={() => window.location.href = "/login"}
               className="flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all border border-transparent hover:border-red-100 mb-4"
@@ -90,6 +74,7 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
               Log Out
             </button>
           </div>
+
 
         </div>
       </aside>
@@ -107,12 +92,23 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
           </div>
 
           <div className="flex items-center gap-8">
+            {user?.tier === 'SEEKER' && (
+              <Link 
+                href="/pricing"
+                className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+              >
+                <Zap size={12} />
+                Go Elite
+              </Link>
+            )}
+
             <div className="relative">
               <button 
                 onClick={() => setIsNotifOpen(!isNotifOpen)}
                 className="p-3 glass-card rounded-[18px] relative text-slate-400 hover:text-slate-900 border-white bg-white/60 hover:shadow-xl transition-all"
               >
                 <Bell size={18} />
+
                 {unreadCount > 0 && (
                   <div className="absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px] bg-red-600 rounded-full border-[3px] border-white flex items-center justify-center text-[10px] font-black text-white px-1 shadow-2xl shadow-red-500/50">
                     {unreadCount}
