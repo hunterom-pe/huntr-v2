@@ -9,9 +9,9 @@ export const TIER_LIMITS = {
     playbooks: 0,
   },
   ELITE: {
-    optimizations: 100, // "Unlimited" for humans
-    briefs: 25,
-    scans: 50,
+    optimizations: 25, 
+    briefs: 15,
+    scans: 10,
     playbooks: 9999,
   },
   PROFESSIONAL: {

@@ -82,20 +82,36 @@ export async function GET() {
       }
     }
 
-    // Skill signals (Dynamic fallback based on job title)
-    const baseSkills = user.jobTitle?.toLowerCase().includes('design') 
-      ? [
-          { name: "Figma Mastery", level: 95, trending: true },
-          { name: "Design Systems", level: 88, trending: true },
-          { name: "Prototyping", level: 82, trending: false },
-          { name: "User Research", level: 75, trending: true }
-        ]
-      : [
-          { name: "React / Next.js", level: 95, trending: true },
-          { name: "TypeScript", level: 90, trending: true },
-          { name: "System Design", level: 82, trending: false },
-          { name: "Cloud Architecture", level: 75, trending: true }
-        ];
+    // --- REAL-TIME MARKET SKILLS (Analyzed from your scans) ---
+    const allDescriptions = trackedJobs.map(j => j.description).join(" ").toLowerCase();
+    
+    // Define skills to look for based on job title
+    const techKeywords = ["react", "next.js", "typescript", "node", "python", "aws", "docker", "kubernetes", "system design", "figma", "tailwind", "graphql", "postgresql", "mongodb"];
+    const designKeywords = ["figma", "sketch", "adobe xd", "ui design", "ux research", "prototyping", "design systems", "wireframing", "branding", "user testing"];
+    
+    const keywordsToSearch = user.jobTitle?.toLowerCase().includes('design') ? designKeywords : techKeywords;
+    
+    const marketSkills = keywordsToSearch.map(skill => {
+      const regex = new RegExp(`\\b${skill.replace('.', '\\.')}\\b`, 'gi');
+      const count = (allDescriptions.match(regex) || []).length;
+      const totalJobs = trackedJobs.length || 1;
+      // Calculate a "Level" (0-100) based on frequency
+      const level = Math.min(Math.round((count / totalJobs) * 100) + 15, 100); 
+      return { 
+        name: skill.charAt(0).toUpperCase() + skill.slice(1), 
+        level, 
+        trending: level > 70 
+      };
+    })
+    .sort((a, b) => b.level - a.level)
+    .slice(0, 5);
+
+    // Trending Skills (Industry Benchmarks - keeping some context)
+    const industryTrends = [
+      { name: "AI/LLM Integration", level: 92, trending: true },
+      { name: "Serverless Architecture", level: 78, trending: true },
+      { name: "Edge Computing", level: 65, trending: false }
+    ];
 
     return NextResponse.json({
       stats: [
@@ -103,7 +119,8 @@ export async function GET() {
         { label: "Avg DNA Match", value: `${avgMatch}%`, sub: avgMatch > 90 ? "Top 5% of candidates" : "Highly competitive", color: "emerald" },
         { label: "Profile Strength", value: avgMatch > 85 ? "Elite" : "Strong", sub: "Based on match scores", color: "indigo" }
       ],
-      skills: baseSkills,
+      marketSkills,
+      industryTrends,
       friction: frictionData,
       insight: strategicInsight
     });

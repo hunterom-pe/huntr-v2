@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { LayoutDashboard, Briefcase, User, LogOut, Zap, Menu, Bell, CheckCircle2, Activity, MessageSquare, Settings } from "lucide-react";
+import { LayoutDashboard, Briefcase, User, LogOut, Zap, Menu, Bell, CheckCircle2, Activity, MessageSquare, Settings, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { signOut } from "next-auth/react";
 import { useNotifications } from "@/lib/NotificationContext";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { motion, AnimatePresence } from "framer-motion";
+import { ThemeToggle } from "./ui/ThemeToggle";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -22,6 +23,14 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const { notifications, unreadCount, markAsRead, markAllAsRead, addNotification } = useNotifications();
+  const [mainRef, setMainRef] = useState<HTMLElement | null>(null);
+
+  // Scroll to top on navigation
+  useEffect(() => {
+    if (mainRef) {
+      mainRef.scrollTo(0, 0);
+    }
+  }, [pathname, mainRef]);
 
   useEffect(() => {
     if (searchParams.get('checkout') === 'success') {
@@ -41,8 +50,8 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
   const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Intelligence", href: "/dashboard/intelligence", icon: Activity },
-    { name: "Interviews", href: "/dashboard/interviews", icon: MessageSquare },
     { name: "Applications", href: "/dashboard/applications", icon: Briefcase },
+    { name: "Interviews", href: "/dashboard/interviews", icon: MessageSquare },
     { name: "Profile", href: "/dashboard/profile", icon: Settings },
   ];
 
@@ -82,10 +91,11 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
             })}
           </nav>
 
-          <div className="pt-8 border-t border-slate-200/40 mt-auto pb-6 space-y-6">
+          <div className="pt-8 border-t border-slate-200/40 dark:border-slate-800 mt-auto pb-6 space-y-4">
+            <ThemeToggle />
             <button 
               onClick={() => signOut({ callbackUrl: "/login" })}
-              className="flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all border border-transparent hover:border-red-100 mb-4"
+              className="flex items-center gap-4 px-4 py-3.5 rounded-2xl w-full text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 transition-all border border-transparent hover:border-red-100 dark:hover:border-red-900/50"
             >
               <LogOut size={20} />
               Log Out
@@ -120,6 +130,21 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
                 >
                   <Zap size={12} className="fill-current" />
                   Go Elite
+                </Link>
+              </motion.div>
+            )}
+
+            {user?.tier === 'ELITE' && (
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link 
+                  href="/pricing"
+                  className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-500 hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-600/20"
+                >
+                  <Sparkles size={12} className="fill-current text-indigo-200" />
+                  Go Professional
                 </Link>
               </motion.div>
             )}
@@ -179,7 +204,7 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
               <div className="text-right hidden sm:block">
                 <div className="text-[13px] font-black text-slate-900 tracking-tight leading-none">{displayName}</div>
                 <div className="label-mono !text-blue-600 !text-[9px] mt-1.5 opacity-80">
-                  {user?.tier === 'ELITE' ? 'Elite Member' : user?.tier === 'PROFESSIONAL' ? 'Pro Member' : 'Seeker Member'}
+                  {user?.tier === 'ELITE' ? 'Elite Member' : user?.tier === 'PROFESSIONAL' ? 'Professional Member' : 'Seeker Member'}
                 </div>
 
               </div>
@@ -190,7 +215,9 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
           </div>
         </header>
 
-        <main className="glass-panel flex-1 p-8 md:p-12 overflow-y-auto border-white/60 shadow-2xl shadow-slate-200/50 scrollbar-hide">
+        <main 
+          ref={setMainRef}
+          className="glass-panel flex-1 p-8 md:p-12 overflow-y-auto border-white/60 shadow-2xl shadow-slate-200/50 scrollbar-hide">
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}

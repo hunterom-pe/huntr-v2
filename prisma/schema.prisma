@@ -87,7 +87,20 @@ model Job {
   userId      String
   rejectionReason String?
   rejectionNotes  String?
+  optimizedSummary String? @db.Text
+  optimizedBullets Json?
   createdAt   DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SearchCache {
+  id        String   @id @default(cuid())
+  query     String
+  location  String
+  results   Json
+  createdAt DateTime @default(now())
+
+  @@unique([query, location])
+  @@index([query, location])
 }
 

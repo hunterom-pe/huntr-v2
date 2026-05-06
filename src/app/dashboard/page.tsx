@@ -30,12 +30,17 @@ interface Job {
 }
 
 
+import useSWR from "swr";
+import { Skeleton, JobCardSkeleton, StatsSkeleton } from "@/components/ui/Skeleton";
+
 export default function DashboardPage() {
+  const { data: trackedData, isLoading: isTrackedLoading, mutate: mutateTracked } = useSWR("/api/jobs/tracked");
+  const { data: usageData, mutate: mutateUsage } = useSWR("/api/user/usage");
+
   const [currentPage, setCurrentPage] = useState(0);
   const jobsPerPage = 8;
   const [isScanning, setIsScanning] = useState(false);
 
-  const [isLoading, setIsLoading] = useState(true);
   const [hasScanned, setHasScanned] = useState(false);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [optimizingId, setOptimizingId] = useState<string | null>(null);
@@ -60,26 +65,33 @@ export default function DashboardPage() {
   const [remoteOnly, setRemoteOnly] = useState(false);
   const { notifications, addNotification, markAsRead } = useNotifications();
   const router = useRouter();
-  const [usage, setUsage] = useState<{ 
-    optimizationCount: number; 
-    scanCount: number; 
-    briefCount: number; 
-    tier: string;
-    limits: any;
-  } | null>(null);
+  
   const [showUpgradeModal, setShowUpgradeModal] = useState<{ type: 'scan' | 'optimization' | 'brief' | 'playbook' } | null>(null);
 
-  const fetchUsage = async () => {
-    try {
-      const res = await fetch("/api/user/usage");
-      if (res.ok) {
-        const data = await res.json();
-        setUsage(data.usage);
+  // Sync SWR data to local state
+  useEffect(() => {
+    if (trackedData?.jobs) {
+      setJobs(prev => {
+        const wishlistJobs = prev.filter(j => j.status === 'WISHLIST');
+        const trackedJobs = trackedData.jobs;
+        
+        // Merge: Keep all tracked jobs, and append wishlist jobs that aren't already tracked
+        const merged = [...trackedJobs];
+        wishlistJobs.forEach(wj => {
+          if (!merged.find(mj => mj.id === wj.id)) {
+            merged.push(wj);
+          }
+        });
+        return merged;
+      });
+      if (trackedData.jobs.some((j: Job) => j.status === 'WISHLIST')) {
+        setHasScanned(true);
       }
-    } catch (e) {
-      console.error("Failed to fetch usage", e);
     }
-  };
+  }, [trackedData]);
+
+  const usage = usageData?.usage;
+  const fetchUsage = () => mutateUsage();
 
 
 
@@ -126,6 +138,7 @@ export default function DashboardPage() {
             return updatedJobs;
           });
           setHasScanned(true);
+          mutateUsage();
         }
       } else {
         addNotification({
@@ -158,30 +171,20 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!isBrowser) return;
 
-    const fetchTrackedJobs = async () => {
-      try {
-        const response = await fetch("/api/jobs/tracked");
-        const data = await response.json();
-        if (data.jobs && data.jobs.length > 0) {
-          setJobs(data.jobs);
-          if (data.jobs.some((j: Job) => j.status === 'WISHLIST')) {
-            setHasScanned(true);
-          }
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTrackedJobs();
-    fetchUsage();
-
     // Trigger automatic scan if requested via URL
     if (typeof window !== 'undefined' && window.location.search.includes('scan=true') && !hasScanned && !isScanning) {
       startScan();
       window.history.replaceState({}, '', '/dashboard');
     }
   }, [isBrowser, hasScanned, isScanning]);
+
+  // Scroll main container to top when page changes
+  useEffect(() => {
+    const main = document.querySelector('main');
+    if (main) {
+      main.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentPage]);
 
 
     const handleStatusChange = async (id: string, newStatus: Job['status']) => {
@@ -289,7 +292,7 @@ export default function DashboardPage() {
       const response = await fetch("/api/jobs/search", { 
         method: "POST", 
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: 'optimize', jobDescription: job.description }) 
+        body: JSON.stringify({ action: 'optimize', jobDescription: job.description, jobId: job.id }) 
       });
       console.log("Optimization Response Status:", response.status);
       
@@ -497,25 +500,23 @@ export default function DashboardPage() {
   const paginatedWishlist = wishlistJobs.slice(currentPage * jobsPerPage, (currentPage + 1) * jobsPerPage);
   const totalPages = Math.ceil(wishlistJobs.length / jobsPerPage);
 
-  if (isLoading) {
+  if (isTrackedLoading && !hasScanned) {
     return (
-      <div className="space-y-12 animate-pulse">
+      <div className="space-y-12">
         <div className="flex justify-between items-center mb-4">
-          <div className="h-10 w-64 bg-slate-200 rounded-xl" />
-          <div className="h-12 w-40 bg-slate-200 rounded-2xl" />
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-12 w-40 rounded-2xl" />
         </div>
         <div className="grid xl:grid-cols-12 gap-10">
           <div className="xl:col-span-8 space-y-8">
-            <div className="h-6 w-32 bg-slate-100 rounded-lg mb-4" />
-            {[1, 2, 3].map(i => (
-              <div key={i} className="glass-card p-10 h-64 bg-white/50 border-white/40" />
-            ))}
+            <Skeleton className="h-6 w-32 rounded-lg mb-4" />
+            <JobCardSkeleton />
+            <JobCardSkeleton />
+            <JobCardSkeleton />
           </div>
           <div className="xl:col-span-4 space-y-6">
-            <div className="h-6 w-40 bg-slate-100 rounded-lg" />
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-32 glass-card bg-white/30 border-white/20" />
-            ))}
+            <Skeleton className="h-6 w-40 rounded-lg" />
+            <Skeleton className="h-full w-full rounded-[32px] min-h-[500px]" />
           </div>
         </div>
       </div>
@@ -721,7 +722,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="flex gap-2">
                           <button 
-                            onClick={() => { setCurrentPage(prev => Math.max(0, prev - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                            onClick={() => { setCurrentPage(prev => Math.max(0, prev - 1)); }}
                             disabled={currentPage === 0}
                             className="btn-glass px-4 py-2 rounded-xl text-[10px] font-black uppercase disabled:opacity-30"
                           >

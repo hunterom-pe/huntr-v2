@@ -39,24 +39,64 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "No resume found" }, { status: 404 });
       }
 
-      // 1. Fetch Resume
-      let buffer: Buffer;
-      if (user.resumePath.startsWith("http")) {
-        const res = await fetch(user.resumePath);
-        buffer = Buffer.from(await res.arrayBuffer());
+      const jobId = body.jobId;
+      const existingJob = jobId ? await prisma.job.findUnique({ where: { id: jobId } }) : null;
+
+      let opt: any = null;
+
+      // 1. Check if we already optimized this specific job
+      if (existingJob?.optimizedSummary) {
+        console.log(`[OPTIMIZE] Cache Hit for Job ${jobId}`);
+        opt = {
+          newSummary: existingJob.optimizedSummary,
+          bulletReplacements: existingJob.optimizedBullets
+        };
       } else {
-        const filePath = path.join(process.cwd(), "storage/resumes", path.basename(user.resumePath));
-        buffer = await fs.readFile(filePath);
+        // 2. AI Optimization (Cache Miss)
+        console.log(`[OPTIMIZE] Cache Miss for Job ${jobId}. Calling Gemini...`);
+        
+        // Fetch Resume
+        let buffer: Buffer;
+        if (user.resumePath.startsWith("http")) {
+          const res = await fetch(user.resumePath);
+          buffer = Buffer.from(await res.arrayBuffer());
+        } else {
+          const filePath = path.join(process.cwd(), "storage/resumes", path.basename(user.resumePath));
+          buffer = await fs.readFile(filePath);
+        }
+
+        const extracted = await mammoth.extractRawText({ buffer });
+        opt = await optimizeResumeContent(extracted.value, body.jobDescription || "");
+        
+        if (!opt) return NextResponse.json({ error: "AI failed" }, { status: 422 });
+
+        // Save result to cache
+        if (existingJob) {
+          await prisma.job.update({
+            where: { id: existingJob.id },
+            data: {
+              optimizedSummary: opt.newSummary,
+              optimizedBullets: opt.bulletReplacements,
+              // If it was in wishlist, mark as applied now that we optimized it
+              status: existingJob.status === 'WISHLIST' ? 'APPLIED' : existingJob.status
+            }
+          }).catch(e => console.error("Failed to cache optimization:", e));
+        }
+
+        await incrementUsage(session.user.email, 'optimization');
       }
 
-      // 2. AI Optimization
-      const extracted = await mammoth.extractRawText({ buffer });
-      const opt = await optimizeResumeContent(extracted.value, body.jobDescription || "");
-      
-      if (!opt) return NextResponse.json({ error: "AI failed" }, { status: 422 });
+      // 3. Surgical XML Update (using the 'opt' data, whether from cache or AI)
+      let resumeBuffer: Buffer;
+      if (user.resumePath.startsWith("http")) {
+        const res = await fetch(user.resumePath);
+        resumeBuffer = Buffer.from(await res.arrayBuffer());
+      } else {
+        const filePath = path.join(process.cwd(), "storage/resumes", path.basename(user.resumePath));
+        resumeBuffer = await fs.readFile(filePath);
+      }
 
-      // 3. Surgical XML Update
-      const zip = new PizZip(buffer);
+      const zip = new PizZip(resumeBuffer);
       const xml = zip.file("word/document.xml")?.asText();
       if (!xml) throw new Error("XML Read Error");
 
@@ -66,9 +106,13 @@ export async function POST(req: Request) {
 
       const updated = paragraphs.map(p => {
         const clean = getCleanText(p);
-        if (clean.includes(opt.originalSummary?.substring(0, 30) || "____")) {
-          const pPr = p.match(/<w:pPr>.*?<\/w:pPr>/)?.[0] || '';
-          return `<w:p>${pPr}<w:r><w:t>${xmlEscape(opt.newSummary || "")}</w:t></w:r>`;
+        if (opt.newSummary && opt.originalSummary && clean.includes(opt.originalSummary.substring(0, 30))) {
+          return p.replace(/<w:r>[\s\S]*<\/w:r>/, `<w:r><w:t>${xmlEscape(opt.newSummary)}</w:t></w:r>`);
+        }
+        for (const bullet of opt.bulletReplacements || []) {
+          if (bullet.new && bullet.original && clean.includes(bullet.original.substring(0, 30))) {
+            return p.replace(/<w:r>[\s\S]*<\/w:r>/, `<w:r><w:t>${xmlEscape(bullet.new)}</w:t></w:r>`);
+          }
         }
         return p;
       });
@@ -76,7 +120,6 @@ export async function POST(req: Request) {
       zip.file("word/document.xml", updated.join(""));
       const out = zip.generate({ type: "nodebuffer" });
 
-      await incrementUsage(session.user.email, 'optimization');
       return new Response(new Uint8Array(out), {
         headers: {
           "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -105,65 +148,81 @@ export async function POST(req: Request) {
     const isRemote = loc.toLowerCase().includes("remote") || loc.toLowerCase().includes("usa");
     const q = isRemote ? `${title} Remote` : title;
 
-    // Normalize location to SerpApi canonical name (e.g. "Brooklyn, NY" -> "Brooklyn,New York,United States")
+    // --- STEP 1: PRUNE OLD CACHE (Housekeeping to save DB space) ---
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    await prisma.searchCache.deleteMany({ where: { createdAt: { lt: sevenDaysAgo } } }).catch(() => {});
+
+    // --- STEP 2: NORMALIZE LOCATION & CHECK CACHE ---
     let serpLocation = "";
     if (!isRemote) {
+      // Check if we have a location mapping in cache already
       try {
         const locRes = await fetch(`https://serpapi.com/locations.json?q=${encodeURIComponent(loc)}&limit=1`);
         const locData = await locRes.json();
         if (locData.length > 0) {
           serpLocation = locData[0].canonical_name || locData[0].name || loc;
-          console.log(`[DEBUG] Location Normalized: "${loc}" -> "${serpLocation}"`);
         } else {
           serpLocation = loc;
-          console.log(`[DEBUG] Location not found in SerpApi, using raw: "${loc}"`);
         }
       } catch {
         serpLocation = loc;
       }
     }
 
-    const fetchJobs = async (start: number) => {
-      try {
-        const p = new URLSearchParams({
-          engine: "google_jobs",
-          q,
-          gl: "us",
-          hl: "en",
-          start: start.toString(),
-          api_key: key
-        });
-        if (serpLocation) p.append("location", serpLocation);
-        
-        // Only force remote if the location is actually Remote/USA or the user requested it
-        if (isRemote || body.remoteOnly) {
-          p.append("ltype", "1");
-        }
-        
-        const res = await fetch(`https://serpapi.com/search.json?${p.toString()}`);
-        const data = await res.json();
-        console.log(`[DEBUG] SerpApi Response (Start: ${start}):`, {
-          has_results: !!data.jobs_results,
-          count: data.jobs_results?.length || 0,
-          error: data.error || "none"
-        });
-        return data.jobs_results || [];
-      } catch {
-        return [];
-      }
-    };
+    const cacheKey = { query: q, location: serpLocation || loc };
+    const cached = await prisma.searchCache.findUnique({
+      where: { query_location: cacheKey }
+    });
 
-    const results = await Promise.all([fetchJobs(0), fetchJobs(10), fetchJobs(20)]);
-    let allJobs = results.flat();
-    
-    // When searching a specific city, filter out purely remote/anywhere listings
-    if (!isRemote && allJobs.length > 0) {
-      const filtered = allJobs.filter((j: any) => {
-        const jLoc = (j.location || "").toLowerCase();
-        return jLoc !== "anywhere" && jLoc !== "remote" && !jLoc.startsWith("anywhere");
-      });
-      // Only use filtered if it didn't wipe everything out
-      if (filtered.length > 0) allJobs = filtered;
+    let allJobs: any[] = [];
+
+    // If cached and fresh (< 24h), use it to save SerpApi credits
+    if (cached && (Date.now() - new Date(cached.createdAt).getTime()) < 24 * 60 * 60 * 1000) {
+      console.log(`[CACHE] Hit: ${q} in ${serpLocation || 'Remote'}`);
+      allJobs = cached.results as any[];
+    } else {
+      console.log(`[CACHE] Miss: Fetching ${q} from SerpApi`);
+      const fetchJobs = async (start: number) => {
+        try {
+          const p = new URLSearchParams({
+            engine: "google_jobs",
+            q,
+            gl: "us",
+            hl: "en",
+            start: start.toString(),
+            api_key: key
+          });
+          if (serpLocation) p.append("location", serpLocation);
+          if (isRemote || body.remoteOnly) p.append("ltype", "1");
+          
+          const res = await fetch(`https://serpapi.com/search.json?${p.toString()}`);
+          const data = await res.json();
+          return data.jobs_results || [];
+        } catch {
+          return [];
+        }
+      };
+
+      const results = await Promise.all([fetchJobs(0), fetchJobs(10), fetchJobs(20)]);
+      allJobs = results.flat();
+
+      // Normalize results for local city searches
+      if (!isRemote && allJobs.length > 0) {
+        const filtered = allJobs.filter((j: any) => {
+          const jLoc = (j.location || "").toLowerCase();
+          return jLoc !== "anywhere" && jLoc !== "remote" && !jLoc.startsWith("anywhere");
+        });
+        if (filtered.length > 0) allJobs = filtered;
+      }
+
+      // Save to Cache if we got results
+      if (allJobs.length > 0) {
+        await prisma.searchCache.upsert({
+          where: { query_location: cacheKey },
+          update: { results: allJobs, createdAt: new Date() },
+          create: { ...cacheKey, results: allJobs }
+        }).catch(err => console.error("[CACHE] Upsert failed:", err));
+      }
     }
     
     if (allJobs.length === 0) return NextResponse.json({ jobs: [] });

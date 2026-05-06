@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import { Download, ExternalLink, Calendar, CheckCircle2, X, Loader2, FileText } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Skeleton, JobCardSkeleton } from "@/components/ui/Skeleton";
 
 interface Application {
   id: string;
@@ -11,53 +13,81 @@ interface Application {
   createdAt: string;
   status: string;
   applyLink: string;
+  description: string;
 }
 
 export default function ApplicationsPage() {
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: appData, isLoading: isAppsLoading, mutate: mutateApps } = useSWR("/api/jobs/tracked");
+  const [isDownloading, setIsDownloading] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchApplications = async () => {
-      try {
-        const response = await fetch("/api/jobs/tracked");
-        const data = await response.json();
-        // Filter for those that have been "Applied" or moved from wishlist
-        const apps = (data.jobs || []).filter((j: any) => j.status !== 'WISHLIST');
-        setApplications(apps);
-      } catch (error) {
-        console.error("Failed to fetch applications:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchApplications();
-  }, []);
+  const handleDownload = async (app: Application) => {
+    setIsDownloading(app.id);
+    try {
+      const res = await fetch("/api/jobs/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          action: 'optimize', 
+          jobDescription: app.description || "",
+          jobId: app.id
+        }),
+      });
+
+      if (!res.ok) throw new Error("Optimization failed");
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Optimized_Resume_${app.company}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to generate resume. Please try again.");
+    } finally {
+      setIsDownloading(null);
+    }
+  };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to remove this application?")) return;
     
-    // Optimistic UI Update
-    setApplications(prev => prev.filter(app => app.id !== id));
-
     try {
-      await fetch("/api/jobs/update-status", {
+      const res = await fetch("/api/jobs/update-status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, isDeleted: true })
+        body: JSON.stringify({ id, isDeleted: true }),
       });
+
+      if (res.ok) {
+        mutateApps();
+      }
     } catch (error) {
-      console.error("Failed to delete application:", error);
+      console.error("Delete failed:", error);
     }
   };
 
-  if (loading) {
+  if (isAppsLoading || !appData) {
     return (
-      <div className="h-96 flex items-center justify-center">
-        <Loader2 className="animate-spin text-blue-600" size={40} />
+      <div className="space-y-10">
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-12 w-48" />
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <JobCardSkeleton />
+          <JobCardSkeleton />
+          <JobCardSkeleton />
+          <JobCardSkeleton />
+          <JobCardSkeleton />
+          <JobCardSkeleton />
+        </div>
       </div>
     );
   }
+
+  const applications = (appData.jobs || []).filter((j: any) => j.status !== 'WISHLIST');
 
   return (
     <div className="space-y-10">
@@ -90,7 +120,7 @@ export default function ApplicationsPage() {
               </thead>
               <tbody className="divide-y divide-slate-100/50">
                 <AnimatePresence>
-                  {applications.map((app) => (
+                  {applications.map((app: any) => (
                     <motion.tr 
                       key={app.id}
                       initial={{ opacity: 0 }}
@@ -128,8 +158,16 @@ export default function ApplicationsPage() {
                               <ExternalLink size={18} />
                             </a>
                           )}
-                          <button className="p-2.5 glass-card rounded-xl text-slate-400 hover:text-indigo-600 transition-all hover:scale-110 active:scale-95 bg-white/80">
-                            <Download size={18} />
+                          <button 
+                            onClick={() => handleDownload(app)}
+                            disabled={isDownloading === app.id}
+                            className="p-2.5 glass-card rounded-xl text-slate-400 hover:text-indigo-600 transition-all hover:scale-110 active:scale-95 bg-white/80 disabled:opacity-50"
+                          >
+                            {isDownloading === app.id ? (
+                              <Loader2 size={18} className="animate-spin" />
+                            ) : (
+                              <Download size={18} />
+                            )}
                           </button>
                           <button 
                             onClick={() => handleDelete(app.id)}

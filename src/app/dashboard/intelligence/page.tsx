@@ -1,44 +1,40 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
 import { TrendingUp, Target, Shield, Zap, ArrowRight, BrainCircuit, BarChart3, Clock, Sparkles, Loader2, Info, Lock } from "lucide-react";
+import { Skeleton, StatsSkeleton } from "@/components/ui/Skeleton";
 
 export default function IntelligencePage() {
-  const [data, setData] = useState<any>(null);
-  const [usage, setUsage] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: intelData, isLoading: isIntelLoading } = useSWR("/api/jobs/intelligence", {
+    refreshInterval: 60000 // Refresh every minute
+  });
+  
+  const { data: userData } = useSWR("/api/user/usage");
 
-  useEffect(() => {
-    const fetchIntel = async () => {
-      try {
-        const [intelRes, usageRes] = await Promise.all([
-          fetch("/api/jobs/intelligence"),
-          fetch("/api/user/usage")
-        ]);
-        
-        const intelJson = await intelRes.json();
-        const usageJson = await usageRes.json();
-        
-        setData(intelJson);
-        setUsage(usageJson.usage);
-      } catch (error) {
-        console.error("Failed to fetch intelligence:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchIntel();
-  }, []);
-
-  if (isLoading || !data) {
+  if (isIntelLoading || !intelData) {
     return (
-      <div className="flex flex-col items-center justify-center py-40 space-y-4">
-        <Loader2 className="animate-spin text-indigo-600" size={40} />
-        <span className="label-mono !text-slate-400">Decrypting career signals...</span>
+      <div className="space-y-12">
+        <div className="flex justify-between items-center mb-4">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-12 w-40 rounded-2xl" />
+        </div>
+        <StatsSkeleton />
+        <div className="grid lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-7 space-y-10">
+            <Skeleton className="h-96 w-full rounded-[32px]" />
+          </div>
+          <div className="lg:col-span-5 space-y-10">
+            <Skeleton className="h-64 w-full rounded-[32px]" />
+            <Skeleton className="h-80 w-full rounded-[32px]" />
+          </div>
+        </div>
       </div>
     );
   }
+
+  const data = intelData;
+  const usage = userData?.usage;
 
   const statsWithIcons = data.stats.map((stat: any) => {
     if (stat.label === "Weekly Velocity") return { ...stat, icon: TrendingUp };
@@ -138,17 +134,18 @@ export default function IntelligencePage() {
             )}
           </div>
 
+          {/* Market Skills from Scans */}
           <div className="glass-panel p-10 space-y-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <BrainCircuit className="text-indigo-600" size={22} />
-                <h2 className="text-xl font-extrabold text-slate-800">Market Signals</h2>
+                <h2 className="text-xl font-extrabold text-slate-800">Market Skills</h2>
               </div>
-              <span className="label-mono !text-[10px]">Trending Skills</span>
+              <span className="label-mono !text-[10px]">From Your Scans</span>
             </div>
 
             <div className="space-y-8">
-              {data.skills.map((skill: any) => (
+              {data.marketSkills.map((skill: any) => (
                 <div key={skill.name} className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-[13px] font-extrabold text-slate-700 flex items-center gap-2">
@@ -162,7 +159,38 @@ export default function IntelligencePage() {
                       initial={{ width: 0 }}
                       animate={{ width: `${skill.level}%` }}
                       transition={{ duration: 1.5, ease: "easeOut" }}
-                      className={`h-full rounded-full bg-gradient-to-r ${skill.trending ? 'from-indigo-600 to-violet-600' : 'from-slate-400 to-slate-500'}`} 
+                      className={`h-full rounded-full bg-gradient-to-r from-indigo-600 to-violet-600`} 
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Industry Trends */}
+          <div className="glass-panel p-10 space-y-10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Zap className="text-amber-500" size={22} />
+                <h2 className="text-xl font-extrabold text-slate-800">Industry Trends</h2>
+              </div>
+              <span className="label-mono !text-[10px]">Market Benchmarks</span>
+            </div>
+
+            <div className="space-y-8">
+              {data.industryTrends.map((trend: any) => (
+                <div key={trend.name} className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[13px] font-extrabold text-slate-700 flex items-center gap-2">
+                      {trend.name}
+                    </span>
+                    <span className="label-mono !text-slate-900">{trend.level}%</span>
+                  </div>
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${trend.level}%` }}
+                      className="h-full rounded-full bg-slate-400" 
                     />
                   </div>
                 </div>
