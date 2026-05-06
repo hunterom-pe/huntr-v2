@@ -107,10 +107,23 @@ export default function DashboardPage() {
       if (response.ok) {
         if (data.jobs) {
           // Merge with existing jobs, but avoid duplicates
+          // Flush wishlist on Page 0 to ensure fresh results for new locations/titles
           setJobs(prev => {
-            const existingIds = new Set(prev.map(j => j.id));
-            const newJobs = data.jobs.filter((j: Job) => !existingIds.has(j.id));
-            return [...prev, ...newJobs];
+            // Keep jobs that are NOT in wishlist (Tracked/Applied/etc)
+            const trackedJobs = prev.filter(j => j.status !== 'WISHLIST');
+            
+            // If it's page 0, we start fresh. If it's page > 0, we append.
+            const updatedJobs = page === 0 ? [...trackedJobs] : [...prev];
+            
+            data.jobs.forEach((newJob: Job) => {
+              const index = updatedJobs.findIndex(j => j.id === newJob.id);
+              if (index !== -1) {
+                updatedJobs[index] = { ...updatedJobs[index], ...newJob };
+              } else {
+                updatedJobs.push(newJob);
+              }
+            });
+            return updatedJobs;
           });
           setHasScanned(true);
         }
@@ -725,7 +738,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="flex gap-2">
                           <button 
-                            onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+                            onClick={() => { setCurrentPage(prev => Math.max(0, prev - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                             disabled={currentPage === 0}
                             className="btn-glass px-4 py-2 rounded-xl text-[10px] font-black uppercase disabled:opacity-30"
                           >
@@ -738,6 +751,7 @@ export default function DashboardPage() {
                               } else {
                                 setCurrentPage(prev => prev + 1);
                               }
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
                             }}
                             disabled={isScanning}
                             className="btn-primary px-4 py-2 rounded-xl text-[10px] font-black uppercase"
