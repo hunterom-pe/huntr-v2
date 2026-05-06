@@ -3,16 +3,16 @@ import { Tier } from "@prisma/client";
 
 export const TIER_LIMITS = {
   SEEKER: {
-    optimizations: 3,
-    briefs: 1,
-    scans: 3,
+    optimizations: 1, // Matches pricing "1 Surgical Resume Download"
+    briefs: 0,        // Exclusive to Elite
+    scans: 3,         // Daily teaser
     playbooks: 0,
   },
   ELITE: {
-    optimizations: 25,
-    briefs: 10,
-    scans: 25,
-    playbooks: 9999, // Effectively unlimited
+    optimizations: 100, // "Unlimited" for humans
+    briefs: 25,
+    scans: 50,
+    playbooks: 9999,
   },
   PROFESSIONAL: {
     optimizations: 9999,
@@ -20,6 +20,7 @@ export const TIER_LIMITS = {
     scans: 9999,
     playbooks: 9999,
   }
+
 };
 
 export async function checkUsageLimit(
@@ -40,26 +41,36 @@ export async function checkUsageLimit(
 
   if (!user) throw new Error("User not found");
 
-  // Handle monthly reset
+  // Handle Resets
   const now = new Date();
   const lastReset = new Date(user.lastResetDate);
+  
   const isNewMonth = now.getMonth() !== lastReset.getMonth() || now.getFullYear() !== lastReset.getFullYear();
+  const isNewDay = now.getDate() !== lastReset.getDate() || isNewMonth;
 
-  if (isNewMonth) {
+  if (isNewMonth || isNewDay) {
+    const updateData: any = { lastResetDate: now };
+    
+    // Monthly Resets
+    if (isNewMonth) {
+      updateData.optimizationCount = 0;
+      updateData.briefCount = 0;
+      user.optimizationCount = 0;
+      user.briefCount = 0;
+    }
+    
+    // Daily Resets
+    if (isNewDay) {
+      updateData.scanCount = 0;
+      user.scanCount = 0;
+    }
+
     await prisma.user.update({
       where: { id: user.id },
-      data: {
-        optimizationCount: 0,
-        briefCount: 0,
-        scanCount: 0, // Resetting scans daily might be better, but let's stick to monthly for now or handle daily separately
-        lastResetDate: now,
-      }
+      data: updateData
     });
-    // Refresh user data after reset
-    user.optimizationCount = 0;
-    user.briefCount = 0;
-    user.scanCount = 0;
   }
+
 
   const limits = TIER_LIMITS[user.tier];
   let currentCount = 0;

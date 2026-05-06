@@ -195,25 +195,29 @@ export default function ProfileClient({ user }: { user: any }) {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { label: 'Optimizations', used: user?.optimizationCount || 0, limit: user?.tier === 'SEEKER' ? 3 : user?.tier === 'ELITE' ? 25 : 9999 },
-              { label: 'Daily Scans', used: user?.scanCount || 0, limit: user?.tier === 'SEEKER' ? 3 : user?.tier === 'ELITE' ? 25 : 9999 },
-              { label: 'Intel Briefs', used: user?.briefCount || 0, limit: user?.tier === 'SEEKER' ? 1 : user?.tier === 'ELITE' ? 10 : 9999 },
+              { label: 'Optimizations', used: user?.optimizationCount || 0, limit: user?.tier === 'SEEKER' ? 1 : user?.tier === 'ELITE' ? 100 : 9999, timeframe: 'Monthly' },
+              { label: 'Job Scans', used: user?.scanCount || 0, limit: user?.tier === 'SEEKER' ? 3 : user?.tier === 'ELITE' ? 50 : 9999, timeframe: 'Daily' },
+              { label: 'Intel Briefs', used: user?.briefCount || 0, limit: user?.tier === 'SEEKER' ? 0 : user?.tier === 'ELITE' ? 25 : 9999, timeframe: 'Monthly' },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/80 p-6 rounded-2xl border border-white shadow-sm space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</span>
-                  <span className="text-[13px] font-bold text-slate-900">{stat.limit > 100 ? 'Unlimited' : `${stat.used}/${stat.limit}`}</span>
+                  <div className="space-y-0.5">
+                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest block">{stat.label}</span>
+                    <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest">{stat.timeframe}</span>
+                  </div>
+                  <span className="text-[13px] font-bold text-slate-900">{stat.limit > 500 ? 'Unlimited' : `${stat.used}/${stat.limit}`}</span>
                 </div>
                 <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: stat.limit > 100 ? '100%' : `${(stat.used / stat.limit) * 100}%` }}
-                    className={`h-full rounded-full ${stat.used >= stat.limit && stat.limit < 100 ? 'bg-amber-500' : 'bg-indigo-600'}`}
+                    animate={{ width: stat.limit > 500 ? '100%' : `${(stat.used / Math.max(1, stat.limit)) * 100}%` }}
+                    className={`h-full rounded-full ${stat.used >= stat.limit && stat.limit < 500 ? 'bg-amber-500' : 'bg-indigo-600'}`}
                   />
                 </div>
               </div>
             ))}
           </div>
+
 
           {user?.tier !== 'PROFESSIONAL' && (
             <div className="mt-8 pt-8 border-t border-indigo-100/50 flex flex-col md:flex-row items-center justify-between gap-6">
