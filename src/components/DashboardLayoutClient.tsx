@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { LayoutDashboard, Briefcase, User, LogOut, Zap, Menu, Bell, CheckCircle2, Activity, MessageSquare, Settings } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signOut } from "next-auth/react";
 import { useNotifications } from "@/lib/NotificationContext";
 import { clsx, type ClassValue } from "clsx";
