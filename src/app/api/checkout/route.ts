@@ -22,7 +22,14 @@ export async function POST(req: Request) {
     }
 
     // Mapping plans to actual Price IDs from Stripe Dashboard
-    const priceMap: Record<string, string> = {
+    const isTest = process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_');
+    
+    const priceMap: Record<string, string> = isTest ? {
+      // TEST MODE PRICE IDs
+      'ELITE': 'price_1TUEIqLkFDyP0eAeZSWikqpR',
+      'PROFESSIONAL': 'price_1TUEJNLkFDyP0eAek5P6j2AM',
+    } : {
+      // LIVE MODE PRICE IDs
       'ELITE': 'price_1TUA0pLkFDyP0eAeJzpBV0ob',
       'PROFESSIONAL': 'price_1TUA1GLkFDyP0eAeyylI7i6f',
     };

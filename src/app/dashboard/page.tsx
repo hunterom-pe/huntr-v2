@@ -154,16 +154,16 @@ export default function DashboardPage() {
   }, []);
 
 
-  // Fetch tracked jobs from DB on load
+  // Combined effect for initial load and scan=true trigger
   useEffect(() => {
     if (!isBrowser) return;
+
     const fetchTrackedJobs = async () => {
       try {
         const response = await fetch("/api/jobs/tracked");
         const data = await response.json();
         if (data.jobs && data.jobs.length > 0) {
           setJobs(data.jobs);
-          // If we have wishlist jobs, it means a search has been performed before
           if (data.jobs.some((j: Job) => j.status === 'WISHLIST')) {
             setHasScanned(true);
           }
@@ -172,30 +172,13 @@ export default function DashboardPage() {
         setIsLoading(false);
       }
     };
+
     fetchTrackedJobs();
     fetchUsage();
 
-
+    // Trigger automatic scan if requested via URL
     if (typeof window !== 'undefined' && window.location.search.includes('scan=true') && !hasScanned && !isScanning) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       startScan();
-      // Remove query param from URL without reloading
-
-      window.history.replaceState({}, '', '/dashboard');
-    }
-  }, [isBrowser]);
-
-
-
-
-
-
-  useEffect(() => {
-    if (isBrowser && typeof window !== 'undefined' && window.location.search.includes('scan=true') && !hasScanned && !isScanning) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      startScan();
-      // Remove query param from URL without reloading
-
       window.history.replaceState({}, '', '/dashboard');
     }
   }, [isBrowser, hasScanned, isScanning]);
