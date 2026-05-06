@@ -66,13 +66,7 @@ export function DashboardLayoutClient({ children, user }: { children: React.Reac
           </nav>
 
           <div className="pt-8 border-t border-slate-200/40 mt-auto pb-6">
-            <div className="glass-card p-6 rounded-[24px] mb-8 bg-blue-50/20 border-blue-100/30">
-              <div className="label-mono !text-[9px] mb-3 !text-blue-600">Engine Status</div>
-              <div className="flex items-center gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)] animate-pulse" />
-                <span className="label-mono !text-slate-900 !text-[10px]">Optimizing Live</span>
-              </div>
-            </div>
+
 
             <button 
               onClick={() => window.location.href = "/login"}
