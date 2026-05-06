@@ -90,7 +90,13 @@ export default function DashboardPage() {
 
     } catch (error) {
       console.error("Scan failed:", error);
+      addNotification({
+        title: "Scan Interrupted",
+        message: "A network or system error occurred. Please refresh and try again.",
+        type: "intel"
+      });
     } finally {
+
       setIsScanning(false);
     }
   };
