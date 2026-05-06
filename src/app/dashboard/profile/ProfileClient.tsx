@@ -120,8 +120,11 @@ export default function ProfileClient({ user }: { user: any }) {
     }
 
     setIsUploading(true);
+    
+    // Safari-Safe: Ensure the file is captured immediately
+    const fileToUpload = selectedFile;
     const formData = new FormData();
-    formData.append("file", selectedFile);
+    formData.append("file", fileToUpload);
     
     try {
       console.log("DIAGNOSTIC: Starting resume upload to /api/upload...");
@@ -207,7 +210,16 @@ export default function ProfileClient({ user }: { user: any }) {
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">Plan & Usage</h2>
             <div className="px-3 py-1 bg-white border border-indigo-100 rounded-full text-[10px] font-black text-indigo-600 uppercase tracking-widest shadow-sm">
-              Next Reset: {new Date(new Date(user?.lastResetDate || Date.now()).setMonth(new Date(user?.lastResetDate || Date.now()).getMonth() + 1)).toLocaleDateString()}
+              {(() => {
+                try {
+                  const d = user?.lastResetDate ? new Date(user.lastResetDate) : new Date();
+                  if (isNaN(d.getTime())) return "Reset: Next Month";
+                  d.setMonth(d.getMonth() + 1);
+                  return `Next Reset: ${d.toLocaleDateString()}`;
+                } catch (e) {
+                  return "Reset: Monthly";
+                }
+              })()}
             </div>
           </div>
 
