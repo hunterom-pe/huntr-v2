@@ -239,16 +239,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ jobs: fallbackJobs });
     }
 
-    const isRemoteOnly = body.remoteOnly === true;
-    const isRemoteKeyword = location.toLowerCase() === "remote";
-    const isUSA = location.toLowerCase() === "usa" || location.toLowerCase() === "united states";
+    const isRemoteOnly = body.remoteOnly === true || isRemoteKeyword;
+    const isUSA = location.toLowerCase() === "usa" || location.toLowerCase() === "united states" || isRemoteKeyword;
     
-    // For specific cities, we use the official filter. For USA/Broad, we use keywords.
-    const useKeywordStrategy = isUSA || isRemoteKeyword;
+    // For specific cities, we use the official filter. For USA/Broad, we use keywords as a fallback.
+    const query = encodeURIComponent(title);
+    const searchLocation = isUSA ? "United States" : encodeURIComponent(location);
     
-    const query = encodeURIComponent(title + (useKeywordStrategy && isRemoteOnly ? " Remote" : ""));
-    const searchLocation = (isUSA || isRemoteKeyword) ? "USA" : encodeURIComponent(location);
-    const remoteParam = (isRemoteOnly && !useKeywordStrategy) ? "&ltype=1" : "";
+    // Always use the official Remote filter if Remote is requested
+    const remoteParam = isRemoteOnly ? "&ltype=1" : "";
     
     // 2. Handle Job Type Chips
     // Mapping: fulltime -> jt:fulltime, contract -> jt:contract, etc.
