@@ -227,11 +227,12 @@ export default function ProfileClient({ user }: { user: any }) {
               </div>
               <div className="flex gap-4 w-full md:w-auto">
                 <button 
-                  onClick={() => setAlert({ title: "Upgrade Successful", message: "Your account is now Elite. Enjoy the power!", type: "success" })}
+                  onClick={() => window.location.href = '/pricing'}
                   className="flex-1 md:flex-none px-8 py-3.5 bg-slate-900 text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-900/20"
                 >
                   Upgrade to Elite
                 </button>
+
               </div>
             </div>
           )}
