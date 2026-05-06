@@ -55,10 +55,38 @@ export default function DashboardPage() {
   const [remoteOnly, setRemoteOnly] = useState(false);
   const { notifications, addNotification, markAsRead } = useNotifications();
   const router = useRouter();
+  const [usage, setUsage] = useState<{ 
+    optimizationCount: number; 
+    scanCount: number; 
+    briefCount: number; 
+    tier: string;
+    limits: any;
+  } | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState<{ type: 'scan' | 'optimization' | 'brief' | 'playbook' } | null>(null);
+
+  const fetchUsage = async () => {
+    try {
+      const res = await fetch("/api/user/usage");
+      if (res.ok) {
+        const data = await res.json();
+        setUsage(data.usage);
+      }
+    } catch (e) {
+      console.error("Failed to fetch usage", e);
+    }
+  };
+
 
 
   const startScan = async (page = 0) => {
+    // PRE-CHECK LIMITS
+    if (usage && usage.scanCount >= usage.limits.scans) {
+      setShowUpgradeModal({ type: 'scan' });
+      return;
+    }
+
     setIsScanning(true);
+
     setCurrentPage(page);
     try {
       const response = await fetch("/api/jobs/search", {
@@ -127,6 +155,8 @@ export default function DashboardPage() {
       }
     };
     fetchTrackedJobs();
+    fetchUsage();
+
 
     if (typeof window !== 'undefined' && window.location.search.includes('scan=true') && !hasScanned && !isScanning) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -229,7 +259,14 @@ export default function DashboardPage() {
     };
 
   const handleOptimize = async (id: string) => {
+    // PRE-CHECK LIMITS
+    if (usage && usage.optimizationCount >= usage.limits.optimizations) {
+      setShowUpgradeModal({ type: 'optimization' });
+      return;
+    }
+
     const job = jobs.find(j => j.id === id);
+
     if (!job) return;
     setOptimizingId(id);
     try {
@@ -310,7 +347,14 @@ export default function DashboardPage() {
   };
 
   const handleGenerateBrief = async (job: Job) => {
+    // PRE-CHECK LIMITS
+    if (usage && usage.briefCount >= usage.limits.briefs) {
+      setShowUpgradeModal({ type: 'brief' });
+      return;
+    }
+
     setBriefingJob(job);
+
     setIsGeneratingBrief(true);
     setInterviewBrief(null);
     try {
@@ -339,7 +383,14 @@ export default function DashboardPage() {
   };
 
   const handleGeneratePlaybook = async (job: Job) => {
+    // PRE-CHECK LIMITS (Seeker is always locked)
+    if (usage && usage.tier === 'SEEKER') {
+      setShowUpgradeModal({ type: 'playbook' });
+      return;
+    }
+
     setPlaybookJob(job);
+
     setIsGeneratingPlaybook(true);
     setPlaybookData(null);
     try {
@@ -469,10 +520,21 @@ export default function DashboardPage() {
             whileTap={{ scale: 0.98 }}
             onClick={() => startScan(0)} 
             disabled={isScanning} 
-            className="btn-primary flex items-center gap-3"
+            className="btn-primary flex items-center gap-3 px-6 py-3.5"
           >
-            {isScanning ? <><Loader2 className="animate-spin" size={18} /> Scanning...</> : <><Search size={18} /> {hasScanned ? "Search" : "Find Jobs"}</>}
+            {isScanning ? (
+              <><Loader2 className="animate-spin" size={18} /> Scanning...</>
+            ) : (
+              <>
+                <Search size={18} /> 
+                {hasScanned ? "Search" : "Find Jobs"}
+                {usage && usage.tier === 'SEEKER' && (
+                  <span className="ml-1 opacity-50 font-bold">({usage.limits.scans - usage.scanCount}/{usage.limits.scans})</span>
+                )}
+              </>
+            )}
           </motion.button>
+
         </div>
       </div>
 
@@ -565,9 +627,10 @@ export default function DashboardPage() {
                 className="btn-primary px-16 py-5 rounded-[20px] shadow-[0_20px_40px_rgba(37,99,235,0.25)] flex items-center gap-4 text-lg"
               >
                 <Search size={20} />
-                Find Jobs
+                Find Jobs {usage && <span className="text-white/40 font-bold text-sm">({usage.limits.scans - usage.scanCount}/{usage.limits.scans})</span>}
               </motion.button>
             </div>
+
           </div>
         </motion.div>
       ) : isScanning ? (
@@ -700,7 +763,63 @@ export default function DashboardPage() {
         hasCopied={hasCopied}
       />
 
+      {/* Upgrade Modal */}
+      <AnimatePresence>
+        {showUpgradeModal && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" 
+              onClick={() => setShowUpgradeModal(null)} 
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.9, y: 20 }} 
+              className="glass-panel w-full max-w-lg bg-white p-12 relative z-10 shadow-2xl border-white overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-600 to-indigo-600" />
+              
+              <div className="w-20 h-20 bg-blue-50 rounded-[28px] flex items-center justify-center mb-8 border border-blue-100 mx-auto">
+                <Zap className="text-blue-600" size={32} />
+              </div>
+
+              <div className="text-center space-y-4 mb-10">
+                <h3 className="text-4xl font-black text-slate-900 tracking-tight">
+                  {showUpgradeModal.type === 'scan' ? 'Daily Scans Full' : 
+                   showUpgradeModal.type === 'optimization' ? 'Optimizations Used' : 
+                   'Feature Locked'}
+                </h3>
+                <p className="text-slate-500 font-medium leading-relaxed px-4">
+                  {showUpgradeModal.type === 'scan' ? `You've used all ${usage?.limits.scans} of your daily scans. Upgrade to Elite for 50 scans per day.` : 
+                   showUpgradeModal.type === 'optimization' ? `You've used your ${usage?.limits.optimizations} monthly optimization. Upgrade to Elite for unlimited power.` : 
+                   "This advanced AI feature is reserved for our Elite and Professional members."}
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <button 
+                  onClick={() => router.push('/pricing')}
+                  className="btn-primary w-full py-5 text-[13px] font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl shadow-blue-600/20"
+                >
+                  View Elite Plans <ArrowRight size={18} />
+                </button>
+                <button 
+                  onClick={() => setShowUpgradeModal(null)}
+                  className="w-full py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-colors"
+                >
+                  Maybe Later
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Notifications Stack */}
+
       <div className="fixed bottom-8 right-8 z-[200] space-y-4 w-full max-w-sm">
         <AnimatePresence>
           {notifications.filter(n => !n.read).map((n) => (
