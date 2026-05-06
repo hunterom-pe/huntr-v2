@@ -282,13 +282,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ jobs: fallbackJobs });
     }
 
-    const query = encodeURIComponent(title);
-    const searchLocation = location.toLowerCase() === "remote" ? "United States" : encodeURIComponent(location);
-    
-    // 1. Handle Remote Logic
-    // If the user toggled 'remoteOnly' OR their profile location is 'Remote'
     const isRemote = body.remoteOnly || location.toLowerCase() === "remote";
-    const remoteParam = isRemote ? "&ltype=1" : "";
+    
+    // For Remote, we bake the keyword into the query for maximum reliability
+    const query = encodeURIComponent(title + (isRemote ? " Remote" : ""));
+    const searchLocation = isRemote ? "USA" : encodeURIComponent(location);
+    const remoteParam = "";
     
     // 2. Handle Job Type Chips
     // Mapping: fulltime -> jt:fulltime, contract -> jt:contract, etc.
