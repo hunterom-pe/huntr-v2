@@ -49,6 +49,7 @@ export async function POST(req: Request) {
 
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
+      payment_method_collection: 'if_required',
       allow_promotion_codes: true,
       line_items: [
         {
