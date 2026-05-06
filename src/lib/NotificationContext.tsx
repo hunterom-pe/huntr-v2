@@ -24,24 +24,8 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
-  const [notifications, setNotifications] = useState<Notification[]>(() => [
-    {
-      id: "seed-1",
-      title: "Weekly Recon Report",
-      message: "You tracked 12 applications this week and your match score average was 88%. Keep up the momentum!",
-      type: "report",
-      read: false,
-      date: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    },
-    {
-      id: "seed-2",
-      title: "Follow-up Required",
-      message: "It's been 5 days since you applied to Netflix. It might be time to reach out to a recruiter. Click here to generate a custom follow-up email.",
-      type: "reminder",
-      read: false,
-      date: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-    }
-  ]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
