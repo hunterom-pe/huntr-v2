@@ -552,7 +552,7 @@ export default function DashboardPage() {
               <>
                 <Search size={18} /> 
                 {hasScanned ? "Search" : "Find Jobs"}
-                {usage && usage.tier === 'SEEKER' && (
+                {usage && usage.tier !== 'PROFESSIONAL' && (
                   <span className="ml-1 opacity-50 font-bold">({usage.limits.scans - usage.scanCount}/{usage.limits.scans})</span>
                 )}
               </>
@@ -651,7 +651,7 @@ export default function DashboardPage() {
                 className="btn-primary px-16 py-5 rounded-[20px] shadow-[0_20px_40px_rgba(37,99,235,0.25)] flex items-center gap-4 text-lg"
               >
                 <Search size={20} />
-                Find Jobs {usage && <span className="text-white/40 font-bold text-sm">({usage.limits.scans - usage.scanCount}/{usage.limits.scans})</span>}
+                Find Jobs {usage && usage.tier !== 'PROFESSIONAL' && <span className="text-white/40 font-bold text-sm">({usage.limits.scans - usage.scanCount}/{usage.limits.scans})</span>}
               </motion.button>
             </div>
 

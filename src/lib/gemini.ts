@@ -3,8 +3,10 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 // Helper for model rotation and auto-retry
 async function runWithRotation(genAI: any, prompt: string) {
   const modelsToTry = [
-    "gemini-1.5-flash",
-    "gemini-1.5-pro",
+    "gemini-3.1-pro-preview",
+    "gemini-3.1-flash-lite-preview",
+    "gemini-flash-latest",
+    "gemini-2.0-flash",
   ];
 
   let lastError = null;

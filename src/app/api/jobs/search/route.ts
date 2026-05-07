@@ -175,13 +175,16 @@ export async function POST(req: Request) {
     });
 
     let allJobs: any[] = [];
+    const tier = user.tier;
+    const pageOffset = (body.page || 0) * 50; // Each 'page' in UI now jumps 5 pages of API results
 
     // If cached and fresh (< 24h), use it to save SerpApi credits
-    if (cached && (Date.now() - new Date(cached.createdAt).getTime()) < 24 * 60 * 60 * 1000) {
+    if (cached && (Date.now() - new Date(cached.createdAt).getTime()) < 24 * 60 * 60 * 1000 && (!body.page || body.page === 0)) {
       console.log(`[CACHE] Hit: ${q} in ${serpLocation || 'Remote'}`);
       allJobs = cached.results as any[];
     } else {
-      console.log(`[CACHE] Miss: Fetching ${q} from SerpApi`);
+      console.log(`[CACHE] Miss/Pagination: Fetching ${q} (Start: ${pageOffset})`);
+      
       const fetchJobs = async (start: number) => {
         try {
           const p = new URLSearchParams({
@@ -203,7 +206,11 @@ export async function POST(req: Request) {
         }
       };
 
-      const results = await Promise.all([fetchJobs(0), fetchJobs(10), fetchJobs(20)]);
+      // Increase depth based on tier
+      const pageCount = tier === 'PROFESSIONAL' ? 10 : tier === 'ELITE' ? 5 : 3;
+      const pages = Array.from({ length: pageCount }, (_, i) => pageOffset + (i * 10));
+      
+      const results = await Promise.all(pages.map(p => fetchJobs(p)));
       allJobs = results.flat();
 
       // Normalize results for local city searches
@@ -215,8 +222,8 @@ export async function POST(req: Request) {
         if (filtered.length > 0) allJobs = filtered;
       }
 
-      // Save to Cache if we got results
-      if (allJobs.length > 0) {
+      // Save to Cache if we got results (only for first page)
+      if (allJobs.length > 0 && (!body.page || body.page === 0)) {
         await prisma.searchCache.upsert({
           where: { query_location: cacheKey },
           update: { results: allJobs, createdAt: new Date() },
@@ -227,7 +234,8 @@ export async function POST(req: Request) {
     
     if (allJobs.length === 0) return NextResponse.json({ jobs: [] });
 
-    const saved = await Promise.all(allJobs.slice(0, 30).map(async (j: any) => {
+    const saveLimit = tier === 'PROFESSIONAL' ? 100 : tier === 'ELITE' ? 50 : 30;
+    const saved = await Promise.all(allJobs.slice(0, saveLimit).map(async (j: any) => {
       const id = j.job_id || Math.random().toString(36).substr(2, 9);
       
       // UI Polish: Title and Location
