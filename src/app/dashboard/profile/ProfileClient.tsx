@@ -30,6 +30,10 @@ export default function ProfileClient({ user }: { user: any }) {
   const [alert, setAlert] = useState<{ title: string; message: string; type: 'success' | 'error' | 'warning' } | null>(null);
   const [showConfirmReset, setShowConfirmReset] = useState(false);
   const [isWiping, setIsWiping] = useState(false);
+  const [isPreviewing, setIsPreviewing] = useState(false);
+  const [resumeText, setResumeText] = useState("");
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [resumeFileName, setResumeFileName] = useState("");
 
   const displayName = user?.name || user?.email?.split('@')[0] || "User";
   const initials = displayName.substring(0, 2).toUpperCase();
@@ -153,6 +157,25 @@ export default function ProfileClient({ user }: { user: any }) {
       });
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleViewResume = async () => {
+    setIsLoadingPreview(true);
+    try {
+      const res = await fetch("/api/user/resume/view");
+      const data = await res.json();
+      if (res.ok) {
+        setResumeText(data.text);
+        setResumeFileName(data.fileName);
+        setIsPreviewing(true);
+      } else {
+        setAlert({ title: "View Failed", message: data.error || "Could not retrieve resume content.", type: "error" });
+      }
+    } catch (err) {
+      setAlert({ title: "Error", message: "Failed to connect to the document server.", type: "error" });
+    } finally {
+      setIsLoadingPreview(false);
     }
   };
 
@@ -326,7 +349,21 @@ export default function ProfileClient({ user }: { user: any }) {
             </div>
             <div className="flex-1 text-center sm:text-left">
               <h4 className="text-lg font-bold text-slate-900 tracking-tight">Active Resume</h4>
-              <p className="text-[14px] text-slate-500 font-medium">Currently using your latest uploaded .docx file for job matching.</p>
+              <div className="flex items-center gap-2 mt-1 justify-center sm:justify-start">
+                <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-md text-[10px] font-black uppercase tracking-wider border border-indigo-100">
+                  {user?.resumePath ? (user.resumePath.split('-').slice(2).join('-') || "Document Active") : "No File Uploaded"}
+                </span>
+                {user?.resumePath && (
+                  <button 
+                    onClick={handleViewResume}
+                    disabled={isLoadingPreview}
+                    className="text-[10px] font-bold text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest flex items-center gap-1"
+                  >
+                    {isLoadingPreview ? <Loader2 className="animate-spin" size={10} /> : <Search size={10} />}
+                    View Content
+                  </button>
+                )}
+              </div>
             </div>
             
             <div className="relative">
@@ -494,6 +531,54 @@ export default function ProfileClient({ user }: { user: any }) {
                   >
                     {isWiping ? <Loader2 className="animate-spin" size={16} /> : "Wipe Now"}
                   </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+          {/* Resume Preview Modal */}
+          {isPreviewing && (
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 md:p-12 h-screen overflow-hidden">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={() => setIsPreviewing(false)} />
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+                animate={{ opacity: 1, scale: 1, y: 0 }} 
+                exit={{ opacity: 0, scale: 0.95, y: 20 }} 
+                className="bg-white w-full max-w-4xl h-full max-h-[85vh] rounded-[32px] overflow-hidden relative z-10 shadow-2xl flex flex-col border border-white"
+              >
+                {/* Header */}
+                <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                      <FileText size={20} />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-slate-900 tracking-tight">{resumeFileName || "Document Preview"}</h3>
+                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Read-Only Mode</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setIsPreviewing(false)}
+                    className="w-10 h-10 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                  </button>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-8 md:p-12 bg-slate-50/30">
+                  <div className="max-w-2xl mx-auto bg-white shadow-2xl shadow-slate-200/50 rounded-lg p-12 min-h-full border border-slate-100">
+                    <pre className="whitespace-pre-wrap font-mono text-[13px] leading-relaxed text-slate-700 selection:bg-indigo-100">
+                      {resumeText}
+                    </pre>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="px-8 py-6 border-t border-slate-100 bg-white flex justify-between items-center">
+                  <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <ShieldCheck size={14} className="text-emerald-500" /> Secure View Active
+                  </div>
+                  <button onClick={() => setIsPreviewing(false)} className="btn-primary px-8 py-3">Close Preview</button>
                 </div>
               </motion.div>
             </div>
