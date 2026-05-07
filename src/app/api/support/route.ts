@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
     const { name, email, subject, message } = validation.data;
 
-    // Send email to the support inbox (Testing directly to personal email)
+    // Send email to the support triage inbox
     const { error } = await resend.emails.send({
       from: "CareerHuntr Support <hello@careerhuntr.io>",
       to: ["hunterom8@proton.me"],
