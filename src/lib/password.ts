@@ -4,7 +4,7 @@
  */
 export function calculatePasswordStrength(password: string) {
   let score = 0;
-  if (!password) return { score: 0, label: "None", color: "bg-slate-200" };
+  if (!password) return { score: 0, label: "None", color: "bg-slate-200", text: "text-slate-400" };
 
   // 1. Length Check
   if (password.length >= 8) score += 1;
