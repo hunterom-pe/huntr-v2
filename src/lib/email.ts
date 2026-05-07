@@ -10,7 +10,7 @@ export async function sendWelcomeEmail(toEmail: string, userName?: string | null
   const displayName = userName || toEmail.split('@')[0];
 
   try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://huntr.ai';
     const loginUrl = `${baseUrl}/login`;
 
     const { data, error } = await resend.emails.send({
@@ -51,7 +51,7 @@ export async function sendWelcomeEmail(toEmail: string, userName?: string | null
             <p style="color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; line-height: 1.8;">
               © 2026 HUNTR SYSTEMS &bull; PRECISION QA CONSULTING<br/>
               SUBSIDIARY OF PRECISIONQACONSULTING.COM<br/>
-              SOC2 COMPLIANT &bull; AES-256 ENCRYPTED
+              BANK-LEVEL SECURITY &bull; AES-256 ENCRYPTED
             </p>
           </div>
         </div>

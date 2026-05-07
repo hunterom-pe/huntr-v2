@@ -14,11 +14,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://huntr.ai"),
   title: "HUNTR - Automated Job Search",
   description: "Stop wasting hours searching and applying. Let our intelligent system find your perfect matches.",
   icons: {
     icon: "/icon.png?v=1",
     apple: "/icon.png?v=1",
+  },
+  openGraph: {
+    title: "HUNTR - Automated Job Search",
+    description: "The intelligent system that finds your perfect job matches.",
+    type: "website",
+    locale: "en_US",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "HUNTR",
+      },
+    ],
   },
 };
 

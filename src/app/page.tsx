@@ -347,7 +347,7 @@ export default function Home() {
         <div className="max-w-[1200px] mx-auto px-8 mt-20 pt-8 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]">© 2026 HUNTR SYSTEMS • ALL RIGHTS RESERVED</div>
           <div className="flex items-center gap-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-            <Shield size={12} className="text-emerald-500" /> SOC2 COMPLIANT • AES-256 ENCRYPTED
+            <Shield size={12} className="text-emerald-500" /> BANK-LEVEL SECURITY • AES-256 ENCRYPTED
           </div>
         </div>
       </footer>
