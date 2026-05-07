@@ -102,16 +102,31 @@ export async function POST(req: Request) {
 
       const paragraphs = xml.split(/(?=<w:p)/);
       const getCleanText = (p: string) => p.replace(/<[^>]+>/g, "").trim();
-      const xmlEscape = (s: string) => s.replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[m] || m));
+      const normalizeText = (t: string) => (t || "").replace(/[\s\u00A0]+/g, " ").trim().toLowerCase();
+      const xmlEscape = (s: string) => (s || "").replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[m] || m));
 
       const updated = paragraphs.map(p => {
-        const clean = getCleanText(p);
-        if (opt.newSummary && opt.originalSummary && clean.includes(opt.originalSummary.substring(0, 30))) {
-          return p.replace(/<w:r>[\s\S]*<\/w:r>/, `<w:r><w:t>${xmlEscape(opt.newSummary)}</w:t></w:r>`);
+        const cleanParagraph = normalizeText(getCleanText(p));
+        if (!cleanParagraph) return p;
+
+        // 1. Try Summary Match
+        if (opt.newSummary && opt.originalSummary) {
+          const cleanOriginal = normalizeText(opt.originalSummary);
+          // Match if significant chunk overlap exists (first 40 chars)
+          if (cleanParagraph.includes(cleanOriginal.substring(0, 40)) || cleanOriginal.includes(cleanParagraph.substring(0, 40))) {
+            console.log("[SURGICAL] Successfully matched and optimized Summary paragraph.");
+            return p.replace(/<w:r>[\s\S]*<\/w:r>/, `<w:r><w:t>${xmlEscape(opt.newSummary)}</w:t></w:r>`);
+          }
         }
+
+        // 2. Try Bullet Matches
         for (const bullet of opt.bulletReplacements || []) {
-          if (bullet.new && bullet.original && clean.includes(bullet.original.substring(0, 30))) {
-            return p.replace(/<w:r>[\s\S]*<\/w:r>/, `<w:r><w:t>${xmlEscape(bullet.new)}</w:t></w:r>`);
+          if (bullet.new && bullet.original) {
+            const cleanOriginal = normalizeText(bullet.original);
+            if (cleanParagraph.includes(cleanOriginal.substring(0, 35)) || cleanOriginal.includes(cleanParagraph.substring(0, 35))) {
+              console.log("[SURGICAL] Successfully matched and optimized Bullet point.");
+              return p.replace(/<w:r>[\s\S]*<\/w:r>/, `<w:r><w:t>${xmlEscape(bullet.new)}</w:t></w:r>`);
+            }
           }
         }
         return p;

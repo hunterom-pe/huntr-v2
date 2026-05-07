@@ -10,23 +10,28 @@ async function runWithRotation(genAI: any, prompt: string) {
   ];
 
   let lastError = null;
-
-  for (const modelName of modelsToTry) {
-    try {
-      console.log(`Attempting AI run with model: ${modelName}`);
-      const model = genAI.getGenerativeModel({ model: modelName });
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      return { text: response.text(), modelName };
-    } catch (error: any) {
-      lastError = error;
-      console.warn(`Model ${modelName} failed: ${error.message}`);
-      // If it's a 404 or 429, continue to next model
-      continue;
+  
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    for (const modelName of modelsToTry) {
+      try {
+        console.log(`[AI] Attempt ${attempt} - Running model: ${modelName}`);
+        const model = genAI.getGenerativeModel({ model: modelName });
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        return { text: response.text(), modelName };
+      } catch (error: any) {
+        lastError = error;
+        console.warn(`[AI] Model ${modelName} failed on attempt ${attempt}: ${error.message}`);
+        
+        // If it's a rate limit or connection glitch, wait briefly
+        if (error.message?.includes('429') || error.message?.includes('fetch') || error.message?.includes('network')) {
+          await new Promise(r => setTimeout(r, 1000 * attempt));
+        }
+      }
     }
   }
 
-  throw lastError || new Error("All AI models failed to respond.");
+  throw lastError || new Error("All AI models failed after multiple attempts.");
 }
 
 export async function optimizeResumeContent(resumeText: string, jobDescription: string) {
