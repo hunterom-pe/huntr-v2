@@ -65,7 +65,7 @@ export default function TermsOfService() {
             <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
             <Link href="/privacy" className="hover:text-blue-600 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="text-blue-600 transition-colors">Terms of Service</Link>
-            <Link href="mailto:hello@precisionqaconsulting.com" className="hover:text-blue-600 transition-colors">Contact Support</Link>
+            <Link href="mailto:hello@careerhuntr.io" className="hover:text-blue-600 transition-colors">Contact Support</Link>
           </nav>
         </div>
         <div className="max-w-[1200px] mx-auto px-6 mt-8 pt-6 border-t border-slate-100 text-center">

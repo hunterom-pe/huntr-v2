@@ -10,13 +10,13 @@ export async function sendWelcomeEmail(toEmail: string, userName?: string | null
   const displayName = userName || toEmail.split('@')[0];
 
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://huntr.ai';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://careerhuntr.io';
     const loginUrl = `${baseUrl}/login`;
 
     const { data, error } = await resend.emails.send({
-      from: 'Huntr <hello@precisionqaconsulting.com>',
+      from: 'Huntr <hello@careerhuntr.io>',
       to: [toEmail],
-      subject: 'Access Granted: Your Surgical Intelligence Engine is Live',
+      subject: `Welcome to CareerHuntr! Let's get started.`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; background-color: #ffffff;">
           <div style="margin-bottom: 60px; text-align: left;">
@@ -49,8 +49,8 @@ export async function sendWelcomeEmail(toEmail: string, userName?: string | null
           
           <div style="margin-top: 80px; padding-top: 32px; border-top: 1px solid #f1f5f9;">
             <p style="color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; line-height: 1.8;">
-              © 2026 HUNTR SYSTEMS &bull; PRECISION QA CONSULTING<br/>
-              SUBSIDIARY OF PRECISIONQACONSULTING.COM<br/>
+              © 2026 HUNTR SYSTEMS &bull; CAREERHUNTR.IO<br/>
+              PHOENIX, AZ &bull; <a href="${baseUrl}/dashboard/profile" style="color: #94a3b8; text-decoration: underline;">Unsubscribe</a><br/>
               BANK-LEVEL SECURITY &bull; AES-256 ENCRYPTED
             </p>
           </div>

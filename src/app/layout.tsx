@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://huntr.ai"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://careerhuntr.io"),
   title: "HUNTR - Automated Job Search",
   description: "Stop wasting hours searching and applying. Let our intelligent system find your perfect matches.",
   icons: {

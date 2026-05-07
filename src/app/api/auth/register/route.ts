@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { sendWelcomeEmail } from "@/lib/email";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -52,6 +53,13 @@ export async function POST(req: Request) {
         password: hashedPassword,
       },
     });
+
+    // Send welcome email asynchronously
+    if (user.email) {
+      sendWelcomeEmail(user.email, user.name).catch(err => {
+        console.error("Failed to send welcome email during registration:", err);
+      });
+    }
 
     return NextResponse.json(
       { message: "User registered successfully", userId: user.id },
