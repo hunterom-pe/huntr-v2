@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://huntr.ai; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'none'; connect-src 'self' https://js.stripe.com; frame-src https://js.stripe.com; object-src 'none';",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://huntr.ai *.sentry.io; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'none'; connect-src 'self' https://js.stripe.com *.sentry.io; frame-src https://js.stripe.com; object-src 'none'; worker-src 'self' blob:;",
           },
           {
             key: 'X-Frame-Options',
@@ -58,7 +58,7 @@ export default withSentryConfig(nextConfig, {
   // This can increase your server load as well as your hosting bill.
   // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
   // side errors will fail.
-  // tunnelRoute: "/monitoring",
+  tunnelRoute: "/monitoring",
 
   webpack: {
     // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
