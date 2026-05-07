@@ -52,3 +52,6 @@ next-env.d.ts
 /storage/
 /scratch/
 .DS_Store
+
+# Sentry Config File
+.env.sentry-build-plugin
