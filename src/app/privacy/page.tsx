@@ -53,7 +53,7 @@ export default function PrivacyPolicy() {
 
           <section className="space-y-4">
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">5. Contact Us</h2>
-            <p>If you have any questions about this Privacy Statement, please contact us at hello@careerhuntr.io.</p>
+            <p>If you have any questions about this Privacy Statement, please contact us at <Link href="/support" className="text-blue-600 hover:underline">Support Center</Link> or hello@careerhuntr.io.</p>
           </section>
         </div>
       </main>
@@ -70,7 +70,7 @@ export default function PrivacyPolicy() {
             <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
             <Link href="/privacy" className="text-blue-600 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-blue-600 transition-colors">Terms of Service</Link>
-            <Link href="mailto:hello@careerhuntr.io" className="hover:text-blue-600 transition-colors">Contact Support</Link>
+            <Link href="/support" className="hover:text-blue-600 transition-colors">Contact Support</Link>
           </nav>
         </div>
         <div className="max-w-[1200px] mx-auto px-6 mt-8 pt-6 border-t border-slate-100 text-center">

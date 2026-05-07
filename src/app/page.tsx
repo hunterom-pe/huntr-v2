@@ -51,6 +51,7 @@ export default function Home() {
             <Link href="#features" className="label-mono !text-slate-900 opacity-60 hover:opacity-100 transition-all">Engine</Link>
             <Link href="#intelligence" className="label-mono !text-slate-900 opacity-60 hover:opacity-100 transition-all">Intelligence</Link>
             <Link href="/pricing" className="label-mono !text-slate-900 opacity-60 hover:opacity-100 transition-all">Pricing</Link>
+            <Link href="/support" className="label-mono !text-slate-900 opacity-60 hover:opacity-100 transition-all">Support</Link>
           </div>
           <div className="flex items-center gap-6">
             <Link href="/login" className="text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors">Sign In</Link>
@@ -290,7 +291,7 @@ export default function Home() {
             
             <div className="relative z-10 pt-8 flex flex-col sm:flex-row justify-center gap-6">
               <Link href="/login" className="btn-pill-blue !px-16 !py-6 !text-base">Create Free Account</Link>
-              <Link href="mailto:hello@careerhuntr.io" className="btn-pill-gray !px-16 !py-6 !text-base !bg-slate-50 !border-slate-200 !text-slate-600 hover:!bg-white">Contact Sales</Link>
+              <Link href="/support" className="btn-pill-gray !px-16 !py-6 !text-base !bg-slate-50 !border-slate-200 !text-slate-600 hover:!bg-white">Contact Support</Link>
             </div>
 
             <div className="pt-12 flex justify-center items-center gap-10 text-[11px] font-black uppercase tracking-[0.3em] text-slate-400 relative z-10">
@@ -339,7 +340,7 @@ export default function Home() {
               <ul className="space-y-4 text-sm font-bold text-slate-500">
                 <li><Link href="/privacy" className="hover:text-blue-600 transition-colors">Privacy</Link></li>
                 <li><Link href="/terms" className="hover:text-blue-600 transition-colors">Terms</Link></li>
-                <li><Link href="mailto:hello@careerhuntr.io" className="hover:text-blue-600 transition-colors">Support</Link></li>
+                <li><Link href="/support" className="hover:text-blue-600 transition-colors">Support Center</Link></li>
               </ul>
             </div>
           </div>
