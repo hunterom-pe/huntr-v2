@@ -26,10 +26,10 @@ export async function POST(req: Request) {
 
     const { name, email, subject, message } = validation.data;
 
-    // Send email to the support inbox
+    // Send email to the support inbox (Testing directly to personal email)
     const { error } = await resend.emails.send({
       from: "CareerHuntr Support <hello@careerhuntr.io>",
-      to: ["hello@careerhuntr.io"],
+      to: ["hunterom8@proton.me"],
       replyTo: email,
       subject: `[SUPPORT TICKET] ${subject}`,
       html: `
