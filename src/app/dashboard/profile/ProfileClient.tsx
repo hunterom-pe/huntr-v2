@@ -2,11 +2,12 @@
 "use client";
 
 import { useState } from "react";
-import { User, Mail, MapPin, Briefcase, FileText, UploadCloud, Loader2, Search, Trash2, ShieldCheck, Lock, AlertCircle, CheckCircle2, Info } from "lucide-react";
+import { User, Mail, MapPin, Briefcase, FileText, UploadCloud, Loader2, Search, Trash2, ShieldCheck, Lock, AlertCircle, CheckCircle2, Info, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { calculatePasswordStrength } from "@/lib/password";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -22,6 +23,9 @@ export default function ProfileClient({ user }: { user: any }) {
   // Security State
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
@@ -84,6 +88,11 @@ export default function ProfileClient({ user }: { user: any }) {
       return;
     }
 
+    if (newPassword !== confirmNewPassword) {
+      setPasswordError("New passwords do not match.");
+      return;
+    }
+
     setIsUpdatingPassword(true);
     
     try {
@@ -102,6 +111,7 @@ export default function ProfileClient({ user }: { user: any }) {
       setPasswordSuccess("Password successfully updated.");
       setCurrentPassword("");
       setNewPassword("");
+      setConfirmNewPassword("");
     } catch (err: any) {
       setPasswordError(err.message);
     } finally {
@@ -393,25 +403,84 @@ export default function ProfileClient({ user }: { user: any }) {
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   <input 
-                    type="password" 
+                    type={showCurrentPassword ? "text" : "password"} 
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-slate-50/80 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all" 
+                    className="w-full bg-slate-50/80 border border-slate-200 rounded-2xl py-4 pl-12 pr-12 text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all" 
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">New Password</label>
                 <div className="relative">
-                  <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   <input 
-                    type="password" 
+                    type={showNewPassword ? "text" : "password"} 
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-slate-50/80 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all" 
+                    className="w-full bg-slate-50/80 border border-slate-200 rounded-2xl py-4 pl-12 pr-12 text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all" 
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {newPassword && (
+                  <div className="space-y-2 px-1 pt-1">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Strength</span>
+                      <span className={`text-[10px] font-black uppercase tracking-widest ${calculatePasswordStrength(newPassword).text}`}>
+                        {calculatePasswordStrength(newPassword).label}
+                      </span>
+                    </div>
+                    <div className="flex gap-1 h-1.5">
+                      {[0, 1, 2, 3].map((idx) => {
+                        const strength = calculatePasswordStrength(newPassword);
+                        const scoreMap: any = { "Weak": 1, "Fair": 2, "Good": 3, "Strong": 4, "Elite": 4 };
+                        const score = scoreMap[strength.label] || 0;
+                        return (
+                          <div 
+                            key={idx} 
+                            className={`flex-1 rounded-full transition-all duration-500 ${idx < score ? strength.color : 'bg-slate-100'}`} 
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">Confirm New Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <input 
+                    type={showNewPassword ? "text" : "password"} 
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full bg-slate-50/80 border border-slate-200 rounded-2xl py-4 pl-12 pr-12 text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all" 
+                  />
+                  {confirmNewPassword && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      {newPassword === confirmNewPassword ? (
+                        <CheckCircle2 size={18} className="text-emerald-500" />
+                      ) : (
+                        <div className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

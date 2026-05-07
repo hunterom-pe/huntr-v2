@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { id, title, company, location, description, matchScore, status, isDeleted, rejectionReason, rejectionNotes } = body;
+    const { id, title, company, location, description, matchScore, status, isDeleted, isSaved, rejectionReason, rejectionNotes } = body;
 
 
     if (!id) {
@@ -45,6 +45,7 @@ export async function POST(req: Request) {
           data: { 
             status: status || undefined,
             isDeleted: isDeleted !== undefined ? isDeleted : undefined,
+            isSaved: isSaved !== undefined ? isSaved : undefined,
             title: title || undefined,
             company: company || undefined,
             rejectionReason: rejectionReason !== undefined ? rejectionReason : undefined,

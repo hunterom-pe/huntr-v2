@@ -4,15 +4,19 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Loader2, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+
+import { calculatePasswordStrength } from "@/lib/password";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
     if (searchParams.get("signup") === "true") {
@@ -50,6 +54,10 @@ function LoginForm() {
 
         if (formData.password.length < 8) {
           throw new Error("Password must be at least 8 characters long");
+        }
+        
+        if (formData.password !== confirmPassword) {
+          throw new Error("Passwords do not match");
         }
 
         if (!/[a-zA-Z]/.test(formData.password) || !/[0-9]/.test(formData.password)) {
@@ -180,26 +188,84 @@ function LoginForm() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <label className="label-mono ml-1">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   <input 
-                    type="password" 
+                    type={showPassword ? "text" : "password"} 
                     placeholder="••••••••" 
-                    className="input-glass pl-12"
+                    className="input-glass pl-12 pr-12"
                     value={formData.password}
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
                     required 
                     minLength={isLogin ? 1 : 8}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
+                
+                {!isLogin && formData.password && (
+                  <div className="space-y-2 px-1">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Strength</span>
+                      <span className={`text-[10px] font-black uppercase tracking-widest ${calculatePasswordStrength(formData.password).text}`}>
+                        {calculatePasswordStrength(formData.password).label}
+                      </span>
+                    </div>
+                    <div className="flex gap-1 h-1.5">
+                      {[0, 1, 2, 3].map((idx) => {
+                        const strength = calculatePasswordStrength(formData.password);
+                        const scoreMap = { "Weak": 1, "Fair": 2, "Good": 3, "Strong": 4, "Elite": 4 };
+                        const score = (scoreMap as any)[strength.label];
+                        return (
+                          <div 
+                            key={idx} 
+                            className={`flex-1 rounded-full transition-all duration-500 ${idx < score ? strength.color : 'bg-slate-100'}`} 
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {!isLogin && (
                   <p className="label-mono !text-slate-400 !text-[9px] ml-1">
                     Min. 8 characters with letters and numbers
                   </p>
                 )}
               </div>
+
+              {!isLogin && (
+                <div className="space-y-2">
+                  <label className="label-mono ml-1">Confirm Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input 
+                      type={showPassword ? "text" : "password"} 
+                      placeholder="••••••••" 
+                      className="input-glass pl-12 pr-12"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required 
+                    />
+                    {confirmPassword && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                        {formData.password === confirmPassword ? (
+                          <CheckCircle2 size={18} className="text-emerald-500" />
+                        ) : (
+                          <div className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <button 
                 type="submit" 

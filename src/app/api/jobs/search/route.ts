@@ -322,8 +322,21 @@ export async function POST(req: Request) {
       });
     }));
 
+    // FINAL STEP: Fetch sorted jobs from DB to ensure Favorites are pinned to the top
+    const finalJobs = await prisma.job.findMany({
+      where: { 
+        userId: user.id,
+        status: "WISHLIST",
+        isDeleted: false
+      },
+      orderBy: [
+        { isSaved: 'desc' },
+        { matchScore: 'desc' }
+      ]
+    });
+
     await incrementUsage(session.user.email, 'scan');
-    return NextResponse.json({ jobs: saved });
+    return NextResponse.json({ jobs: finalJobs });
 
   } catch (err: any) {
     console.error("SEARCH_ROUTE_CRITICAL:", err);
