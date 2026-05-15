@@ -65,7 +65,7 @@ jobs:
           if [ "${{ github.event.inputs.update-snapshots }}" = "true" ]; then
             npx playwright test --update-snapshots
           else
-            npx playwright test
+            npx playwright test smoke a11y
           fi
 
       - name: Upload Playwright report
