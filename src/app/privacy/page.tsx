@@ -22,7 +22,7 @@ export default function PrivacyPolicy() {
 
       <main className="max-w-3xl mx-auto px-6 py-20">
         <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">Privacy Policy</h1>
-        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-12">Last Updated: April 2026</p>
+        <p className="text-sm font-bold text-slate-600 uppercase tracking-widest mb-12">Last Updated: April 2026</p>
         
         <div className="space-y-8 text-lg text-slate-600 font-medium leading-relaxed">
           <section className="space-y-4">
@@ -53,7 +53,7 @@ export default function PrivacyPolicy() {
 
           <section className="space-y-4">
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">5. Contact Us</h2>
-            <p>If you have any questions about this Privacy Statement, please contact us at <Link href="/support" className="text-blue-600 hover:underline">Support Center</Link> or hello@careerhuntr.io.</p>
+            <p>If you have any questions about this Privacy Statement, please contact us at <Link href="/support" className="text-blue-600 underline decoration-blue-600/40 underline-offset-2 hover:decoration-blue-600">Support Center</Link> or hello@careerhuntr.io.</p>
           </section>
         </div>
       </main>
@@ -63,7 +63,7 @@ export default function PrivacyPolicy() {
         <div className="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-center md:items-start gap-2">
             <span className="logo-text !text-xl">HUNTR</span>
-            <p className="text-sm font-medium text-slate-400">The automated job search platform.</p>
+            <p className="text-sm font-medium text-slate-600">The automated job search platform.</p>
           </div>
           
           <nav className="flex items-center gap-8 text-sm font-bold text-slate-500">
@@ -74,7 +74,7 @@ export default function PrivacyPolicy() {
           </nav>
         </div>
         <div className="max-w-[1200px] mx-auto px-6 mt-8 pt-6 border-t border-slate-100 text-center">
-          <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
+          <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em]">
             &copy; 2026 HUNTR SYSTEMS &bull; ALL RIGHTS RESERVED
           </div>
         </div>

@@ -157,7 +157,7 @@ export default function Home() {
               </div>
               <div className="pt-8 flex gap-4">
                 {['LinkedIn', 'Indeed', 'Ottis', 'Greenhouse'].map(tag => (
-                  <span key={tag} className="px-4 py-1.5 bg-white border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400">{tag}</span>
+                  <span key={tag} className="px-4 py-1.5 bg-white border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600">{tag}</span>
                 ))}
               </div>
             </motion.div>
@@ -192,15 +192,15 @@ export default function Home() {
                 <p className="text-lg text-slate-500 font-medium leading-relaxed max-w-lg">The engine surgically rewrites your professional summary and experience bullets to mirror the job description's terminology. Real-time ATS hacking.</p>
               </div>
               <div className="flex-1 w-full max-w-md space-y-4">
-                <div className="glass-card p-6 bg-white border-slate-100 shadow-sm opacity-50 scale-95 blur-[1px]">
-                  <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Original Bullet</p>
-                  <p className="text-sm font-medium text-slate-600 italic">"Responsible for managing team projects and hitting deadlines."</p>
+                <div className="glass-card p-6 bg-white border-slate-100 shadow-sm opacity-90 scale-95 blur-[1px]">
+                  <p className="text-[10px] font-black uppercase text-slate-700 mb-2">Original Bullet</p>
+                  <p className="text-sm font-medium text-slate-800 italic">"Responsible for managing team projects and hitting deadlines."</p>
                 </div>
                 <div className="glass-card p-6 bg-blue-600 text-white border-blue-500 shadow-2xl relative">
                   <div className="absolute -top-3 -right-3 w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center border-4 border-white shadow-xl">
                     <Zap size={18} />
                   </div>
-                  <p className="text-[10px] font-black uppercase text-blue-200 mb-2 tracking-widest">Optimized Bullet</p>
+                  <p className="text-[10px] font-black uppercase text-blue-50 mb-2 tracking-widest">Optimized Bullet</p>
                   <p className="text-sm font-bold leading-relaxed">"Orchestrated cross-functional Agile workflows to deliver high-stakes product releases with a 98% on-time completion rate."</p>
                 </div>
               </div>
@@ -346,8 +346,8 @@ export default function Home() {
           </div>
         </div>
         <div className="max-w-[1200px] mx-auto px-8 mt-20 pt-8 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]">© 2026 HUNTR SYSTEMS • ALL RIGHTS RESERVED</div>
-          <div className="flex items-center gap-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+          <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">© 2026 HUNTR SYSTEMS • ALL RIGHTS RESERVED</div>
+          <div className="flex items-center gap-4 text-[10px] font-black text-slate-600 uppercase tracking-widest">
             <Shield size={12} className="text-emerald-500" /> BANK-LEVEL SECURITY • AES-256 ENCRYPTED
           </div>
         </div>

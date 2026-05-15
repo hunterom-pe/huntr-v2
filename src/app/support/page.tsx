@@ -178,8 +178,8 @@ export default function SupportPage() {
         )}
 
         <div className="mt-16 text-center space-y-4">
-          <p className="text-slate-400 font-medium flex items-center justify-center gap-2">
-            <Mail size={16} /> Direct inquiries: <a href="mailto:hello@careerhuntr.io" className="text-blue-600 hover:underline">hello@careerhuntr.io</a>
+          <p className="text-slate-600 font-medium flex items-center justify-center gap-2">
+            <Mail size={16} /> Direct inquiries: <a href="mailto:hello@careerhuntr.io" className="text-blue-600 underline decoration-blue-600/40 underline-offset-2 hover:decoration-blue-600">hello@careerhuntr.io</a>
           </p>
         </div>
       </main>
