@@ -32,10 +32,25 @@ jobs:
       - name: Wait for Netlify deploy preview
         id: netlify
         if: github.event_name == 'pull_request'
-        uses: JakePartusch/wait-for-netlify-action@v1.4
-        with:
-          site_name: ${{ secrets.NETLIFY_SITE_NAME }}
-          max_timeout: 600
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          for i in $(seq 1 60); do
+            url=$(gh api "repos/$REPO/commits/$SHA/statuses" --jq \
+              '.[] | select(.context | test("^netlify/.*/deploy-preview$")) | select(.state=="success") | .target_url' \
+              | head -n1)
+            if [ -n "$url" ]; then
+              echo "url=$url" >> "$GITHUB_OUTPUT"
+              echo "Preview ready: $url"
+              exit 0
+            fi
+            echo "[$i/60] Waiting for Netlify deploy preview on $SHA..."
+            sleep 15
+          done
+          echo "Timed out waiting for Netlify preview status"
+          exit 1
 
       - name: Resolve target URL
         id: target
@@ -43,7 +58,7 @@ jobs:
           if [ -n "${{ steps.netlify.outputs.url }}" ]; then
             echo "url=${{ steps.netlify.outputs.url }}" >> "$GITHUB_OUTPUT"
           else
-            echo "url=https://www.careerhunter.io" >> "$GITHUB_OUTPUT"
+            echo "url=https://www.careerhuntr.io" >> "$GITHUB_OUTPUT"
           fi
 
       - uses: actions/setup-node@v4
