@@ -5,6 +5,7 @@ const IGNORED_CONSOLE_PATTERNS = [
   /Download the React DevTools/i,
   /\[Fast Refresh\]/i,
   /\[HMR\]/i,
+  /app\.netlify\.com/i,
 ];
 
 for (const route of publicRoutes) {

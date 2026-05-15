@@ -6,15 +6,15 @@ for (const route of publicRoutes) {
     await page.goto(route.path, { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("load");
 
-    await page.addStyleTag({
-      content: `
-        *, *::before, *::after {
-          animation-duration: 0s !important;
-          animation-delay: 0s !important;
-          transition-duration: 0s !important;
-          transition-delay: 0s !important;
-        }
-      `,
+    await page.evaluate(() => {
+      const style = document.createElement("style");
+      style.textContent = `*, *::before, *::after {
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+        transition-duration: 0s !important;
+        transition-delay: 0s !important;
+      }`;
+      document.head.appendChild(style);
     });
 
     await page.evaluate(() => document.fonts.ready);
