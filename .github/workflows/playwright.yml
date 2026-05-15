@@ -1,0 +1,105 @@
+name: Playwright E2E
+
+on:
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      update-snapshots:
+        description: "Update visual baseline snapshots and commit them"
+        type: boolean
+        default: false
+
+concurrency:
+  group: playwright-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Playwright (smoke + a11y + visual)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need write access to commit updated snapshots back to the PR branch
+          ref: ${{ github.head_ref || github.ref }}
+
+      - name: Wait for Netlify deploy preview
+        id: netlify
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          for i in $(seq 1 60); do
+            url=$(gh api "repos/$REPO/commits/$SHA/statuses" --jq \
+              '.[] | select(.context | test("^netlify/.*/deploy-preview$")) | select(.state=="success") | .target_url' \
+              | head -n1)
+            if [ -n "$url" ]; then
+              echo "url=$url" >> "$GITHUB_OUTPUT"
+              echo "Preview ready: $url"
+              exit 0
+            fi
+            echo "[$i/60] Waiting for Netlify deploy preview on $SHA..."
+            sleep 15
+          done
+          echo "Timed out waiting for Netlify preview status"
+          exit 1
+
+      - name: Resolve target URL
+        id: target
+        run: |
+          if [ -n "${{ steps.netlify.outputs.url }}" ]; then
+            echo "url=${{ steps.netlify.outputs.url }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=https://www.careerhuntr.io" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ steps.target.outputs.url }}
+          CI: "true"
+        run: |
+          if [ "${{ github.event.inputs.update-snapshots }}" = "true" ]; then
+            npx playwright test --update-snapshots
+          else
+            npx playwright test smoke a11y
+          fi
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Commit updated snapshots
+        if: github.event.inputs.update-snapshots == 'true'
+        run: |
+          if git diff --quiet -- 'e2e/**/*.png'; then
+            echo "No snapshot changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add e2e
+          git commit -m "chore(e2e): update Playwright visual baselines"
+          git push

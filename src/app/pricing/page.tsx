@@ -50,7 +50,7 @@ export default function PricingPage() {
             </span>
           </Link>
           <div className="hidden md:flex items-center gap-10">
-            <Link href="/" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-900 transition-colors">Product</Link>
+            <Link href="/" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-600 hover:text-slate-900 transition-colors">Product</Link>
             <Link href="/pricing" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-900">Pricing</Link>
           </div>
           <div className="flex items-center gap-6">
