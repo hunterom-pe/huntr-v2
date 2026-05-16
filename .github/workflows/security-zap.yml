@@ -1,0 +1,74 @@
+name: "Security: OWASP ZAP DAST"
+
+on:
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: zap-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  zap_scan:
+    name: ZAP Baseline Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Wait for Netlify preview to be ready before scanning
+      - name: Wait for Netlify deploy preview
+        id: netlify
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          for i in $(seq 1 60); do
+            url=$(gh api "repos/$REPO/commits/$SHA/statuses" --jq \
+              '.[] | select(.context | test("^netlify/.*/deploy-preview$")) | select(.state=="success") | .target_url' \
+              | head -n1)
+            if [ -n "$url" ]; then
+              echo "url=$url" >> "$GITHUB_OUTPUT"
+              echo "Preview ready: $url"
+              exit 0
+            fi
+            echo "[$i/60] Waiting for Netlify deploy preview on $SHA..."
+            sleep 15
+          done
+          echo "Timed out waiting for Netlify preview status"
+          exit 1
+
+      - name: Resolve target URL
+        id: target
+        run: |
+          if [ -n "${{ steps.netlify.outputs.url }}" ]; then
+            echo "url=${{ steps.netlify.outputs.url }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=https://www.careerhuntr.io" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: ${{ steps.target.outputs.url }}
+          # Fail the action on any WARN/FAIL findings (user opted for strict pass/fail)
+          fail_action: true
+          # Issue generation
+          issue_title: 'Security: ZAP Baseline Findings'
+          allow_issue_writing: false
+          
+      - name: Upload ZAP Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-security-report
+          path: report_html.html
+          retention-days: 14

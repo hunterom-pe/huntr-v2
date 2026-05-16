@@ -7,14 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "test:e2e:smoke": "playwright test smoke",
-    "test:e2e:visual": "playwright test visual",
-    "test:e2e:visual:update": "playwright test visual --update-snapshots",
-    "test:e2e:a11y": "playwright test a11y",
-    "test:e2e:perf": "playwright test perf",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e": "npx playwright test",
+    "test:e2e:ui": "npx playwright test --ui",
+    "test:e2e:smoke": "npx playwright test smoke",
+    "test:e2e:visual": "npx playwright test visual",
+    "test:e2e:visual:update": "npx playwright test visual --update-snapshots",
+    "test:e2e:a11y": "npx playwright test a11y",
+    "test:e2e:perf": "npx playwright test perf",
+    "test:e2e:security": "npx playwright test security",
+    "test:e2e:report": "npx playwright show-report"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1039.0",
