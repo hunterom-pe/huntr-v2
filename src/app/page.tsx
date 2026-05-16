@@ -232,7 +232,7 @@ export default function Home() {
                 <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center border border-indigo-100">
                   <ShieldCheck className="text-indigo-600" size={28} />
                 </div>
-                <h4 className="text-2xl font-black text-slate-900 tracking-tight">Surgical Interview Briefs</h4>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight">Surgical Interview Briefs</h3>
               </div>
               <p className="text-slate-500 text-lg font-medium leading-relaxed">We analyze the JD to predict exact technical and behavioral questions you'll face. We even build a "Company Dossier" on their likely values and culture.</p>
               <div className="space-y-4">
@@ -256,7 +256,7 @@ export default function Home() {
                 <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center border border-emerald-100">
                   <DollarSign className="text-emerald-600" size={28} />
                 </div>
-                <h4 className="text-2xl font-black text-slate-900 tracking-tight">Negotiation Playbooks</h4>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight">Negotiation Playbooks</h3>
               </div>
               <p className="text-slate-500 text-lg font-medium leading-relaxed">Don't leave money on the table. We calculate your market leverage and provide scripts for a 10-15% increase in base salary.</p>
               <div className="space-y-4">
@@ -320,7 +320,7 @@ export default function Home() {
           </div>
           <div className="md:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-12">
             <div className="space-y-6">
-              <h5 className="label-mono !text-slate-900">Product</h5>
+              <h3 className="label-mono !text-slate-900">Product</h3>
               <ul className="space-y-4 text-sm font-bold text-slate-500">
                 <li><Link href="#features" className="hover:text-blue-600 transition-colors">Surgical Scan</Link></li>
                 <li><Link href="#features" className="hover:text-blue-600 transition-colors">Optimization Engine</Link></li>
@@ -328,7 +328,7 @@ export default function Home() {
               </ul>
             </div>
             <div className="space-y-6">
-              <h5 className="label-mono !text-slate-900">Intelligence</h5>
+              <h3 className="label-mono !text-slate-900">Intelligence</h3>
               <ul className="space-y-4 text-sm font-bold text-slate-500">
                 <li><Link href="#intelligence" className="hover:text-blue-600 transition-colors">Interview Briefs</Link></li>
                 <li><Link href="#intelligence" className="hover:text-blue-600 transition-colors">Salary Leverage</Link></li>
@@ -336,7 +336,7 @@ export default function Home() {
               </ul>
             </div>
             <div className="space-y-6">
-              <h5 className="label-mono !text-slate-900">Company</h5>
+              <h3 className="label-mono !text-slate-900">Company</h3>
               <ul className="space-y-4 text-sm font-bold text-slate-500">
                 <li><Link href="/privacy" className="hover:text-blue-600 transition-colors">Privacy</Link></li>
                 <li><Link href="/terms" className="hover:text-blue-600 transition-colors">Terms</Link></li>

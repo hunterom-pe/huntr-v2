@@ -151,7 +151,7 @@ function LoginForm() {
 
             <div className="relative flex items-center gap-6 py-2">
               <div className="flex-1 h-[1px] bg-slate-200/60" />
-              <span className="label-mono !text-[9px] opacity-40">secure email login</span>
+              <span className="label-mono !text-[9px] text-slate-500">secure email login</span>
               <div className="flex-1 h-[1px] bg-slate-200/60" />
             </div>
 
@@ -205,7 +205,7 @@ function LoginForm() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? "Hide password" : "Show password"}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-2 -mr-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -214,7 +214,7 @@ function LoginForm() {
                 {!isLogin && formData.password && (
                   <div className="space-y-2 px-1">
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Strength</span>
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Strength</span>
                       <span className={`text-[10px] font-black uppercase tracking-widest ${calculatePasswordStrength(formData.password).text}`}>
                         {calculatePasswordStrength(formData.password).label}
                       </span>
@@ -236,7 +236,7 @@ function LoginForm() {
                 )}
 
                 {!isLogin && (
-                  <p className="label-mono !text-slate-400 !text-[9px] ml-1">
+                  <p className="label-mono !text-slate-500 !text-[9px] ml-1">
                     Min. 8 characters with letters and numbers
                   </p>
                 )}

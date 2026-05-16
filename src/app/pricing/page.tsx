@@ -89,7 +89,7 @@ export default function PricingPage() {
           <div className="glass-card p-10 bg-white/60 border border-slate-200/60 rounded-[32px] shadow-xl shadow-slate-200/30">
             <div className="flex items-center gap-3 mb-4">
               <Shield className="text-slate-400" size={24} />
-              <h3 className="text-[13px] font-black uppercase tracking-widest text-slate-600">Seeker</h3>
+              <h2 className="text-[13px] font-black uppercase tracking-widest text-slate-600">Seeker</h2>
             </div>
             <div className="mb-6">
               <span className="text-5xl font-black text-slate-900">$0</span>
@@ -120,7 +120,7 @@ export default function PricingPage() {
             </div>
             <div className="flex items-center gap-3 mb-4">
               <Sparkles className="text-blue-400" size={24} />
-              <h3 className="text-[13px] font-black uppercase tracking-widest text-blue-400">Elite</h3>
+              <h2 className="text-[13px] font-black uppercase tracking-widest text-blue-400">Elite</h2>
             </div>
             <div className="mb-6">
               <span className="text-5xl font-black text-white">$15</span>
@@ -158,7 +158,7 @@ export default function PricingPage() {
           <div className="glass-card p-10 bg-white/60 border border-slate-200/60 rounded-[32px] shadow-xl shadow-slate-200/30">
             <div className="flex items-center gap-3 mb-4">
               <Zap className="text-slate-400" size={24} />
-              <h3 className="text-[13px] font-black uppercase tracking-widest text-slate-600">Professional</h3>
+              <h2 className="text-[13px] font-black uppercase tracking-widest text-slate-600">Professional</h2>
             </div>
             <div className="mb-6">
               <span className="text-5xl font-black text-slate-900">$29</span>
@@ -202,11 +202,11 @@ export default function PricingPage() {
           <p className="text-[13px] font-black text-blue-600 uppercase tracking-widest mb-6">Zero-Access Policy</p>
           <div className="grid md:grid-cols-2 gap-8 text-left">
             <div className="space-y-2">
-              <h4 className="font-bold text-slate-900">Encrypted By Default</h4>
+              <h3 className="font-bold text-slate-900">Encrypted By Default</h3>
               <p className="text-sm text-slate-500 leading-relaxed font-medium">Your resumes, job matches, and negotiation scripts are encrypted. Even we cannot read them.</p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-bold text-slate-900">You Own Your Data</h4>
+              <h3 className="font-bold text-slate-900">You Own Your Data</h3>
               <p className="text-sm text-slate-500 leading-relaxed font-medium">We don't sell data. We don't track your identity. Your career moves are your business, and yours alone.</p>
             </div>
           </div>
