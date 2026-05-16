@@ -13,6 +13,7 @@
     "test:e2e:visual": "playwright test visual",
     "test:e2e:visual:update": "playwright test visual --update-snapshots",
     "test:e2e:a11y": "playwright test a11y",
+    "test:e2e:perf": "playwright test perf",
     "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
