@@ -1,7 +1,29 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { z } from "zod";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
+
+const JOB_STATUS = ["WISHLIST", "APPLIED", "INTERVIEWING", "OFFER", "REJECTED"] as const;
+
+const updateStatusSchema = z
+  .object({
+    id: z.string().min(1).optional(),
+    title: z.string().min(1).max(500).optional(),
+    company: z.string().min(1).max(300).optional(),
+    location: z.string().max(300).optional(),
+    description: z.string().max(20000).optional(),
+    matchScore: z.union([z.number(), z.string()]).optional(),
+    status: z.enum(JOB_STATUS).optional(),
+    isDeleted: z.boolean().optional(),
+    isSaved: z.boolean().optional(),
+    rejectionReason: z.string().max(500).optional(),
+    rejectionNotes: z.string().max(5000).optional(),
+  })
+  .refine(
+    (data) => data.id || (data.title && data.company),
+    "Either an id or both title and company are required",
+  );
 
 export async function POST(req: Request) {
   try {
@@ -20,41 +42,53 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { id, title, company, location, description, matchScore, status, isDeleted, isSaved, rejectionReason, rejectionNotes } = body;
+    const validation = updateStatusSchema.safeParse(body);
 
-
-    if (!id) {
-      // If no ID is provided, we must have title/company to create a new one
-      if (!title || !company) {
-        return NextResponse.json({ error: "Missing required job data" }, { status: 400 });
-      }
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error.issues[0].message },
+        { status: 400 },
+      );
     }
+
+    const {
+      id,
+      title,
+      company,
+      location,
+      description,
+      matchScore,
+      status,
+      isDeleted,
+      isSaved,
+      rejectionReason,
+      rejectionNotes,
+    } = validation.data;
+
+    const parsedMatchScore =
+      typeof matchScore === "string" ? parseInt(matchScore, 10) || 0 : matchScore ?? 0;
 
     let savedJob;
 
     if (id) {
-      // Try to find existing and verify ownership
       const existingJob = await prisma.job.findFirst({
-        where: { id, userId: user.id }
+        where: { id, userId: user.id },
       });
-      
+
       if (existingJob) {
-        // Update existing fields if provided
         savedJob = await prisma.job.update({
           where: { id, userId: user.id },
-          data: { 
+          data: {
             status: status || undefined,
             isDeleted: isDeleted !== undefined ? isDeleted : undefined,
             isSaved: isSaved !== undefined ? isSaved : undefined,
             title: title || undefined,
             company: company || undefined,
             rejectionReason: rejectionReason !== undefined ? rejectionReason : undefined,
-            rejectionNotes: rejectionNotes !== undefined ? rejectionNotes : undefined
-          }
-
+            rejectionNotes: rejectionNotes !== undefined ? rejectionNotes : undefined,
+          },
         });
       } else if (title && company) {
-        // Create new with provided ID
         savedJob = await prisma.job.create({
           data: {
             id,
@@ -62,33 +96,29 @@ export async function POST(req: Request) {
             company,
             location: location || "",
             description: description || "",
-            matchScore: parseInt(matchScore) || 0,
+            matchScore: parsedMatchScore,
             status: status || "WISHLIST",
-            userId: user.id
-          }
+            userId: user.id,
+          },
         });
       }
-    } else {
-      // Create new with generated ID
+    } else if (title && company) {
       savedJob = await prisma.job.create({
         data: {
           title,
           company,
           location: location || "",
           description: description || "",
-          matchScore: parseInt(matchScore) || 0,
+          matchScore: parsedMatchScore,
           status: status || "WISHLIST",
-          userId: user.id
-        }
+          userId: user.id,
+        },
       });
     }
 
     return NextResponse.json({ success: true, job: savedJob });
   } catch (error) {
     console.error("Update Job Status Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

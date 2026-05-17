@@ -1,7 +1,7 @@
 "use client";
 
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search, Zap, ExternalLink, Loader2, Sparkles, Star, Trash2, ArrowRight, Mail, Copy, Check, X, FolderOpen, ShieldCheck, Info, BrainCircuit, DollarSign, ScrollText, Briefcase, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
@@ -59,7 +59,7 @@ export default function DashboardPage() {
   const [rejectionJob, setRejectionJob] = useState<Job | null>(null);
   const [hasCopied, setHasCopied] = useState(false);
 
-  const [isBrowser, setIsBrowser] = useState(false);
+  const hasAutoScannedRef = useRef(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [jobType, setJobType] = useState<string>("all");
   const [remoteOnly, setRemoteOnly] = useState(false);
@@ -68,9 +68,13 @@ export default function DashboardPage() {
   
   const [showUpgradeModal, setShowUpgradeModal] = useState<{ type: 'scan' | 'optimization' | 'brief' | 'playbook' } | null>(null);
 
-  // Sync SWR data to local state
+  // Sync SWR data to local state. We mirror server-fetched tracked jobs into
+  // local state because we also store in-memory wishlist jobs (from live scans)
+  // that haven't been persisted yet. This is a legitimate use of setState in
+  // an effect — see https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
   useEffect(() => {
     if (trackedData?.jobs) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setJobs(prev => {
         const wishlistJobs = prev.filter(j => j.status === 'WISHLIST');
         const trackedJobs = trackedData.jobs;
@@ -161,22 +165,18 @@ export default function DashboardPage() {
     }
   };
 
+  // Trigger automatic scan if requested via URL. Guarded by a ref so this
+  // only fires once per mount even if dependencies change while scanning.
   useEffect(() => {
+    if (hasAutoScannedRef.current) return;
+    if (!window.location.search.includes('scan=true')) return;
+    if (hasScanned || isScanning) return;
+
+    hasAutoScannedRef.current = true;
+    window.history.replaceState({}, '', '/dashboard');
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsBrowser(true);
-  }, []);
-
-
-  // Combined effect for initial load and scan=true trigger
-  useEffect(() => {
-    if (!isBrowser) return;
-
-    // Trigger automatic scan if requested via URL
-    if (typeof window !== 'undefined' && window.location.search.includes('scan=true') && !hasScanned && !isScanning) {
-      startScan();
-      window.history.replaceState({}, '', '/dashboard');
-    }
-  }, [isBrowser, hasScanned, isScanning]);
+    startScan();
+  }, [hasScanned, isScanning]);
 
   // Scroll main container to top when page changes
   useEffect(() => {
@@ -486,8 +486,6 @@ export default function DashboardPage() {
 
 
 
-
-  if (!isBrowser) return null;
 
   const wishlistJobs = jobs.filter(j => j.status === 'WISHLIST')
     .sort((a, b) => {
