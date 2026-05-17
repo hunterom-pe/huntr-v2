@@ -121,7 +121,7 @@ function LoginForm() {
             <h2 className="heading-editorial !text-4xl tracking-tighter leading-none">
               {isLogin ? "Welcome back" : "Join the elite"}
             </h2>
-            <p className="text-slate-500 font-medium text-[16px] opacity-80">
+            <p className="text-slate-600 font-medium text-[16px]">
               {isLogin ? "Enter your credentials to resume your hunt." : "Start your automated career acceleration today."}
             </p>
           </div>
@@ -284,7 +284,7 @@ function LoginForm() {
                   setError("");
                 }} 
                 type="button"
-                className="text-slate-600 font-medium hover:text-slate-900 transition-colors text-sm"
+                className="text-slate-600 font-medium hover:text-slate-900 transition-colors text-sm min-h-[44px] px-2 inline-flex items-center justify-center rounded-lg"
               >
                 {isLogin ? "Don't have an account? " : "Already have an account? "}
                 <span className="font-bold text-blue-600 underline decoration-blue-600/30 underline-offset-4">{isLogin ? "Sign Up" : "Log In"}</span>
