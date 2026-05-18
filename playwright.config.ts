@@ -33,10 +33,17 @@ export default defineConfig({
   projects: [
     {
       name: "chromium-desktop",
+      testIgnore: /api\//,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1440, height: 900 },
       },
+    },
+    {
+      // API contract tests — no browser, runs in seconds.
+      name: "api",
+      testMatch: /api\/.*\.spec\.ts$/,
+      use: { baseURL },
     },
   ],
 

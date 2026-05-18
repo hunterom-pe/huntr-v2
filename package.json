@@ -16,6 +16,7 @@
     "test:e2e:a11y": "npx playwright test a11y",
     "test:e2e:perf": "npx playwright test perf",
     "test:e2e:security": "npx playwright test security",
+    "test:e2e:api": "npx playwright test --project=api",
     "test:e2e:report": "npx playwright show-report"
   },
   "dependencies": {
