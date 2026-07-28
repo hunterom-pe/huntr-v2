@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_placeholder') {
+    if (!process.env.STRIPE_SECRET_KEY) {
       console.error("Stripe Secret Key is missing or invalid.");
       return NextResponse.json({ error: "Payments are currently disabled. Please contact support." }, { status: 503 });
     }
